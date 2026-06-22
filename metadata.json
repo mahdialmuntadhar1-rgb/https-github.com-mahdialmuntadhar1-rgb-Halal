@@ -1,0 +1,6 @@
+{
+  "name": "HALAL Matchmaking",
+  "description": "Modern, respectful, and private marriage matchmaking platform for intentional connections leading to marriage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
