@@ -2,14 +2,18 @@ import React from 'react';
 import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield } from 'lucide-react';
 import { Language } from '../lib/translations';
 import { TRANSLATIONS } from '../lib/translations';
+import { HeroImage } from '../types';
+import HeroSlideshow from './HeroSlideshow';
 
 interface HeaderProps {
-  currentTab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account';
-  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account') => void;
+  currentTab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'community' | 'admin';
+  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'community' | 'admin') => void;
   profileStrength: number;
   userProfileName?: string;
   locale: Language;
   setLocale: (locale: Language) => void;
+  isAdmin?: boolean;
+  heroImages?: HeroImage[];
 }
 
 export default function Header({ 
@@ -18,9 +22,15 @@ export default function Header({
   profileStrength, 
   userProfileName, 
   locale, 
-  setLocale 
+  setLocale,
+  isAdmin = false,
+  heroImages = []
 }: HeaderProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-warm-ivory/60 backdrop-blur-md border-b border-white/20 shadow-sm" id="main-header">
@@ -49,7 +59,7 @@ export default function Header({
           <nav className="hidden md:flex space-x-1 rtl:space-x-reverse bg-white/30 backdrop-blur-sm p-1 rounded-full border border-white/30 shadow-inner">
             <button
               onClick={() => setTab('landing')}
-              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
                 currentTab === 'landing'
                   ? 'bg-warm-charcoal text-white shadow-md'
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
@@ -59,18 +69,18 @@ export default function Header({
             </button>
             <button
               onClick={() => setTab('onboarding')}
-              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
                 currentTab === 'onboarding'
                   ? 'bg-accent-coral text-white shadow-md'
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
               }`}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 animate-pulse" />
               <span>{t.onboarding}</span>
             </button>
             <button
               onClick={() => setTab('explore')}
-              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
                 currentTab === 'explore'
                   ? 'bg-white/60 text-warm-charcoal shadow-sm border border-white/20'
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
@@ -78,9 +88,22 @@ export default function Header({
             >
               {t.explore}
             </button>
+            
+            {/* Community tab */}
+            <button
+              onClick={() => setTab('community')}
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1 ${
+                currentTab === 'community'
+                  ? 'bg-[#40798C] text-white shadow-md'
+                  : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
+              }`}
+            >
+              <span>{txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}</span>
+            </button>
+
             <button
               onClick={() => setTab('chat')}
-              className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
                 currentTab === 'chat'
                   ? 'bg-white/60 text-warm-charcoal shadow-sm border border-white/20'
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
@@ -89,6 +112,20 @@ export default function Header({
               <MessageSquareHeart className="w-4 h-4 text-accent-coral" />
               <span>{t.chat}</span>
             </button>
+
+            {/* Admin control panel tab */}
+            {isAdmin && (
+              <button
+                onClick={() => setTab('admin')}
+                className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1 border border-stone-200 ${
+                  currentTab === 'admin'
+                    ? 'bg-stone-800 text-white shadow-md font-bold scale-102'
+                    : 'bg-white/60 text-stone-700 hover:bg-stone-100 hover:text-stone-900'
+                }`}
+              >
+                <span>🛡️ {txt('Admin Panel', 'لوحة التحكم', 'بەشی بەڕێوەبەر')}</span>
+              </button>
+            )}
           </nav>
 
           {/* Right Action Menu: Profile Strength bar & Shortcuts */}
@@ -231,19 +268,7 @@ export default function Header({
         {/* Beautiful Hero Section Rectangle Banner (Without any overlay text or button) */}
         {currentTab === 'landing' && (
           <div className="w-full mt-1.5 mb-5 animate-fade-in" id="header-hero-banner">
-            <div className="relative w-full aspect-[21/9] md:aspect-[24/7] bg-gradient-to-br from-[#EAE3D2] via-[#E1DDD5] to-[#CED9D8] rounded-[1.8rem] overflow-hidden border border-stone-200/60 shadow-xl shadow-[#40798C]/5 group">
-              {/* Premium, silent, textless photographic representation of elegant companionship or geometry */}
-              <img
-                src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&q=80&w=1600"
-                alt="HALAL Matrimonial Serene Architectural Gateway"
-                className="w-full h-full object-cover opacity-90 group-hover:scale-[1.015] transition-transform duration-[6000ms] ease-out select-none"
-                referrerPolicy="no-referrer"
-              />
-              {/* Subtle ambient lighting vignette overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/10 via-transparent to-white/10 pointer-events-none" />
-              {/* Left/Right ambient lighting */}
-              <div className="absolute inset-0 bg-radial-gradient from-transparent to-stone-900/5 pointer-events-none" />
-            </div>
+            <HeroSlideshow images={heroImages} />
           </div>
         )}
 
@@ -264,7 +289,7 @@ export default function Header({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span className="shrink-0">{locale === 'en' ? 'Onboarding' : t.onboarding}</span>
+            <span className="shrink-0">{txt('Onboarding', 'التسجيل', 'تۆمارکردن')}</span>
           </button>
           <button
             onClick={() => setTab('explore')}
@@ -272,7 +297,15 @@ export default function Header({
               currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {locale === 'en' ? 'Matches' : t.explore}
+            {txt('Matches', 'البحث', 'گەڕان')}
+          </button>
+          <button
+            onClick={() => setTab('community')}
+            className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
+              currentTab === 'community' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80 bg-[#40798C]/5 border border-[#40798C]/10'
+            }`}
+          >
+            {txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}
           </button>
           <button
             onClick={() => setTab('chat')}
@@ -280,8 +313,18 @@ export default function Header({
               currentTab === 'chat' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {locale === 'en' ? 'Chats' : t.chat}
+            {txt('Chats', 'الدردشات', 'گفتوگۆکان')}
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => setTab('admin')}
+              className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap border ${
+                currentTab === 'admin' ? 'bg-stone-850 text-white' : 'text-stone-700 bg-stone-100'
+              }`}
+            >
+              🛡️ {txt('Admin', 'التحكم', 'بەڕێوەبەر')}
+            </button>
+          )}
           {profileStrength > 0 && (
             <>
               <button
@@ -290,7 +333,7 @@ export default function Header({
                   currentTab === 'profile' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
-                {locale === 'en' ? 'Profile' : 'الملف'}
+                {txt('Profile', 'الملف', 'پڕۆفایل')}
               </button>
               <button
                 onClick={() => setTab('privacy')}
@@ -298,7 +341,7 @@ export default function Header({
                   currentTab === 'privacy' ? 'bg-[#FF7F50] text-[#FF7F50] bg-[#FF7F50]/10' : 'text-[#4A443F]/80'
                 }`}
               >
-                {locale === 'en' ? 'Privacy' : 'السرية'}
+                {txt('Privacy', 'السرية', 'نهێنیپارێزی')}
               </button>
               <button
                 onClick={() => setTab('account')}
@@ -306,7 +349,7 @@ export default function Header({
                   currentTab === 'account' ? 'bg-emerald-600 text-white' : 'text-[#4A443F]/80'
                 }`}
               >
-                {locale === 'en' ? 'Verification' : 'التوثيق'}
+                {txt('Verification', 'التوثيق', 'سەلماندن')}
               </button>
             </>
           )}

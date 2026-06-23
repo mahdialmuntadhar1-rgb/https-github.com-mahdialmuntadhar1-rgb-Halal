@@ -10,6 +10,9 @@ interface GenderSelectionCardsProps {
 
 export default function GenderSelectionCards({ locale, onSelectGender }: GenderSelectionCardsProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto pt-6 text-start" id="gender-selection-cards">
@@ -24,7 +27,7 @@ export default function GenderSelectionCards({ locale, onSelectGender }: GenderS
             <span className="text-2xl select-none">🧔</span>
           </div>
           <span className="text-[10px] font-bold text-[#6B635B] uppercase tracking-wider bg-white/60 px-3 py-1 rounded-full border border-white/40">
-            {locale === 'en' ? 'Exclusive Intentions' : 'سعي جاد'}
+            {txt('Exclusive Intentions', 'سعي جاد', 'هەوڵی جدی')}
           </span>
         </div>
         <div className="space-y-2 relative z-10">
@@ -37,7 +40,7 @@ export default function GenderSelectionCards({ locale, onSelectGender }: GenderS
         </div>
         <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-[#40798C] group-hover:text-accent-coral transition-colors pt-2">
           <UserCheck className="w-4 h-4" />
-          <span>{locale === 'en' ? 'Start Men Onboarding' : 'تأسيس حساب الرجال'}</span>
+          <span>{txt('Start Men Onboarding', 'تأسيس حساب الرجال', 'دەستپێکردنی تۆمارکردنی پیاوان')}</span>
         </div>
       </div>
 
@@ -52,7 +55,7 @@ export default function GenderSelectionCards({ locale, onSelectGender }: GenderS
             <span className="text-2xl select-none">🧕</span>
           </div>
           <span className="text-[10px] font-bold text-accent-coral uppercase tracking-wider bg-[#FF7F50]/5 px-3 py-1 rounded-full border border-[#FF7F50]/15">
-            {locale === 'en' ? 'Dignity Guaranteed' : 'مصان بالكامل'}
+            {txt('Dignity Guaranteed', 'مصان بالكامل', 'کەرامەتی پارێزراوە')}
           </span>
         </div>
         <div className="space-y-2 relative z-10">
@@ -65,7 +68,7 @@ export default function GenderSelectionCards({ locale, onSelectGender }: GenderS
         </div>
         <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-accent-coral group-hover:text-accent-pink transition-colors pt-2">
           <UserCheck className="w-4 h-4" />
-          <span>{locale === 'en' ? 'Start Women Onboarding' : 'تأسيس حساب النساء'}</span>
+          <span>{txt('Start Women Onboarding', 'تأسيس حساب النساء', 'دەستپێکردنی تۆمارکردنی ئافرەتان')}</span>
         </div>
       </div>
     </div>

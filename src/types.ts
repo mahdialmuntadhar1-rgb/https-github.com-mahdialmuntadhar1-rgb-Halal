@@ -58,6 +58,9 @@ export interface UserProfile {
   languages: string[];
   maritalStatus?: string;
   intention?: string;
+  email?: string;
+  badges?: string[];
+  savedMatches?: string[]; // Array of match profile IDs that are bookmarked
   
   // Marriage Intention & Details
   lookingFor?: string;
@@ -117,6 +120,7 @@ export interface MatchProfile {
   communicationPreference: string;
   valuesSummary: string[];
   verified: boolean;
+  isOnline?: boolean;
   photoStatus: 'visible' | 'blurred' | 'hidden' | 'initials' | 'unlocked';
   avatarSeed: string;
   avatarUrl: string;
@@ -125,6 +129,40 @@ export interface MatchProfile {
   aboutMe: string;
   dealbreakers?: string[];
   requestStatus: 'none' | 'sent' | 'accepted' | 'declined';
+  badges?: string[];
+}
+
+export interface HeroImage {
+  id: string;
+  url: string;
+  order: number;
+  isActive: boolean;
+  title: string;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  userName: string;
+  userGender: 'male' | 'female';
+  text: string;
+  createdAt: string;
+  isReported?: boolean;
+}
+
+export interface CommunityPost {
+  id: string;
+  category: 'advice' | 'family' | 'engagement' | 'culture' | 'religion' | 'success' | 'daily';
+  title: string;
+  content: string;
+  userName: string;
+  userGender: 'male' | 'female';
+  createdAt: string;
+  likesCount: number;
+  likedBy: string[]; // List of user IDs / names who liked this post
+  comments: PostComment[];
+  isReported?: boolean;
+  isDailyQuestion?: boolean;
 }
 
 export interface IntroductionRequest {

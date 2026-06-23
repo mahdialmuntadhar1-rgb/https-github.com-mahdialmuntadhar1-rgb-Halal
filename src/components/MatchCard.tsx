@@ -1,6 +1,6 @@
 import React from 'react';
 import { MatchProfile, AppLanguage } from '../types';
-import { Heart, Lock, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Heart, Lock, ShieldCheck, CheckCircle, Star } from 'lucide-react';
 
 interface MatchCardProps {
   key?: string | number;
@@ -9,6 +9,8 @@ interface MatchCardProps {
   onSendRequest: (id: string) => void;
   onInitiateChat: (id: string) => void;
   onOpenDetails: (match: MatchProfile) => void;
+  savedMatchIds?: string[];
+  onToggleSaveMatch?: (id: string) => void;
 }
 
 export default function MatchCard({
@@ -16,17 +18,89 @@ export default function MatchCard({
   locale,
   onSendRequest,
   onInitiateChat,
-  onOpenDetails
+  onOpenDetails,
+  savedMatchIds = [],
+  onToggleSaveMatch
 }: MatchCardProps) {
   const isBlur = match.photoStatus === 'blurred' && match.requestStatus !== 'accepted';
   const isHiddenState = match.photoStatus === 'hidden' && match.requestStatus !== 'accepted';
   const isInitialsState = match.photoStatus === 'initials' && match.requestStatus !== 'accepted';
   const initialsLetter = match.name ? match.name.charAt(0).toUpperCase() : '?';
+  const isSaved = savedMatchIds.includes(match.id);
+
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
+
+  const getReligionSect = () => {
+    if (match.religion === 'islam') {
+      const sectStr = match.sect === 'sunni' 
+        ? txt('Sunni', 'سُنّي', 'سوننە') 
+        : match.sect === 'shiaa' 
+          ? txt('Shiaa', 'شيعي', 'شیعە') 
+          : txt('Muslim', 'مسلم', 'موسڵمان');
+      return `${sectStr} ${txt('Muslim', 'مسلم', 'موسڵمان')}`;
+    }
+    return txt('Non-Muslim', 'غير مسلم', 'نا موسڵمان');
+  };
+
+  const getEthnicity = () => {
+    if (match.ethnicity === 'arab') return txt('Arab', 'عربي', 'عەرەب');
+    if (match.ethnicity === 'kurdish') return txt('Kurdish', 'كوردي', 'کورد');
+    return txt('Others', 'آخرون', 'هیتر');
+  };
+
+  const translateValue = (v: string) => {
+    const valueMap: Record<string, { ar: string, ckb: string }> = {
+      'Family First': { ar: 'العائلة أولاً', ckb: 'خێزان لە پێشینەیە' },
+      'Religious Commitment': { ar: 'الالتزام الديني', ckb: 'پابەندبوونی ئاینی' },
+      'Financial Stability': { ar: 'الاستقرار المالي', ckb: 'سەقامگیری دارایی' },
+      'Mutual Respect': { ar: 'الاحترام المتبادل', ckb: 'ڕێزی دوولایەنە' },
+      'Traditional Values': { ar: 'القيم التقليدية', ckb: 'بەها کلتورییەکان' },
+      'Modern Outlook': { ar: 'نظرة حديثة', ckb: 'ڕوانینی مۆدێرن' },
+      'No Smoking': { ar: 'عدم التدخين', ckb: 'جگەرەنەکێشان' },
+      'Educated Partner': { ar: 'شريك متعلم', ckb: 'هاوبەشی خوێندەوار' },
+    };
+    const key = v.trim();
+    if (locale === 'en') return key;
+    if (valueMap[key]) {
+      return locale === 'ckb' ? valueMap[key].ckb : valueMap[key].ar;
+    }
+    return v;
+  };
 
   return (
     <div className="bg-white/40 backdrop-blur-xl border border-white/35 rounded-[2.2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between group text-start">
       {/* Photo container with privacy indicators */}
       <div className="relative aspect-[4/3] bg-stone-100 overflow-hidden select-none">
+        {/* Live Online Status Badge */}
+        {match.isOnline && (
+          <div className="absolute top-12 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50/95 backdrop-blur-md border border-emerald-200/50 shadow-sm z-10 animate-fade-in">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[9px] font-mono font-black text-emerald-700 tracking-wider uppercase">
+              {txt('Online', 'نشط الآن', 'ئێستا چالاکە')}
+            </span>
+          </div>
+        )}
+
+        {/* Bookmark/Save button */}
+        {onToggleSaveMatch && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSaveMatch(match.id);
+            }}
+            className="absolute top-3 right-3 shrink-0 rounded-full w-8 h-8 flex items-center justify-center bg-white/85 backdrop-blur-md hover:bg-white border text-stone-600 transition shadow-sm hover:scale-110 active:scale-95 z-20"
+            title={isSaved ? "Remove bookmark" : "Save / Bookmark Dossier"}
+            id={`bookmark-btn-${match.id}`}
+          >
+            <Star className={`w-4 h-4 ${isSaved ? 'fill-amber-400 text-amber-500' : 'text-stone-400'}`} />
+          </button>
+        )}
         
         {/* Render conditions based on photoStatus */}
         {isHiddenState ? (
@@ -36,10 +110,10 @@ export default function MatchCard({
               <Lock className="w-4 h-4 text-[#40798C]" />
             </div>
             <p className="text-[10px] text-warm-charcoal font-black uppercase tracking-wider">
-              {locale === 'en' ? 'Portrait Hidden' : locale === 'ar' ? 'الصورة الشخصية مخفية' : 'وێنە شاراوەیە'}
+              {txt('Portrait Hidden', 'الصورة الشخصية مخفية', 'وێنە شاراوەیە')}
             </p>
             <p className="text-[8px] text-stone-500 font-medium">
-              {locale === 'en' ? 'Portrait only revealed on mutual consent' : 'تُكشف الصورة فقط بموافقة الطرفين'}
+              {txt('Portrait only revealed on mutual consent', 'تُكشف الصورة فقط بموافقة الطرفين', 'وێنە تەنها بە ڕەزامەندی دوولایەنە دەردەکەوێت')}
             </p>
           </div>
         ) : isInitialsState ? (
@@ -49,10 +123,10 @@ export default function MatchCard({
               {initialsLetter}
             </div>
             <p className="text-[10px] text-warm-charcoal font-black uppercase tracking-wider">
-              {locale === 'en' ? 'Initials-Only Mode' : locale === 'ar' ? 'الاسم الثنائي فقط' : 'پۆرتریتی ناوی یەکەم'}
+              {txt('Initials-Only Mode', 'الاسم الثنائي فقط', 'تەنها پیتەکانی سەرەتای ناو')}
             </p>
             <p className="text-[8px] text-stone-500 font-medium font-mono">
-              {locale === 'en' ? 'Reveals after request acceptance' : 'تظهر بالكامل بعد قبول الطلب'}
+              {txt('Reveals after request acceptance', 'تظهر بالكامل بعد قبول الطلب', 'دوای قبوڵکردنی داواکارییەکە دەردەکەوێت')}
             </p>
           </div>
         ) : (
@@ -74,10 +148,10 @@ export default function MatchCard({
                   <Lock className="w-4 h-4 text-accent-coral" />
                 </div>
                 <p className="text-[10px] text-white font-bold uppercase tracking-wider">
-                  {locale === 'en' ? 'Portrait Protected' : 'الصورة مصانة'}
+                  {txt('Portrait Protected', 'الصورة مصانة', 'وێنە پارێزراوە')}
                 </p>
                 <p className="text-[8px] text-white/90">
-                  {locale === 'en' ? 'Click "Send Request" to request photo unlock' : 'اضغط على "إرسال طلب" لطلب فك حجب الصورة'}
+                  {txt('Click "Send Request" to request photo unlock', 'اضغط على "إرسال طلب" لطلب فك حجب الصورة', 'کرتە بکە لەسەر "ناردنی داواکاری" بۆ بینینی وێنەکە')}
                 </p>
               </div>
             )}
@@ -87,12 +161,12 @@ export default function MatchCard({
         {/* Compatibility & Demo Verification inside card header */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 items-center z-10">
           <span className="text-[9px] font-black tracking-wider bg-white/80 backdrop-blur-md text-accent-coral border border-accent-coral/25 px-2.5 py-0.5 rounded-md uppercase font-mono shadow-sm">
-            {match.compatibilityScore}% {locale === 'en' ? 'Compatibility' : locale === 'ar' ? 'توافق' : 'گونجان'}
+            {match.compatibilityScore}% {txt('Compatibility', 'توافق', 'گونجان')}
           </span>
           {match.verified && (
             <span className="bg-[#40798C] text-white flex items-center gap-1 text-[8px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-white/20 select-none">
               <ShieldCheck className="w-3 h-3 text-white shrink-0" />
-              <span>{locale === 'en' ? 'Demo Verified' : locale === 'ar' ? 'موثق تجريبي' : 'خۆپیشاندانی سەلمێنراو'}</span>
+              <span>{txt('Demo Verified', 'موثق تجريبي', 'سەلمێنراوی تاقیکاری')}</span>
             </span>
           )}
         </div>
@@ -136,23 +210,23 @@ export default function MatchCard({
           {/* Religion/sect, photo privacy status, and ethnicity */}
           <div className="flex flex-wrap gap-1.5 text-[9px] font-bold font-mono">
             {/* Religion & Sect */}
-            <span className="text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded border border-[#40798C]/20 capitalize">
-              🕌 {match.religion === 'islam' ? `${match.sect || 'Sunni'} Muslim` : 'Non-Muslim'}
+            <span className="text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded border border-[#40798C]/20 capitalize font-bold leading-none">
+              🕌 {getReligionSect()}
             </span>
             
             {/* Privacy / photo status */}
-            <span className="text-amber-700 bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200/50 capitalize">
+            <span className="text-amber-700 bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200/50 capitalize font-bold leading-none">
               {match.requestStatus === 'accepted' 
-                ? (locale === 'en' ? '🔓 Portrait Visible' : locale === 'ar' ? '🔓 الصورة مكشوفة' : '🔓 وێنە بینراوە')
+                ? txt('🔓 Portrait Visible', '🔓 الصورة مكشوفة', '🔓 وێنە بینراوە')
                 : match.photoStatus === 'hidden'
-                ? (locale === 'en' ? '🔒 Portrait Hidden' : locale === 'ar' ? '🔒 الصورة مخفية' : '🔒 وێنە شاراوەیە')
+                ? txt('🔒 Portrait Hidden', '🔒 الصورة مخفية', '🔒 وێنە شاراوەیە')
                 : match.photoStatus === 'initials'
-                ? (locale === 'en' ? '🔒 Initials Only' : locale === 'ar' ? '🔒 الاسم الثنائي فقط' : '🔒 تەنها سەرەتای ناو')
-                : (locale === 'en' ? '🔒 Portrait Blurred' : locale === 'ar' ? '🔒 الصورة مموهة' : '🔒 وێنە لێڵکراوە')}
+                ? txt('🔒 Initials Only', '🔒 الاسم الثنائي فقط', '🔒 تەنها پیتەکانی سەرەتای ناو')
+                : txt('🔒 Portrait Blurred', '🔒 الصورة مموهة', '🔒 وێنە لێڵکراوە')}
             </span>
 
-            <span className="text-accent-coral bg-[#FF7F50]/10 px-2 py-0.5 rounded border border-[#FF7F50]/20 capitalize">
-              {match.ethnicity}
+            <span className="text-accent-coral bg-[#FF7F50]/10 px-2 py-0.5 rounded border border-[#FF7F50]/20 capitalize font-bold leading-none">
+              {getEthnicity()}
             </span>
           </div>
 
@@ -163,10 +237,35 @@ export default function MatchCard({
                 key={val} 
                 className="text-[9px] font-bold text-[#4A443F] bg-white border border-stone-200 px-2 py-0.5 rounded-md"
               >
-                {val}
+                {translateValue(val)}
               </span>
             ))}
           </div>
+
+          {/* Serious Intention Badges on Card */}
+          {match.badges && match.badges.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5" id={`match-${match.id}-badges`}>
+              {match.badges.slice(0, 3).map((badgeKey) => {
+                const colors = badgeKey.includes('Serious') ? 'bg-emerald-50 text-emerald-700 border-emerald-250' :
+                               badgeKey.includes('Family') ? 'bg-indigo-50 text-indigo-700 border-indigo-250' :
+                               badgeKey.includes('Ready') ? 'bg-amber-50 text-amber-700 border-amber-250' :
+                               badgeKey.includes('Studying') || badgeKey.includes('studies') ? 'bg-blue-50 text-blue-700 border-blue-250' :
+                               'bg-purple-50 text-purple-700 border-purple-250';
+                return (
+                  <span 
+                    key={badgeKey} 
+                    className={`text-[8.5px] font-extrabold px-1.5 py-0.5 rounded-md border ${colors} shadow-2xs`}
+                  >
+                    {badgeKey === 'Serious for marriage' ? txt('💍 Serious', '💍 جاد بالزواج', '💍 جدی بۆ هاوسەرگیری') :
+                     badgeKey === 'Family involved' ? txt('👨‍👩‍👧 Family Aware', '👨‍👩‍👧 الأهل عل علم', '👨‍👩‍👧 خێزان ئاگادارە') :
+                     badgeKey === 'Ready for engagement' ? txt('📝 Ready', '📝 جاهز كلياً', '📝 ئامادەیە') :
+                     badgeKey === 'Studying first' ? txt('📚 Studies First', '📚 الدراسة أولاً', '📚 خوێندن لە پێشینەیە') :
+                     txt('🔒 Private', '🔒 ملف تحفظي', '🔒 پڕۆفایلی تایبەتی')}
+                  </span>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Primary card CTA buttons */}
@@ -178,7 +277,7 @@ export default function MatchCard({
               className="w-full py-2.5 rounded-xl bg-warm-charcoal text-white font-bold text-xs hover:opacity-90 transition duration-200 shadow-lg flex items-center justify-center space-x-1.5"
             >
               <Heart className="w-3.5 h-3.5 text-accent-pink fill-accent-pink/20" />
-              <span>{locale === 'en' ? 'Send Request' : 'إرسال طلب'}</span>
+              <span>{txt('Send Request', 'إرسال طلب', 'ناردنی داواکاری')}</span>
             </button>
           )}
 
@@ -190,10 +289,10 @@ export default function MatchCard({
                 className="w-full py-2.5 rounded-xl bg-accent-coral/10 text-accent-coral border border-accent-coral/20 font-bold text-xs cursor-not-allowed flex items-center justify-center space-x-1"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-coral animate-ping shrink-0" />
-                <span>{locale === 'en' ? 'Request Pending Review' : 'بانتظار مراجعة القبول'}</span>
+                <span>{txt('Request Pending Review', 'بانتظار مراجعة القبول', 'داواکاری لە ژێر پێداچوونەوەدایە')}</span>
               </button>
               <p className="text-[8px] text-center text-[#6B635B] font-mono font-medium">
-                {locale === 'en' ? 'Auto-approves in 2.5 seconds (Simulated)' : 'موافقة تلقائية خلال 2.5 ثانية (محاكاة)'}
+                {txt('Auto-approves in 2.5 seconds (Simulated)', 'موافقة تلقائية خلال 2.5 ثانية (محاكاة)', 'پەسەندکردنی خۆکارانە لە ٢.٥ چرکەدا (سیمولەیتد)')}
               </p>
             </div>
           )}
@@ -205,7 +304,7 @@ export default function MatchCard({
               className="w-full py-2.5 rounded-xl bg-[#40798C] hover:opacity-90 text-white font-bold text-xs transition duration-200 shadow-md flex items-center justify-center space-x-1.5"
             >
               <CheckCircle className="w-4 h-4 text-emerald-300" />
-              <span>{locale === 'en' ? 'Connected! Chat' : 'تم القبول! دردشة'} ➔</span>
+              <span>{txt('Connected! Chat', 'تم القبول! دردشة', 'پەیوەست بوو! گفتوگۆ بکە')} ➔</span>
             </button>
           )}
         </div>
@@ -216,7 +315,7 @@ export default function MatchCard({
         onClick={() => onOpenDetails(match)}
         className="bg-white/45 hover:bg-white border-t border-white/20 p-2 text-center text-[9px] font-bold text-[#6B635B] cursor-pointer transition uppercase font-mono tracking-wider"
       >
-        {locale === 'en' ? 'View Full Dossier ↗' : 'عرض الملف الكامل ↗'}
+        {txt('View Full Dossier ↗', 'عرض الملف الكامل ↗', 'بینینی پڕۆفایلی تەواو ↗')}
       </div>
     </div>
   );

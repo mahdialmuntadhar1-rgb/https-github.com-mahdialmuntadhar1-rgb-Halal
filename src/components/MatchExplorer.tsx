@@ -63,6 +63,9 @@ const PROFESSION_CATEGORIES = [
 
 export default function MatchExplorer({ locale, matches, onSendRequest, onInitiateChat, userGender }: MatchExplorerProps) {
   const t = TRANSLATIONS[locale];
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
   const [filters, setFilters] = useState<SearchFilters>({
     gender: userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : 'all',
     minAge: 18,
@@ -671,10 +674,10 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                 <div className="absolute inset-0 bg-gradient-to-br from-[#ECE8E1] via-[#E1DDD5] to-[#D5CFB9] flex flex-col items-center justify-center p-4 text-center">
                   <Lock className="w-6 h-6 text-[#40798C] mb-2" />
                   <p className="text-xs text-warm-charcoal font-black uppercase tracking-wider">
-                    {locale === 'en' ? 'Portrait Hidden' : 'الصورة مخفية'}
+                    {txt('Portrait Hidden', 'الصورة مخفية', 'وێنە شاراوەیە')}
                   </p>
                   <p className="text-[10px] text-stone-500 font-medium">
-                    {locale === 'en' ? 'Visible only with double consent.' : 'تظهر فقط للشركاء المقبولين بنية جادة.'}
+                    {txt('Visible only with double consent.', 'تظهر فقط للشركاء المقبولين بنية جادة.', 'تەنها بە ڕەزامەندی چاوەڕوانکراوی دوولایەنە دەردەکەوێت.')}
                   </p>
                 </div>
               ) : selectedMatch.photoStatus === 'initials' && selectedMatch.requestStatus !== 'accepted' ? (
@@ -684,10 +687,10 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                     {selectedMatch.name ? selectedMatch.name.charAt(0).toUpperCase() : '?'}
                   </div>
                   <p className="text-xs text-warm-charcoal font-black uppercase tracking-wider">
-                    {locale === 'en' ? 'Initials Only' : 'الاسم الثنائي'}
+                    {txt('Initials Only', 'الاسم الثنائي', 'تەنها پیتەکانی سەرەتای ناو')}
                   </p>
                   <p className="text-[10px] text-stone-500 font-medium">
-                    {locale === 'en' ? 'Reveals after request is approved.' : 'تنكشف بالكامل فور قبول الطلب.'}
+                    {txt('Reveals after request is approved.', 'تنكشف بالكامل فور قبول الطلب.', 'دوای قبوڵکردنی داواکارییەکە دەردەکەوێت.')}
                   </p>
                 </div>
               ) : (
@@ -704,8 +707,12 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                   {selectedMatch.photoStatus === 'blurred' && selectedMatch.requestStatus !== 'accepted' && (
                     <div className="absolute inset-0 bg-[#2D2A26]/40 flex flex-col items-center justify-center p-4 text-center">
                       <Lock className="w-6 h-6 text-accent-coral mb-2 drop-shadow" />
-                      <p className="text-xs text-white font-bold uppercase tracking-wider">Portrait Protected</p>
-                      <p className="text-[10px] text-white/90">Unlocked automatically to accepted match partners.</p>
+                      <p className="text-xs text-white font-bold uppercase tracking-wider">
+                        {txt('Portrait Protected', 'الصورة مصانة', 'وێنە پارێزراوە')}
+                      </p>
+                      <p className="text-[10px] text-white/90">
+                        {txt('Unlocked automatically to accepted match partners.', 'تظهر تلقائياً بعد قبول طلب الطرف المتبادل.', 'ئۆتۆماتیکی دەکرێتەوە بۆ هاوبەشە قبوڵکراوەکان.')}
+                      </p>
                     </div>
                   )}
                 </>
@@ -719,9 +726,17 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                 {/* Name */}
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-serif font-black text-warm-charcoal tracking-tight flex items-center gap-1.5">
+                    <h3 className="text-xl font-serif font-black text-warm-charcoal tracking-tight flex items-center flex-wrap gap-1.5">
                       <span>{selectedMatch.name}, {selectedMatch.age}</span>
                       {selectedMatch.verified && <ShieldCheck className="w-5 h-5 text-[#40798C]" />}
+                      {selectedMatch.isOnline && (
+                        <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200/50 px-2 py-0.5 rounded text-[10px] font-semibold shadow-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[9px] font-mono font-black tracking-wide uppercase">
+                            {locale === 'en' ? 'Online' : locale === 'ar' ? 'نشط الآن' : 'ئێستا چالاکە'}
+                          </span>
+                        </span>
+                      )}
                     </h3>
                     <p className="text-xs text-[#6B635B] font-semibold">📍 {selectedMatch.governorate ? `${selectedMatch.governorate}, ` : ''}{selectedMatch.country} • <span className="capitalize">{selectedMatch.religion === 'islam' ? `${selectedMatch.sect || 'Sunni'} Muslim` : 'Non-Muslim'} ({selectedMatch.ethnicity})</span></p>
                   </div>

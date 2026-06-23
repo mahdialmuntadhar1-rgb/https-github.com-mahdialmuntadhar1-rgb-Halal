@@ -51,6 +51,10 @@ export default function ChatSimulator({
 }: ChatSimulatorProps) {
   const t = TRANSLATIONS[locale];
   
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
+  
   const [typedMessage, setTypedMessage] = useState<string>('');
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   
@@ -183,19 +187,21 @@ export default function ChatSimulator({
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-serif font-black text-warm-charcoal font-display">
-              {locale === 'en' ? 'No Private Chats Unlocked Yet' : 'لم يتم إلغاء قفل أي محادثات خاصة بعد'}
+              {txt('No Private Chats Unlocked Yet', 'لم يتم إلغاء قفل أي محادثات خاصة بعد', 'هیچ گفتوگۆیەکی تایبەت هێشتا نەکراوەتەوە')}
             </h3>
             <p className="text-[#6B635B] text-sm max-w-lg mx-auto leading-relaxed">
-              {locale === 'en'
-                ? 'To begin talking, browse portfolios in the Match Explorer and click "Send Marriage Request". Once the request is mutually accepted, communication is unlocked in absolute privacy!'
-                : 'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف للزواج". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.'}
+              {txt(
+                'To begin talking, browse portfolios in the Match Explorer and click "Send Marriage Request". Once the request is mutually accepted, communication is unlocked in absolute privacy!',
+                'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف للزواج". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.',
+                'بۆ دەستپێکردنی گفتوگۆ، بڕۆ پڕۆفایلەکان لە دۆزەرەوەی هاوبەشەکان ببینە و کرتە بکە لەسەر "ناردنی داواکاری هاوسەرگیری". کاتێک داواکارییەکە لەلایەن هەردوولاوە پەسەندکرا، گفتوگۆ لە پارێزگاریی و متمانەی تەواودا دەکرێتەوە!'
+              )}
             </p>
           </div>
           
           <div className="p-4 bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl max-w-md mx-auto text-left text-xs text-[#6B635B] space-y-2">
             <p className="font-bold text-accent-coral">⭐ Connection Simulation Tip:</p>
             <p className="font-medium">
-              Click the **Match Explorer** tab above, choose any compatible profile (e.g. Lina or Sara or Zaid), and send a request. We've built in automated simulation approval so you can immediately return here to preview the private conversation!
+              Click the **Match Explorer** tab above, choose any compatible profile (e.g. Lina or Sara or Zaid), and send a request. We\'ve built in automated simulation approval so you can immediately return here to preview the private conversation!
             </p>
           </div>
         </div>
@@ -207,10 +213,10 @@ export default function ChatSimulator({
             <div>
               <div className="p-4 border-b border-white/25 bg-white/30">
                 <h4 className="text-xs font-mono font-bold text-[#6B635B] tracking-widest uppercase">
-                  {locale === 'en' ? 'COURTSHIP CONNECTIONS' : 'قنوات التعارف المقبولة'}
+                  {txt('COURTSHIP CONNECTIONS', 'قنوات التعارف المقبولة', 'پەیوەندییەکانی هاوسەرگیری')}
                 </h4>
                 <p className="text-[10px] text-[#A2978C] font-semibold mt-0.5">
-                  {locale === 'en' ? 'Mutual intent accepted • Chat active' : 'تم القبول المتبادل • المحادثة مفعلة'}
+                  {txt('Mutual intent accepted • Chat active', 'تم القبول المتبادل • المحادثة مفعلة', 'نیازی دوولایەنە پەسەندکرا • گفتوگۆ چالاکە')}
                 </p>
               </div>
 
@@ -245,7 +251,7 @@ export default function ChatSimulator({
                           <span className="text-[9px] text-accent-coral font-mono font-bold">{m.compatibilityScore}%</span>
                         </div>
                         <p className="text-[11px] text-[#6B635B] truncate mt-0.5 italic font-medium">
-                          {lastMessage ? lastMessage.text : (locale === 'en' ? 'Conversation started' : 'بدأت المحادثة')}
+                          {lastMessage ? lastMessage.text : txt('Conversation started', 'بدأت المحادثة', 'گفتوگۆ دەستی پێکرد')}
                         </p>
                       </div>
                     </button>
@@ -258,12 +264,14 @@ export default function ChatSimulator({
             <div className="p-4 bg-white/20 border-t border-white/15 text-[#6B635B] text-[10px] space-y-1.5">
               <div className="flex items-center gap-1 text-warm-charcoal font-bold">
                 <Lock className="w-3.5 h-3.5 text-accent-coral shrink-0" />
-                <span>{locale === 'en' ? 'Direct Connection Integrity' : 'صيانة الاتصال المباشر'}</span>
+                <span>{txt('Direct Connection Integrity', 'صيانة الاتصال المباشر', 'پاراستنی پەیوەندی ڕاستەوخۆ')}</span>
               </div>
               <p className="font-semibold leading-relaxed">
-                {locale === 'en' 
-                  ? 'Abusive scripts, unserious behaviors and spam trigger automatic review bans. Communicate with honor.'
-                  : 'الألفاظ الجارحة، انعدام الجدية أو محاولات الإزعاج تفعّل الحظر والمراجعة من قبل الإدارة.'}
+                {txt(
+                  'Abusive scripts, unserious behaviors and spam trigger automatic review bans. Communicate with honor.',
+                  'الألفاظ الجارحة، انعدام الجدية أو محاولات الإزعاج تفعّل الحظر والمراجعة من قبل الإدارة.',
+                  'زمان و ڕەفتاری نەشیاو، بێجدییەت و نامەی بێزارکەر دەبنە هۆی بلۆککردن و پێداچوونەوەی ئۆتۆماتیکی لەلایەن بەڕێوبەرایەتییەوە. بە ڕێزەوە گفتوگۆ بکە.'
+                )}
               </p>
             </div>
           </div>
@@ -293,7 +301,7 @@ export default function ChatSimulator({
                       <div className="flex items-center gap-1.5">
                         <h4 className="font-serif font-black text-warm-charcoal text-sm">{activeMatch.name}</h4>
                         <span className="text-[8px] bg-[#40798C] text-white font-mono font-bold px-1.5 py-0.5 rounded-full uppercase scale-90">
-                          {locale === 'en' ? 'Direct Match' : 'ثنائي متوافق'}
+                          {txt('Direct Match', 'ثنائي متوافق', 'هاوبەشی ڕاستەوخۆ')}
                         </span>
                       </div>
                       <p className="text-[10px] text-[#6B635B] font-semibold leading-none mt-1">
@@ -310,7 +318,7 @@ export default function ChatSimulator({
                       type="button"
                       onClick={() => setShowBlockModal(true)}
                       className="p-2 rounded-xl text-stone-500 hover:text-red-600 hover:bg-stone-100/50 transition duration-150"
-                      title={locale === 'en' ? 'Block this partner' : 'حظر هذا الشريك'}
+                      title={txt('Block this partner', 'حظر هذا الشريك', 'بلۆککردنی ئەم هاوبەشە')}
                     >
                       <Ban className="w-4.5 h-4.5" />
                     </button>
@@ -320,7 +328,7 @@ export default function ChatSimulator({
                       type="button"
                       onClick={() => setShowReportModal(true)}
                       className="p-2 rounded-xl text-stone-500 hover:text-amber-600 hover:bg-stone-100/50 transition duration-150"
-                      title={locale === 'en' ? 'Report violation' : 'أبلغ عن مخالفة'}
+                      title={txt('Report violation', 'أبلغ عن مخالفة', 'ڕاپۆرتکردنی سەرپێچی')}
                     >
                       <Flag className="w-4.5 h-4.5" />
                     </button>
@@ -345,10 +353,10 @@ export default function ChatSimulator({
                   {activeConversation.messages.length === 0 ? (
                     <div className="text-center py-10 space-y-2">
                       <p className="text-[#6B635B] text-xs font-bold">
-                        {locale === 'en' ? 'Initialize discussion with an expectation check' : 'ابدأ الحوار بسؤال جاد حول البناء الأسري الكريـم'}
+                        {txt('Initialize discussion with an expectation check', 'ابدأ الحوار بسؤال جاد حول البناء الأسري الكريـم', 'دەستپێکردنی گفتوگۆ بە پشکنینی هاوشێوەیی بۆچوونەکان')}
                       </p>
                       <p className="text-[10px] text-[#A2978C] max-w-sm mx-auto font-medium">
-                        {locale === 'en' ? 'Select any of the guided questions below to check alignment.' : 'انقر على أي من الأسئلة المتخصصة أدناه لقياس مدى التطابق.'}
+                        {txt('Select any of the guided questions below to check alignment.', 'انقر على أي من الأسئلة المتخصصة أدناه لقياس مدى التطابق.', 'یەکێک لە پرسیارە ئاراستەکراوەکانی خوارەوە هەڵبژێرە بۆ پشکنینی هاوتەریبی.')}
                       </p>
                     </div>
                   ) : (
@@ -381,7 +389,7 @@ export default function ChatSimulator({
                 <div className="bg-white/35 border-t border-[#A2978C]/15 p-4 space-y-2 text-left rtl:text-right">
                   <p className="text-[9px] font-bold text-accent-coral uppercase tracking-wider flex items-center gap-1 font-mono">
                     <Sparkles className="w-3.5 h-3.5 text-accent-coral fill-accent-coral shrink-0" />
-                    <span>{locale === 'en' ? 'GUIDED VALUE QUESTIONS' : 'أسئلة معايير التوافق والزواج الموصى بها'}</span>
+                    <span>{txt('GUIDED VALUE QUESTIONS', 'أسئلة معايير التوافق والزواج الموصى بها', 'پرسیارە ئاراستەکراوەکانی هاوسەرگیری')}</span>
                   </p>
                   
                   <div className="flex flex-nowrap md:flex-wrap overflow-x-auto gap-2 pb-1.5 scrollbar-none scroll-smooth">
@@ -403,7 +411,7 @@ export default function ChatSimulator({
                     type="text"
                     value={typedMessage}
                     onChange={(e) => setTypedMessage(e.target.value)}
-                    placeholder={locale === 'en' ? "Write your respectful response..." : "أكتب رسالة وقورة وبناءة..."}
+                    placeholder={txt("Write your respectful response...", "أكتب رسالة وقورة وبناءة...", "وەڵامێکی بەڕێز بنووسە...")}
                     className="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral"
                   />
                   <button
@@ -416,9 +424,11 @@ export default function ChatSimulator({
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center p-10 text-[#6B635B] text-xs font-bold text-center">
-                {locale === 'en' 
-                  ? 'Select an active marriage connection from the sidebar to dialogue.' 
-                  : 'يرجى اختيار أحد الشركاء المتطابقين في القائمة الجانبية لبدء حوار بناء.'}
+                {txt(
+                  'Select an active marriage connection from the sidebar to dialogue.', 
+                  'يرجى اختيار أحد الشركاء المتطابقين في القائمة الجانبية لبدء حوار بناء.',
+                  'پەیوەندییەکی هاوسەرگیری چالاک لە لیستەکە هەڵبژێرە بۆ گفتوگۆکردن.'
+                )}
               </div>
             )}
           </div>
@@ -435,12 +445,14 @@ export default function ChatSimulator({
             </div>
             <div className="space-y-1.5 text-center">
               <h4 className="text-lg font-serif font-black text-warm-charcoal">
-                {locale === 'en' ? `Block ${activeMatch.name}?` : `حظر ${activeMatch.name}؟`}
+                {txt(`Block ${activeMatch.name}?`, `حظر ${activeMatch.name}؟`, `بلۆککردنی ${activeMatch.name}؟`)}
               </h4>
               <p className="text-xs text-[#6B635B] leading-relaxed font-semibold">
-                {locale === 'en' 
-                  ? 'Are you sure you want to block this user? They will be permanently removed from your active connections and matches.'
-                  : 'هل أنت متأكد من رغبتك في حظر هذا الشريك؟ سيتم حجب ملفه بالكامل وتطهير قنوات التعارف معه.'}
+                {txt(
+                  'Are you sure you want to block this user? They will be permanently removed from your active connections and matches.',
+                  'هل أنت متأكد من رغبتك في حظر هذا الشريك؟ سيتم حجب ملفه بالكامل وتطهير قنوات التعارف معه.',
+                  'تۆ دڵنیایت لە بلۆککردنی ئەم بەکارهێنەرە؟ بە شێوازێکی هەمیشەیی لە پەیوەندییە چالاکەکانت لادەبرێت.'
+                )}
               </p>
             </div>
             <div className="flex gap-3 justify-end pt-2">
@@ -449,14 +461,14 @@ export default function ChatSimulator({
                 onClick={() => setShowBlockModal(false)}
                 className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-[#4A443F] font-bold text-xs rounded-xl transition"
               >
-                {locale === 'en' ? 'Cancel' : 'إلغاء'}
+                {txt('Cancel', 'إلغاء', 'پاشگەزبوونەوە')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmBlock}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-600/15"
               >
-                {locale === 'en' ? 'Yes, Block User' : 'نعم، قم بالحظر'}
+                {txt('Yes, Block User', 'نعم، قم بالحظر', 'بەڵێ، بلۆکی بکە')}
               </button>
             </div>
           </div>
@@ -470,7 +482,7 @@ export default function ChatSimulator({
             <div className="flex justify-between items-center pb-3 border-b border-stone-150">
               <h4 className="text-sm sm:text-base font-serif font-black text-warm-charcoal flex items-center gap-1.5">
                 <Flag className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
-                <span>{locale === 'en' ? `Report ${activeMatch.name}` : `تقديم بلاغ ضد ${activeMatch.name}`}</span>
+                <span>{txt(`Report ${activeMatch.name}`, `تقديم بلاغ ضد ${activeMatch.name}`, `ڕاپۆرتکردن لەسەر ${activeMatch.name}`)}</span>
               </h4>
               <button 
                 onClick={() => setShowReportModal(false)}
@@ -484,7 +496,7 @@ export default function ChatSimulator({
               
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
-                  {locale === 'en' ? 'Reason for Reporting' : 'سبب البلاغ المباشر'}
+                  {txt('Reason for Reporting', 'سبب البلاغ المباشر', 'هۆکاری ڕاپۆرتکردن')}
                 </label>
                 <select
                   value={reportReason}
@@ -492,17 +504,17 @@ export default function ChatSimulator({
                   className="w-full bg-stone-50 border border-stone-200 p-2.5 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none"
                   required
                 >
-                  <option value="unserious">{locale === 'en' ? 'Unserious / Casual player' : 'غير جاد / يتسلى بملء الأوقات'}</option>
-                  <option value="harassment">{locale === 'en' ? 'Harassment or Impolite speech' : 'إساءة استخدام أو ألفاظ غير لائقة'}</option>
-                  <option value="fake_profile">{locale === 'en' ? 'Fake identity / Catfish' : 'هوية مزورة أو كاذبة للتحقق'}</option>
-                  <option value="commercial">{locale === 'en' ? 'Commercial or spam advertise' : 'إعلان تجاري أو طلبات خارجية'}</option>
-                  <option value="other">{locale === 'en' ? 'Other policy violation' : 'أخرى تشكل خرقاً للقواعد'}</option>
+                  <option value="unserious">{txt('Unserious / Casual player', 'غير جاد / يتسلى بملء الأوقات', 'بێجدی / تەنها بۆ کاتبەسەربردن یاری دەکات')}</option>
+                  <option value="harassment">{txt('Harassment or Impolite speech', 'إساءة استخدام أو ألفاظ غير لائقة', 'بێزارکردن یان قسەی نەشیاو')}</option>
+                  <option value="fake_profile">{txt('Fake identity / Catfish', 'هوية مزورة أو كاذبة للتحقق', 'ناسنامەی ساختە')}</option>
+                  <option value="commercial">{txt('Commercial or spam advertise', 'إعلان تجاري أو طلبات خارجية', 'ڕیکلامی بازرگانی یان بێزارکەر')}</option>
+                  <option value="other">{txt('Other policy violation', 'أخرى تشكل خرقاً للقواعد', 'سەرپێچی تری یاساکان')}</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
-                  {locale === 'en' ? 'Details and evidence (Required)' : 'التفاصيل والوقائع والملاحظات (هام للتأكيد)'}
+                  {txt('Details and evidence (Required)', 'التفاصيل والوقائع والملاحظات (هام للتأكيد)', 'وردەکارییەکان و بەڵگەکان (پێویستە)')}
                 </label>
                 <textarea
                   value={reportDetails}
@@ -510,7 +522,7 @@ export default function ChatSimulator({
                   required
                   rows={3}
                   className="w-full bg-stone-50 border border-stone-200 p-3 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral"
-                  placeholder={locale === 'en' ? "Please outline specific statements or actions that violate marriage intention rules..." : "يرجى ذكر الوقائع والعبارات التي تمت كتابتها وتخالف ميثاق الشرف للخطوبة..."}
+                  placeholder={txt("Please outline specific statements or actions that violate marriage intention rules...", "يرجى ذكر الوقائع والعبارات التي تمت كتابتها وتخالف ميثاق الشرف للخطوبة...", "تکایە دەستنیشانی ئەو دەستەواژە یان ڕەفتارە تایبەتانە بکە کە یاساکانی خواستی هاوسەرگیری دەشکێنن...")}
                 />
               </div>
 
@@ -525,13 +537,13 @@ export default function ChatSimulator({
                   onClick={() => setShowReportModal(false)}
                   className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-[#4A443F] font-bold text-xs rounded-xl transition"
                 >
-                  {locale === 'en' ? 'Close' : 'إغلاق'}
+                  {txt('Close', 'إغلاق', 'داخستن')}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2.5 bg-accent-coral hover:bg-opacity-95 text-white font-bold text-xs rounded-xl shadow-lg shadow-accent-coral/15"
                 >
-                  {locale === 'en' ? 'Submit Report for Review' : 'إرسال البلاغ للتدقيق'}
+                  {txt('Submit Report for Review', 'إرسال البلاغ للتدقيق', 'ناردنی ڕاپۆرت بۆ پێداچوونەوە')}
                 </button>
               </div>
 

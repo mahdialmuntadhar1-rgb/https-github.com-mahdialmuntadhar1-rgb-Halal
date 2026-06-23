@@ -67,6 +67,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
   const [step, setStep] = useState<number>(1);
   const [profile, setProfile] = useState<UserProfile>({
     ...initialProfile,
+    badges: initialProfile.badges || ['Serious for marriage'],
     country: initialProfile.country || 'Iraq',
     governorate: initialProfile.governorate || 'Baghdad',
     city: initialProfile.city || '',
@@ -670,6 +671,49 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
                     }`}
                   >
                     {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C. Serious Intention Badges Selection */}
+          <div className="space-y-3 pt-5 border-t border-stone-200/50">
+            <label className="block text-xs font-black text-warm-charcoal uppercase tracking-wider font-mono">
+              {isEn ? '🛡️ Serious Intention Badges' : '🛡️ شارات ونوايا الارتباط الجاد'}
+            </label>
+            <p className="text-[11px] text-stone-500 font-semibold leading-relaxed">
+              {isEn 
+                ? 'Select the badges that represent your current situation and marriage path. These will be highlighted on your card.' 
+                : 'اختر الشارات التي تصف وضعك الحالي ونقاشاتك تجاه بناء بيت مستقبلي؛ ستظهر للآخرين لدعم ثقتهم بنظرتك المتزنة:'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'Serious for marriage', en: 'Serious for marriage', ar: '💍 جاد للزواج الفعلي' },
+                { key: 'Family involved', en: 'Family involved', ar: '👨‍👩‍👧 الأهل على علم بالمشاركة' },
+                { key: 'Ready for engagement', en: 'Ready for engagement', ar: '📝 مستعد للخطوبة الفورية' },
+                { key: 'Studying first', en: 'Studying first', ar: '📚 الدراسة أولاً مع التعرف' },
+                { key: 'Private profile', en: 'Private profile', ar: '🔒 ملف تعريفي متحفظ وخاص' }
+              ].map((badge) => {
+                const isSelected = (profile.badges || []).includes(badge.key);
+                return (
+                  <button
+                    type="button"
+                    key={badge.key}
+                    onClick={() => {
+                      const currentBadges = profile.badges || [];
+                      const updatedBadges = currentBadges.includes(badge.key)
+                        ? currentBadges.filter(b => b !== badge.key)
+                        : [...currentBadges, badge.key];
+                      updateProfile({ badges: updatedBadges });
+                    }}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition duration-200 ${
+                      isSelected
+                        ? 'bg-[#40798C] border-[#40798C] text-white shadow-md'
+                        : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>{isEn ? badge.en : badge.ar}</span>
                   </button>
                 );
               })}

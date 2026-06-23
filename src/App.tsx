@@ -14,20 +14,42 @@ import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
 import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
+import CommunityFeed from './components/CommunityFeed';
+import AdminPanel from './components/AdminPanel';
 import { useLocale } from './hooks/useLocale';
 import { mockApi } from './services/mockApi';
 import { Sparkles, Check, Heart } from 'lucide-react';
+import { HeroImage } from './types';
 
 export default function App() {
   const { locale, setLocale, t } = useLocale('ar');
-  const [currentTab, setTab] = useState<'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'trust_safety'>('landing');
+  const [currentTab, setTab] = useState<'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin'>('landing');
 
   // Async States
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [savedMatchIds, setSavedMatchIds] = useState<string[]>([]);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [matches, setMatches] = useState<MatchProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Load Slideshow photos
+  const loadHeroImages = async () => {
+    try {
+      const imgs = await mockApi.getHeroImages();
+      setHeroImages(imgs);
+    } catch (err) {
+      console.error("Failed loading hero photos", err);
+    }
+  };
+
+  // Sync saved list
+  useEffect(() => {
+    if (userProfile?.savedMatches) {
+      setSavedMatchIds(userProfile.savedMatches);
+    }
+  }, [userProfile]);
 
   // Load Initial API Data
   useEffect(() => {
@@ -41,12 +63,32 @@ export default function App() {
         setUserProfile(profile);
         setMatches(matchesList);
         setConversations(convs);
+        await loadHeroImages();
       } catch (err) {
         console.error("Failed to load initial data", err);
       }
     }
     loadData();
   }, []);
+
+  // Bookmark Toggler
+  const handleToggleSaveMatch = async (matchId: string) => {
+    try {
+      const updatedUser = await mockApi.toggleSaveProfile(matchId);
+      setUserProfile(updatedUser);
+      const savedIds = updatedUser.savedMatches || [];
+      setSavedMatchIds(savedIds);
+      
+      const isSavedNow = savedIds.includes(matchId);
+      triggerToast(
+        isSavedNow
+          ? "⭐ Candidate added to your Saved Portfolios!"
+          : "🗑️ Portfolio bookmark removed."
+      );
+    } catch (err) {
+      console.error("Failed toggling save candidates", err);
+    }
+  };
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -182,6 +224,8 @@ export default function App() {
         userProfileName={userProfile.name}
         locale={locale}
         setLocale={setLocale}
+        isAdmin={userProfile?.email?.trim().toLowerCase() === 'safaribosafar@gmail.com' || localStorage.getItem('simulate_admin') === 'true'}
+        heroImages={heroImages}
       />
 
       {/* Primary switcher layout */}
@@ -196,7 +240,13 @@ export default function App() {
                 photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible' as const
               };
               await handleUpdateUserProfile(updatedProfile);
-              triggerToast(locale === 'en' ? `✨ Gender set to ${gender}. Let's fill out your parameters!` : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`);
+              triggerToast(
+                locale === 'en' 
+                  ? `✨ Gender set to ${gender}. Let's fill out your parameters!` 
+                  : locale === 'ckb'
+                    ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
+                    : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
+              );
               setTab('onboarding');
             }}
             onExploreMatches={() => setTab('explore')}
@@ -220,6 +270,8 @@ export default function App() {
             onInitiateChat={handleInitiateChat}
             userGender={userProfile.gender}
             userGovernorate={userProfile.governorate}
+            savedMatchIds={savedMatchIds}
+            onToggleSaveMatch={handleToggleSaveMatch}
           />
         )}
 
@@ -264,6 +316,24 @@ export default function App() {
           <TrustPrivacyScreen
             locale={locale}
             onBackToOverview={() => setTab('landing')}
+          />
+        )}
+
+        {currentTab === 'community' && (
+          <CommunityFeed
+            locale={locale}
+            currentEmail={userProfile.email}
+            currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {currentTab === 'admin' && (
+          <AdminPanel
+            locale={locale}
+            currentEmail={userProfile.email}
+            triggerToast={triggerToast}
+            onRefreshHero={loadHeroImages}
           />
         )}
       </main>

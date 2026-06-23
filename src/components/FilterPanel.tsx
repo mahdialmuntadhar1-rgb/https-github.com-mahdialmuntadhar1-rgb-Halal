@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { SearchFilters, AppLanguage } from '../types';
 import { GOVERNORATES, SECTS, ETHNICITIES, EDUCATION_LEVELS, PROFESSION_CATEGORIES } from '../constants';
 import { SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { TRANSLATIONS } from '../lib/translations';
 
 interface FilterPanelProps {
   filters: SearchFilters;
@@ -45,6 +46,11 @@ export default function FilterPanel({
   locale
 }: FilterPanelProps) {
 
+  const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
+
   const handleGenderToggle = (g: 'male' | 'female' | 'all') => {
     setFilters(prev => ({ ...prev, gender: g }));
   };
@@ -65,12 +71,10 @@ export default function FilterPanel({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-warm-charcoal font-serif tracking-tight">
-            {locale === 'en' ? 'Explore Courtship Portfolios' : 'استعراض الشركاء المحتملين'}
+            {t.exploreTitle}
           </h2>
           <p className="text-[#6B635B] text-xs sm:text-sm font-medium mt-1">
-            {locale === 'en' 
-              ? 'Genuine profiles seeking marriage. No swipe tricks, verified portfolios only.'
-              : 'ملفات جادة وحقيقية تسعى للزواج على سنة الله ورسوله، بدون ألاعيب التمرير العشوائي.'}
+            {t.exploreSub}
           </p>
         </div>
 
@@ -85,7 +89,7 @@ export default function FilterPanel({
             }`}
           >
             <SlidersHorizontal className="w-4 h-4 shrink-0" />
-            <span>{showAdvancedFilters ? (locale === 'en' ? "Hide Advanced Filters" : "إخفاء الفلاتر المتقدمة") : (locale === 'en' ? "Advanced Filters" : "الفلاتر المتقدمة")}</span>
+            <span>{showAdvancedFilters ? t.filterButtonHide : t.filterButtonShow}</span>
           </button>
 
           {/* Reset button */}
@@ -94,12 +98,12 @@ export default function FilterPanel({
             className="flex items-center space-x-1.5 px-3 py-2.5 rounded-xl border border-white/40 bg-white/45 text-xs font-bold text-[#6B635B] hover:text-warm-charcoal transition"
           >
             <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-            <span>{locale === 'en' ? 'Reset' : 'إعادة تعيين'}</span>
+            <span>{txt('Reset', 'إعادة تعيين', 'پاککردنەوە')}</span>
           </button>
 
           <div className="bg-white/40 border border-white/30 px-4 py-2.5 rounded-xl text-xs text-[#6B635B] font-mono font-bold flex items-center gap-1.5 shrink-0">
             <span className="w-1.5 h-1.5 bg-[#40798C] rounded-full animate-pulse" />
-            <span>{filteredCount} {locale === 'en' ? 'Portfolios' : 'ملفات متوافقة'}</span>
+            <span>{filteredCount} {txt('Portfolios', 'ملفات متوافقة', 'پڕۆفایلی گونجاو')}</span>
           </div>
         </div>
       </div>
@@ -113,24 +117,24 @@ export default function FilterPanel({
           {/* Sort By Option (High visibility requested!) */}
           <div>
             <label className="block text-[10px] font-bold text-accent-coral uppercase tracking-widest font-mono mb-2">
-              🧭 {locale === 'en' ? 'Sort Profiles By' : 'فرز الملفات حسب'}
+              🧭 {txt('Sort Profiles By', 'فرز الملفات حسب', 'ڕیزکردنی پڕۆفایلەکان بەپێی')}
             </label>
             <select
               value={filters.sortBy || 'compatibility'}
               onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
               className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral shadow-sm"
             >
-              <option value="compatibility">{locale === 'en' ? '⭐️ Best Compatibility' : '⭐ الأفضل توافقاً'}</option>
-              <option value="newest">{locale === 'en' ? '🕐 Newest Members' : '🕐 الأعضاء الأحدث'}</option>
-              <option value="closest">{locale === 'en' ? '📍 Closest Location' : '📍 الموقع الأقرب لي'}</option>
-              <option value="completeness">{locale === 'en' ? '📈 Most Complete Profiles' : '📈 الملفات الأكثر اكتمالاً'}</option>
+              <option value="compatibility">{txt('⭐️ Best Compatibility', '⭐ الأفضل توافقاً', '⭐️ باشترین گونجاوی')}</option>
+              <option value="newest">{txt('🕐 Newest Members', '🕐 الأعضاء الأحدث', '🕐 نوێترین ئەندامەکان')}</option>
+              <option value="closest">{txt('📍 Closest Location', '📍 الموقع الأقرب لي', '📍 نزیکترین شوێن')}</option>
+              <option value="completeness">{txt('📈 Most Complete Profiles', '📈 الملفات الأكثر اكتمالاً', '📈 تەواوترین پڕۆفایلەکان')}</option>
             </select>
           </div>
 
           {/* Gender */}
           <div>
             <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-              {locale === 'en' ? 'Partner Gender' : 'جنس الشريك المرتقب'}
+              {txt('Partner Gender', 'جنس الشريك المرتقب', 'ڕەگەزی هاوبەش')}
             </label>
             <div className="grid grid-cols-3 gap-1 bg-white/50 border border-white/40 p-1 rounded-xl">
               {(['male', 'female', 'all'] as const).map((g) => (
@@ -144,7 +148,7 @@ export default function FilterPanel({
                       : 'text-[#6B635B] hover:text-warm-charcoal'
                   }`}
                 >
-                  {g === 'all' ? (locale === 'en' ? 'both' : 'الكل') : g === 'male' ? (locale === 'en' ? 'men' : 'رجال') : (locale === 'en' ? 'women' : 'نساء')}
+                  {g === 'all' ? txt('both', 'الكل', 'هەردووکیان') : g === 'male' ? txt('men', 'رجال', 'پیاوان') : txt('women', 'نساء', 'ژنان')}
                 </button>
               ))}
             </div>
@@ -154,7 +158,7 @@ export default function FilterPanel({
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono">
-                {locale === 'en' ? `Age Scope (${filters.minAge} - ${filters.maxAge})` : `النطاق العمري (${filters.minAge} - ${filters.maxAge})`}
+                {txt(`Age Scope (${filters.minAge} - ${filters.maxAge})`, `النطاق العمري (${filters.minAge} - ${filters.maxAge})`, `مەودای تەمەن (${filters.minAge} - ${filters.maxAge})`)}
               </label>
             </div>
             <div className="flex items-center space-x-3 bg-white/60 p-2 border border-white/30 rounded-xl">
@@ -180,14 +184,14 @@ export default function FilterPanel({
           {/* Iraq Governorate */}
           <div>
             <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-              {locale === 'en' ? 'Iraqi Governorate' : 'المحافظة العراقية'}
+              {txt('Iraqi Governorate', 'المحافظة العراقية', 'پارێزگای عێراق')}
             </label>
             <select
               value={filters.governorate}
               onChange={(e) => setFilters(prev => ({ ...prev, governorate: e.target.value }))}
               className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-accent-coral shadow-sm font-semibold"
             >
-              <option value="All Iraq">{locale === 'en' ? 'Across all Iraq' : 'كل المحافظات'}</option>
+              <option value="All Iraq">{txt('Across all Iraq', 'كل المحافظات', 'هەموو پارێزگاکان')}</option>
               {GOVERNORATES.map((g) => (
                 <option key={g} value={g}>{g}</option>
               ))}
@@ -203,7 +207,7 @@ export default function FilterPanel({
             {/* Iraq City Option (Dynamically dependent on selected governorate) */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🏡 {locale === 'en' ? 'City / District' : 'المدينة / القضاء'}
+                🏡 {txt('City / District', 'المدينة / القضاء', 'شارۆچکە / قەزا')}
               </label>
               <select
                 value={filters.city || 'All Cities'}
@@ -212,7 +216,7 @@ export default function FilterPanel({
               >
                 {availableCities.map((c) => (
                   <option key={c} value={c}>
-                    {c === 'All Cities' ? (locale === 'en' ? 'All Cities' : 'كل المدن') : c}
+                    {c === 'All Cities' ? txt('All Cities', 'كل المدن', 'هەموو شارەکان') : c}
                   </option>
                 ))}
               </select>
@@ -221,16 +225,16 @@ export default function FilterPanel({
             {/* Religion Selection */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🕌 {locale === 'en' ? 'Religion Stance' : 'الديانة'}
+                🕌 {txt('Religion Stance', 'الديانة', 'بۆچوونی ئایینی')}
               </label>
               <select
                 value={filters.religion}
                 onChange={(e) => setFilters(prev => ({ ...prev, religion: e.target.value as 'all' | 'islam' | 'non_islam', sect: 'all' }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none shadow-sm"
               >
-                <option value="all">{locale === 'en' ? 'Any Religion' : 'أي ديانة'}</option>
-                <option value="islam">{locale === 'en' ? 'Islam' : 'الإسلام'}</option>
-                <option value="non_islam">{locale === 'en' ? 'Non-Islam' : 'غير مسلم'}</option>
+                <option value="all">{txt('Any Religion', 'أي ديانة', 'هەر ئایینێک')}</option>
+                <option value="islam">{txt('Islam', 'الإسلام', 'ئیسلام')}</option>
+                <option value="non_islam">{txt('Non-Islam', 'غير مسلم', 'غیر ئیسلام')}</option>
               </select>
             </div>
 
@@ -238,16 +242,16 @@ export default function FilterPanel({
             {filters.religion !== 'non_islam' && (
               <div>
                 <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                  📿 {locale === 'en' ? 'Islamic Sect' : 'المذهب'}
+                  📿 {txt('Islamic Sect', 'المذهب', 'مەزهەب')}
                 </label>
                 <select
                   value={filters.sect}
                   onChange={(e) => setFilters(prev => ({ ...prev, sect: e.target.value as 'all' | 'sunni' | 'shiaa' | 'none' }))}
                   className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
                 >
-                  <option value="all">{locale === 'en' ? 'Any Sect / Tolerant' : 'أي مذهب / متسامح'}</option>
-                  <option value="sunni">{locale === 'en' ? 'Sunni Only' : 'سُنّي فقط'}</option>
-                  <option value="shiaa">{locale === 'en' ? 'Shiaa Only' : 'شيعي فقط'}</option>
+                  <option value="all">{txt('Any Sect / Tolerant', 'أي مذهب / متسامح', 'هەر مەزهەبێک / لێبوردە')}</option>
+                  <option value="sunni">{txt('Sunni Only', 'سُنّي فقط', 'تەنها سوننە')}</option>
+                  <option value="shiaa">{txt('Shiaa Only', 'شيعي فقط', 'تەنها شیعە')}</option>
                 </select>
               </div>
             )}
@@ -255,31 +259,31 @@ export default function FilterPanel({
             {/* Ethnicity Preference */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🌍 {locale === 'en' ? 'Ethnicity' : 'القومية'}
+                🌍 {txt('Ethnicity', 'القومية', 'نەتەوە')}
               </label>
               <select
                 value={filters.ethnicity}
                 onChange={(e) => setFilters(prev => ({ ...prev, ethnicity: e.target.value as 'all' | 'arab' | 'kurdish' | 'others' }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="all">{locale === 'en' ? 'Any Ethnicity' : 'أي قومية'}</option>
-                <option value="arab">{locale === 'en' ? 'Arab Heritage' : 'قومية عربية'}</option>
-                <option value="kurdish">{locale === 'en' ? 'Kurdish Heritage' : 'قومية كوردية'}</option>
-                <option value="others">{locale === 'en' ? 'Others (Turkmen, Assyrian)' : 'قومية أخرى (تركماني، آشوري)'}</option>
+                <option value="all">{txt('Any Ethnicity', 'أي قومية', 'هەر نەتەوەیەک')}</option>
+                <option value="arab">{txt('Arab Heritage', 'قومية عربية', 'عەرەب')}</option>
+                <option value="kurdish">{txt('Kurdish Heritage', 'قومية كوردية', 'کورد')}</option>
+                <option value="others">{txt('Others (Turkmen, Assyrian)', 'قومية أخرى (تركماني، آشوري)', 'کەمینەکانی تر (تورکمان، ئاشووری)')}</option>
               </select>
             </div>
 
             {/* Academic Education Level */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🎓 {locale === 'en' ? 'Education' : 'التعليم'}
+                🎓 {txt('Education', 'التعليم', 'ئاستی خوێندن')}
               </label>
               <select
                 value={filters.education}
                 onChange={(e) => setFilters(prev => ({ ...prev, education: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="All Education Levels">{locale === 'en' ? 'All Education Levels' : 'كل المستويات التعليمية'}</option>
+                <option value="All Education Levels">{txt('All Education Levels', 'كل المستويات التعليمية', 'هەموو ئاستەکانی خوێندن')}</option>
                 {EDUCATION_LEVELS.map((level) => (
                   <option key={level} value={level}>{level}</option>
                 ))}
@@ -289,14 +293,14 @@ export default function FilterPanel({
             {/* Profession category */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                💼 {locale === 'en' ? 'Profession Category' : 'فئة المهنة'}
+                💼 {txt('Profession Category', 'فئة المهنة', 'پۆلی پیشە')}
               </label>
               <select
                 value={filters.profession}
                 onChange={(e) => setFilters(prev => ({ ...prev, profession: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="All Professions">{locale === 'en' ? 'All Professions' : 'كل المهن والوظائف'}</option>
+                <option value="All Professions">{txt('All Professions', 'كل المهن والوظائف', 'هەموو پیشەکان')}</option>
                 {PROFESSION_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
@@ -306,65 +310,65 @@ export default function FilterPanel({
             {/* Marriage timeline filter */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🕒 {locale === 'en' ? 'Marriage Timeline' : 'الجدول الزمني للزواج'}
+                🕒 {txt('Marriage Timeline', 'الجدول الزمني للزواج', 'ماوەی گەیشتن بە هاوسەرگیری')}
               </label>
               <select
                 value={filters.timeline || 'all'}
                 onChange={(e) => setFilters(prev => ({ ...prev, timeline: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="all">{locale === 'en' ? 'Any Timeline / Flexible' : 'أي وقت / مرن'}</option>
-                <option value="soon">{locale === 'en' ? 'Soon / Within 6 months' : 'بسرعة / خلال 6 أشهر'}</option>
-                <option value="1year">{locale === 'en' ? 'Within 1 year' : 'خلال سنة واحدة'}</option>
-                <option value="2years">{locale === 'en' ? 'Within 1-2 years' : 'خلال سنة إلى سنتين'}</option>
-                <option value="flexible">{locale === 'en' ? 'Flexible' : 'مرن وغير مستعجل'}</option>
+                <option value="all">{txt('Any Timeline / Flexible', 'أي وقت / مرن', 'هەر کاتێک / نەرم')}</option>
+                <option value="soon">{txt('Soon / Within 6 months', 'بسرعة / خلال 6 أشهر', 'بەمنزیکانە / لە ماوەی ٦ مانگدا')}</option>
+                <option value="1year">{txt('Within 1 year', 'خلال سنة واحدة', 'لە ماوەی ١ ساڵدا')}</option>
+                <option value="2years">{txt('Within 1-2 years', 'خلال سنة إلى سنتين', 'لە ماوەی ١-٢ ساڵدا')}</option>
+                <option value="flexible">{txt('Flexible', 'مرن وغير مستعجل', 'نەرم و بێپەلە')}</option>
               </select>
             </div>
 
             {/* Wants Children stance */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                👶 {locale === 'en' ? 'Children Stance' : 'الرغبة في الإنجاب'}
+                👶 {txt('Children Stance', 'الرغبة في الإنجاب', 'هەڵوێستی منداڵبوون')}
               </label>
               <select
                 value={filters.wantsChildren}
                 onChange={(e) => setFilters(prev => ({ ...prev, wantsChildren: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="All">{locale === 'en' ? 'Any Stance' : 'أي موقف'}</option>
-                <option value="Yes">{locale === 'en' ? 'Yes, wants children' : 'نعم، يفضل إنجاب أطفال'}</option>
-                <option value="No">{locale === 'en' ? 'No/Undecided' : 'لا أو يفضل الانتظار'}</option>
+                <option value="All">{txt('Any Stance', 'أي موقف', 'هەر هەڵوێستێک')}</option>
+                <option value="Yes">{txt('Yes, wants children', 'نعم، يفضل إنجاب أطفال', 'بەڵێ، منداڵی دەوێت')}</option>
+                <option value="No">{txt('No/Undecided', 'لا أو يفضل الانتظار', 'نەخێر/بڕیارنەدراو')}</option>
               </select>
             </div>
 
             {/* Smoking preference filter */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                🚭 {locale === 'en' ? 'Smoking Status' : 'موقف التدخين'}
+                🚭 {txt('Smoking Status', 'موقف التدخين', 'دۆخی جگەرەکێشان')}
               </label>
               <select
                 value={filters.smoking || 'All'}
                 onChange={(e) => setFilters(prev => ({ ...prev, smoking: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="All">{locale === 'en' ? 'Any preference' : 'أي شريك'}</option>
-                <option value="Strictly Non-smoker">{locale === 'en' ? 'Strictly Non-smoker' : 'غير مدخن قطارياً'}</option>
+                <option value="All">{txt('Any preference', 'أي شريك', 'هەر شتێک')}</option>
+                <option value="Strictly Non-smoker">{txt('Strictly Non-smoker', 'غير مدخن قطارياً', 'بە توندی جگەرەنەکێش')}</option>
               </select>
             </div>
 
             {/* Photo Visibility preference filter */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
-                📸 {locale === 'en' ? 'Portrait Privacy' : 'خصوصية الصورة الشخصية'}
+                📸 {txt('Portrait Privacy', 'خصوصية الصورة الشخصية', 'تایبەتمەندێتی وێنە')}
               </label>
               <select
                 value={filters.photoVisibility || 'All'}
                 onChange={(e) => setFilters(prev => ({ ...prev, photoVisibility: e.target.value }))}
                 className="w-full bg-white border border-white/40 p-2.5 rounded-xl text-xs text-warm-charcoal focus:outline-none shadow-sm font-semibold"
               >
-                <option value="All">{locale === 'en' ? 'Any Portrait Preference' : 'جميع خيارات الصورة'}</option>
-                <option value="Blurred Only">{locale === 'en' ? 'Blurred / Portrait Protected' : 'الصور المصانة مغطاة فقط'}</option>
-                <option value="Visible Only">{locale === 'en' ? 'Directly Visible Portraits' : 'الصور المكشوفة مباشرة'}</option>
+                <option value="All">{txt('Any Portrait Preference', 'جميع خيارات الصورة', 'هەر تایبەتمەندییەکی وێنە')}</option>
+                <option value="Blurred Only">{txt('Blurred / Portrait Protected', 'الصور المصانة مغطاة فقط', 'وێنەی پارێزراو/شێڵکراو')}</option>
+                <option value="Visible Only">{txt('Directly Visible Portraits', 'الصور المكشوفة مباشرة', 'وێنەی پڕۆفایلی ئاشکرا')}</option>
               </select>
             </div>
 
@@ -379,7 +383,7 @@ export default function FilterPanel({
                   className="w-4 h-4 text-accent-coral border-white/40 focus:ring-accent-coral rounded cursor-pointer accent-accent-coral"
                 />
                 <span className="flex items-center gap-1.5 flex-wrap">
-                  <span>🥇 {locale === 'en' ? 'Verified Only (Demo Validation)' : 'الموثقين فقط (تأكيد تجريبي)'}</span>
+                  <span>🥇 {txt('Verified Only (Demo Validation)', 'الموثقين فقط (تأكيد تجريبي)', 'تەنها موثقەکان (تێست)')}</span>
                 </span>
               </label>
             </div>

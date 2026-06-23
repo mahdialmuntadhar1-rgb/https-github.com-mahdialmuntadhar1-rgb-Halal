@@ -13,6 +13,8 @@ interface MatchExplorerScreenProps {
   onInitiateChat: (id: string) => void;
   userGender: 'male' | 'female';
   userGovernorate?: string;
+  savedMatchIds?: string[];
+  onToggleSaveMatch: (id: string) => void;
 }
 
 export default function MatchExplorerScreen({
@@ -21,10 +23,16 @@ export default function MatchExplorerScreen({
   onSendRequest,
   onInitiateChat,
   userGender,
-  userGovernorate
+  userGovernorate,
+  savedMatchIds = [],
+  onToggleSaveMatch
 }: MatchExplorerScreenProps) {
+  const txt = (en: string, ar: string, ckb: string) => {
+    return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
   const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchProfile | null>(null);
+  const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
 
   // Default user location is Baghdad if not provided
   const userGov = userGovernorate || 'Baghdad';
@@ -92,6 +100,9 @@ export default function MatchExplorerScreen({
 
   // 1. Thorough Filtering Logic
   const filteredMatches = matches.filter((m) => {
+    // Saved Matches Filter
+    if (showSavedOnly && !savedMatchIds.includes(m.id)) return false;
+
     // Gender Filter
     if (filters.gender !== 'all' && m.gender !== filters.gender) return false;
 
@@ -244,16 +255,61 @@ export default function MatchExplorerScreen({
         </span>
       </div>
 
+      {/* Browsing modes tabs (All vs Saved portfolios) */}
+      <div className="flex gap-2.5 pb-2 border-b border-stone-200 text-left">
+        <button
+          onClick={() => setShowSavedOnly(false)}
+          className={`px-5 py-3 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 ${
+            !showSavedOnly
+              ? 'bg-warm-charcoal text-white shadow-sm'
+              : 'bg-stone-50 border text-stone-600 hover:bg-stone-100'
+          }`}
+        >
+          <span>📋 {txt('All Candidates', 'جميع المحترمين', 'هەموو بەربژێرەکان')}</span>
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono text-center shrink-0">
+            {matches.filter(m => filters.gender === 'all' || m.gender === filters.gender).length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setShowSavedOnly(true)}
+          className={`px-5 py-3 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 ${
+            showSavedOnly
+              ? 'bg-[#40798C] text-white shadow-sm'
+              : 'bg-stone-50 border text-[#40798C] hover:bg-stone-100'
+          }`}
+          id="saved-portfolios-tab"
+        >
+          <span>⭐ {txt('Saved Portfolios', 'المدونات المحفوظة', 'پارێزراوەکان')}</span>
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono text-center shrink-0">
+            {savedMatchIds.length}
+          </span>
+        </button>
+      </div>
+
       {/* Grid of Match Dossier Cards */}
       {sortedMatches.length === 0 ? (
-        <EmptyState
-          title={locale === 'en' ? 'No compatible dossiers found' : 'لم يتم العثور على ملفات متوافقة'}
-          description={locale === 'en' 
-            ? 'We enforce strict search constraints to respect seriousness. Try expanding your age limits or searching all Iraqi governorates.'
-            : 'نحن نفرض معايير دقيقة لمطابقة حقيقية ومصانة للزواج. يرجى تجربة توسيع المدى العمري أو اختيار محافظات أخرى.'}
-          actionText={locale === 'en' ? 'Reset Parameters' : 'إعادة تعيين المعايير'}
-          onAction={handleResetFilters}
-        />
+        showSavedOnly ? (
+          <EmptyState
+            title={txt('Your Bookmarks are Empty', 'لا توجد محفوظات عائلية حالياً', 'هیچ پڕۆفایلێکی پاشەکەوتکراو نییە')}
+            description={txt(
+              'Click the gold Star icon on any candidate’s card while browsing to save their portfolio here for careful reflection.',
+              'انقر رمز النجمة الذهبية في زاوية ملف أي عائلات لتجدها مؤرشفة هنا للتدبر اللاحق والتأمل الوقور.',
+              'کلیک لەسەر ئەستێرەی زێڕین بکە لەسەر پڕۆفایلەکان بۆ پاشەکەوتکردنیان لێرە.'
+            )}
+            actionText={txt('Browse All Candidates', 'عرض كامل الأعضاء', 'بابەتە جیاوازەکان ببینی')}
+            onAction={() => setShowSavedOnly(false)}
+          />
+        ) : (
+          <EmptyState
+            title={locale === 'en' ? 'No compatible dossiers found' : 'لم يتم العثور على ملفات متوافقة'}
+            description={locale === 'en' 
+              ? 'We enforce strict search constraints to respect seriousness. Try expanding your age limits or searching all Iraqi governorates.'
+              : 'نحن نفرض معايير دقيقة لمطابقة حقيقية ومصانة للزواج. يرجى تجربة توسيع المدى العمري أو اختيار محافظات أخرى.'}
+            actionText={locale === 'en' ? 'Reset Parameters' : 'إعادة تعيين المعايير'}
+            onAction={handleResetFilters}
+          />
+        )
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {sortedMatches.map((m) => (
@@ -264,6 +320,8 @@ export default function MatchExplorerScreen({
               onSendRequest={onSendRequest}
               onInitiateChat={onInitiateChat}
               onOpenDetails={(profile) => setSelectedMatch(profile)}
+              savedMatchIds={savedMatchIds}
+              onToggleSaveMatch={onToggleSaveMatch}
             />
           ))}
         </div>
@@ -274,8 +332,8 @@ export default function MatchExplorerScreen({
         isOpen={activeSelectedMatch !== null}
         onClose={() => setSelectedMatch(null)}
         title={activeSelectedMatch 
-          ? (locale === 'en' ? `${activeSelectedMatch.name}'s Serious Portfolio` : `الملف التعريفي للخطوبة: ${activeSelectedMatch.name}`)
-          : (locale === 'en' ? 'Courtship Dossier' : 'ملف التعارف')}
+          ? txt(`${activeSelectedMatch.name}'s Serious Portfolio`, `الملف التعريفي للخطوبة: ${activeSelectedMatch.name}`, `پۆرتفۆلیۆی جدی ${activeSelectedMatch.name}`)
+          : txt('Courtship Dossier', 'ملف التعارف', 'دۆسیەی هاوسەرگیری')}
       >
         {activeSelectedMatch && (
           <div className="space-y-6 text-left max-h-[75vh] overflow-y-auto pr-1">
@@ -311,7 +369,7 @@ export default function MatchExplorerScreen({
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-black text-warm-charcoal flex items-center gap-1.5">
+                  <h3 className="text-xl font-serif font-black text-warm-charcoal flex items-center flex-wrap gap-1.5">
                     <span>{activeSelectedMatch.name}, {activeSelectedMatch.age}</span>
                     {activeSelectedMatch.verified && (
                       <span className="text-xs bg-[#40798C] text-white px-2 py-0.5 rounded flex items-center gap-0.5 shadow-sm">
@@ -319,11 +377,41 @@ export default function MatchExplorerScreen({
                         <span className="text-[9px] font-bold">Demo Verified</span>
                       </span>
                     )}
+                    {activeSelectedMatch.isOnline && (
+                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200/50 px-2 py-0.5 rounded text-[10px] font-semibold shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[9.5px] font-mono uppercase font-black tracking-wide">
+                          {txt('Online', 'نشط الآن', 'ئێستا چالاکە')}
+                        </span>
+                      </span>
+                    )}
                   </h3>
                   <p className="text-xs text-[#6B635B] font-semibold mt-0.5 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
                     <span>{activeSelectedMatch.governorate}, Iraq</span>
                   </p>
+                  
+                  {/* Active badges in modal */}
+                  {activeSelectedMatch.badges && activeSelectedMatch.badges.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {activeSelectedMatch.badges.map(badgeKey => {
+                        const colors = badgeKey.includes('Serious') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                       badgeKey.includes('Family') ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                                       badgeKey.includes('Ready') ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                       badgeKey.includes('Studying') || badgeKey.includes('studies') ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                       'bg-purple-50 text-purple-700 border-purple-200';
+                        return (
+                          <span key={badgeKey} className={`text-[8.5px] font-extrabold px-2 py-0.5 rounded-md border ${colors} shadow-3xs uppercase tracking-wide`}>
+                            🛡️ {badgeKey === 'Serious for marriage' ? txt('Serious Match', 'جاد للزواج', 'جدی بۆ هاوسەرگیری') :
+                                 badgeKey === 'Family involved' ? txt('Family Aware', 'الأهل عل علم', 'خێزان ئاگادارە') :
+                                 badgeKey === 'Ready for engagement' ? txt('Ready', 'جاهز كلياً', 'ئامادەیە') :
+                                 badgeKey === 'Studying first' ? txt('Studies First', 'الدراسة أولاً', 'خوێندن لە پێشینەیە') :
+                                 txt('Private Profile', 'ملف تحفظي وخاص', 'پڕۆفایلی تایبەتی')}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -339,11 +427,13 @@ export default function MatchExplorerScreen({
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-start gap-2 animate-pulse">
                 <AlertCircle className="w-4 h-4 text-accent-coral shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block">{locale === 'en' ? 'Simulation Active' : 'المحاكاة نشطة'}</strong>
+                  <strong className="block">{txt('Simulation Active', 'المحاكاة نشطة', 'سیمیولەیشن چالاکە')}</strong>
                   <span>
-                    {locale === 'en'
-                      ? 'Demo: auto-accepting request so you can preview chat flow.'
-                      : 'عرض تجريبي: سيتم قبول الطلب تلقائياً لكي تتمكن من تجربة شاشة المحادثة واستعراض محاكاة الدردشة.'}
+                    {txt(
+                      'Demo: auto-accepting request so you can preview chat flow.',
+                      'عرض تجريبي: سيتم قبول الطلب تلقائياً لكي تتمكن من تجربة شاشة المحادثة واستعراض محاكاة الدردشة.',
+                      'پێشاندانی تاقیکاری: وەرگرتنی ئۆتۆماتیکی داواکاری بۆ ئەوەی بتوانیت چاتەکە ببینیت.'
+                    )}
                   </span>
                 </div>
               </div>
@@ -353,7 +443,7 @@ export default function MatchExplorerScreen({
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-accent-coral uppercase tracking-widest font-mono flex items-center gap-1.5">
                 <Award className="w-4 h-4" />
-                <span>{locale === 'en' ? 'Sincere Message & Goal' : 'الرسالة الصادقة والهدف'}</span>
+                <span>{txt('Sincere Message & Goal', 'الرسالة الصادقة والهدف', 'نامەی ڕاستگۆیانە و ئامانج')}</span>
               </h4>
               <div className="bg-[#40798C]/5 p-4 rounded-2xl border border-[#40798C]/15 text-[#4A443F] text-xs sm:text-sm leading-relaxed italic font-medium">
                 "{activeSelectedMatch.aboutMe}"
@@ -361,7 +451,7 @@ export default function MatchExplorerScreen({
               {activeSelectedMatch.intention && (
                 <div className="p-3.5 bg-white border border-stone-200/80 rounded-2xl border-l-4 border-l-accent-coral shadow-sm">
                   <span className="text-[9px] font-bold text-[#6B635B] uppercase block tracking-wider font-mono">
-                    {locale === 'en' ? 'Marital Intentions Summary' : 'ملخص الرؤية للزواج'}
+                    {txt('Marital Intentions Summary', 'ملخص الرؤية للزواج', 'پوختەی خواستەکانی هاوسەرگیری')}
                   </span>
                   <p className="text-xs text-warm-charcoal italic mt-1 leading-relaxed font-semibold">
                     "{activeSelectedMatch.intention}"
@@ -374,7 +464,7 @@ export default function MatchExplorerScreen({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white/60 border border-stone-200/60 p-4 rounded-2xl space-y-2">
                 <span className="text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wider block">
-                  🕌 {locale === 'en' ? 'Beliefs & Origins' : 'المعتقد والأصول'}
+                  🕌 {txt('Beliefs & Origins', 'المعتقد والأصول', 'باوەڕ و ڕەگەز')}
                 </span>
                 <ul className="text-xs space-y-1.5 font-bold text-warm-charcoal">
                   <li>
@@ -396,7 +486,7 @@ export default function MatchExplorerScreen({
 
               <div className="bg-white/60 border border-stone-200/60 p-4 rounded-2xl space-y-2">
                 <span className="text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wider block">
-                  🎓 {locale === 'en' ? 'Education & Career' : 'التحصيل الأكاديمي والمهني'}
+                  🎓 {txt('Education & Career', 'التحصيل الأكاديمي والمهني', 'خوێندن و پیشە')}
                 </span>
                 <ul className="text-xs space-y-1.5 font-bold text-warm-charcoal">
                   <li className="truncate">
@@ -412,7 +502,7 @@ export default function MatchExplorerScreen({
             {/* SECTION 3: Timeline, Children, Languages & Dealbreakers */}
             <div className="bg-white/60 border border-stone-200/60 p-4 rounded-2xl space-y-3.5">
               <span className="text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wider block">
-                ⚙️ {locale === 'en' ? 'Courtship Commitments' : 'شروط ومتطلبات التعارف'}
+                ⚙️ {txt('Courtship Commitments', 'شروط ومتطلبات التعارف', 'بەڵێنەکانی هاوسەرگیری')}
               </span>
               
               <div className="grid grid-cols-2 gap-4 text-xs font-bold text-warm-charcoal">
@@ -430,7 +520,7 @@ export default function MatchExplorerScreen({
               <div className="space-y-1.5 pt-2 border-t border-stone-100">
                 <span className="text-[9px] text-[#6B635B] font-mono uppercase font-bold block flex items-center gap-1">
                   <Languages className="w-3.5 h-3.5 text-stone-600" />
-                  <span>{locale === 'en' ? 'Spoken Languages' : 'اللغات المتقنة'}</span>
+                  <span>{txt('Spoken Languages', 'اللغات المتقنة', 'زمانە قسەکراوەکان')}</span>
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {activeSelectedMatch.languages.map(l => (
@@ -445,7 +535,7 @@ export default function MatchExplorerScreen({
               {activeSelectedMatch.dealbreakers && activeSelectedMatch.dealbreakers.length > 0 && (
                 <div className="space-y-1.5 pt-2 border-t border-stone-100">
                   <span className="text-[9px] text-[#6B635B] font-mono uppercase font-bold block">
-                    🚫 {locale === 'en' ? 'Absolute Dealbreakers' : 'خطوط حمراء مستحيلة'}
+                    🚫 {txt('Absolute Dealbreakers', 'خطوط حمراء مستحيلة', 'هێڵە سوورەکان')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {activeSelectedMatch.dealbreakers.map(db => (
@@ -461,12 +551,14 @@ export default function MatchExplorerScreen({
             {/* SECTION 4: Preferences Summary */}
             <div className="bg-white/40 border border-stone-200/50 p-4 rounded-2xl space-y-2">
               <span className="text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wider block">
-                🎯 {locale === 'en' ? 'Ideal Match Preferences' : 'المواصفات المطلوبة في الشريك'}
+                🎯 {txt('Ideal Match Preferences', 'المواصفات المطلوبة في الشريك', 'تایبەتمەندییە دڵخوازەکانی هاوبەش')}
               </span>
               <p className="text-xs text-warm-charcoal leading-relaxed font-semibold">
-                {locale === 'en'
-                  ? `Seeking a ${activeSelectedMatch.gender === 'female' ? 'serious man' : 'serious woman'} located primarily of compatible traditional background, values ${activeSelectedMatch.valuesSummary.slice(0, 3).join(', ')}, with an honest commitment to secure a stable marital environment within ${activeSelectedMatch.timeline.toLowerCase()}.`
-                  : `يبحث عن شريك جاد ومسؤول يتوافق مع نمط الحياة العائلية، يلتزم بالقيم الأساسية: ${activeSelectedMatch.valuesSummary.slice(0, 3).join('، ')}، ويستعد لإبرام مودة وسكينة خلال ${activeSelectedMatch.timeline.toLowerCase()}.`}
+                {txt(
+                  `Seeking a ${activeSelectedMatch.gender === 'female' ? 'serious man' : 'serious woman'} located primarily of compatible traditional background, values ${activeSelectedMatch.valuesSummary.slice(0, 3).join(', ')}, with an honest commitment to secure a stable marital environment within ${activeSelectedMatch.timeline.toLowerCase()}.`,
+                  `يبحث عن شريك جاد ومسؤول يتوافق مع نمط الحياة العائلية، يلتزم بالقيم الأساسية: ${activeSelectedMatch.valuesSummary.slice(0, 3).join('، ')}، ويستعد لإبرام مودة وسكينة خلال ${activeSelectedMatch.timeline.toLowerCase()}.`,
+                  `بەدوای ${activeSelectedMatch.gender === 'female' ? 'پیاوێکی جدی' : 'ئافرەتێکی جدی'}دا دەگەڕێت کە زۆرترین گونجانی خێزانی، بەهاکانی ${activeSelectedMatch.valuesSummary.slice(0, 3).join('، ')}، لەگەڵ بەڵێنی ڕاستگۆیانە بۆ دابینکردنی ژینگەیەکی جێگیری هاوسەرگیری لە ماوەی ${activeSelectedMatch.timeline.toLowerCase()}دایە.`
+                )}
               </p>
             </div>
 
@@ -474,27 +566,31 @@ export default function MatchExplorerScreen({
             <div className="bg-[#40798C]/5 border border-[#40798C]/10 p-3.5 rounded-xl flex items-start gap-2.5">
               <Lock className="w-4.5 h-4.5 text-[#40798C] shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed text-[#4A443F]">
-                <strong>{locale === 'en' ? 'Respectful Photo Privacy' : 'خصوصية الصورة المصونة'}</strong>
+                <strong>{txt('Respectful Photo Privacy', 'خصوصية الصورة المصونة', 'تایبەتیپارێزیی ڕێزدارانەی وێنە')}</strong>
                 <p className="mt-0.5 text-[11px] font-medium text-[#6B635B]">
                   {activeSelectedMatch.photoStatus === 'blurred'
-                    ? (locale === 'en' 
-                      ? 'This member protects their image. The picture will automatically unlock once you send a request and they mutually accept.' 
-                      : 'يقوم هذا العضو بصون صورته الشخصية. سيتم فك حجب الصورة تلقائياً عندما تبادر بإرسال طلب ويتم القبول.')
-                    : (locale === 'en' 
-                      ? 'Directly visible portrait. Communicates with absolute visual and personal transparency.' 
-                      : 'الصورة مكشوفة مباشرة. يتواصل هذا العضو بوضوح تام وشفافية كاملة منذ البداية.')}
+                    ? txt(
+                      'This member protects their image. The picture will automatically unlock once you send a request and they mutually accept.', 
+                      'يقوم هذا العضو بصون صورته الشخصية. سيتم فك حجب الصورة تلقائياً عندما تبادر بإرسال طلب ويتم القبول.',
+                      'ئەم ئەندامە وێنەی خۆی دەپارێزێت. وێنەکە بە شێوەیەکی ئۆتۆماتیکی دەکرێتەوە کاتێک داواکاری دەنێریت و بە دوولایەنە پەسەند دەکرێت.'
+                    )
+                    : txt(
+                      'Directly visible portrait. Communicates with absolute visual and personal transparency.', 
+                      'الصورة مكشوفة مباشرة. يتواصل هذا العضو بوضوح تام وشفافية كاملة منذ البداية.',
+                      'وێنەی ڕاستەوخۆ دیار. پەیوەندی بە ڕوونی متمانەبەخشی تەواوی وێنە و کەسایەتی دەکات.'
+                    )}
                 </p>
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row gap-3 justify-end">
+            {/* BUTTONS FOR REQUEST ACTION */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-stone-150">
               <button
                 type="button"
                 onClick={() => setSelectedMatch(null)}
                 className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200/90 font-bold text-[#4A443F] rounded-xl text-xs transition uppercase font-mono tracking-wider"
               >
-                {locale === 'en' ? 'Close Dossier' : 'إغلاق الملف'}
+                {txt('Close Dossier', 'إغلاق الملف', 'داخستنی دۆسیە')}
               </button>
 
               {activeSelectedMatch.requestStatus === 'none' && (
@@ -506,7 +602,7 @@ export default function MatchExplorerScreen({
                   className="px-6 py-2.5 bg-accent-coral text-white font-bold text-xs rounded-xl shadow-lg shadow-accent-coral/20 hover:opacity-90 transition flex items-center justify-center gap-1.5"
                 >
                   <Heart className="w-4 h-4 fill-white text-white shrink-0" />
-                  <span>{locale === 'en' ? 'Send Marriage Request' : 'إرسال طلب تعارف للزواج'}</span>
+                  <span>{txt('Send Marriage Request', 'إرسال طلب تعارف للزواج', 'ناردنی داواکاری هاوسەرگیری')}</span>
                 </button>
               )}
 
@@ -517,7 +613,7 @@ export default function MatchExplorerScreen({
                   className="px-6 py-2.5 bg-amber-500/20 border border-amber-500/30 text-amber-800 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0" />
-                  <span>{locale === 'en' ? 'Pending Review...' : 'بانتظار المراجعة...'}</span>
+                  <span>{txt('Pending Review...', 'بانتظار المراجعة...', 'چاوەڕوانی پێداچوونەوە...')}</span>
                 </button>
               )}
 
@@ -531,7 +627,7 @@ export default function MatchExplorerScreen({
                   className="px-6 py-2.5 bg-[#40798C] text-white font-bold text-xs rounded-xl shadow-lg shadow-[#40798C]/20 hover:opacity-90 transition flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle className="w-4 h-4 text-emerald-300" />
-                  <span>{locale === 'en' ? 'Mutually Connected! Open Chat' : 'تم القبول! افتح المحادثة'}</span>
+                  <span>{txt('Mutually Connected! Open Chat', 'تم القبول! افتح المحادثة', 'پەیوەستبوون دروستبوو! دەستکردن بە چات')}</span>
                 </button>
               )}
 
@@ -541,7 +637,7 @@ export default function MatchExplorerScreen({
                   disabled
                   className="px-5 py-2.5 bg-red-50 text-red-500 border border-red-100 font-bold text-xs rounded-xl cursor-not-allowed"
                 >
-                  {locale === 'en' ? 'Request Declined' : 'تم رفض الطلب'}
+                  {txt('Request Declined', 'تم رفض الطلب', 'داواکارییەکە ڕەتکرایەوە')}
                 </button>
               )}
             </div>
