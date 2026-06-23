@@ -3,6 +3,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export type AppLanguage = 'en' | 'ar' | 'ckb';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  membershipStatus: 'free' | 'premium' | 'verified';
+  createdAt: string;
+}
+
+export interface PrivacySettings {
+  photoPrivacy: 'visible' | 'hidden_by_default' | 'private_mode' | 'hidden' | 'blurred' | 'initials' | 'floral' | 'mutual_approval';
+  profileVisibility: 'all' | 'verified_only' | 'hidden';
+  privateContactMode: 'Direct Private Only' | 'Requires Mutual Matching First' | 'Zero External Tracking' | 'Private Introduction Requests Only' | 'Standard Privacy Options';
+  sendRequestsPermission: string;
+  seeProfilePermission: string;
+}
+
+export interface PartnerPreferences {
+  partnerAgeRange: string;
+  partnerCountry: string;
+  partnerGovernorate: string;
+  partnerCity?: string;
+  partnerReligion?: 'all' | 'islam' | 'non_islam';
+  partnerSect?: 'all' | 'sunni' | 'shiaa' | 'none';
+  partnerEthnicity?: 'all' | 'arab' | 'kurdish' | 'others';
+  partnerEducation?: string;
+  partnerProfession?: string;
+  partnerLanguage?: string[];
+  partnerFamilyValues?: string;
+  partnerLifestyle?: string;
+  partnerSmoking?: string;
+  partnerWantsChildren?: string;
+  partnerPersonality?: string;
+  partnerSeriousness?: string;
+  partnerDealbreakers?: string[];
+  locationSearchPreference?: string;
+}
+
 export interface UserProfile {
   name: string;
   age: number;
@@ -20,22 +59,26 @@ export interface UserProfile {
   maritalStatus?: string;
   intention?: string;
   
-  // Step 2 Marriage Intention
+  // Marriage Intention & Details
   lookingFor?: string;
   timeline: string;
   wantsChildren: string;
   relocation: string;
-  familyInvolvement: string;
+  communicationPreference: string;
   values: string[];
 
-  // Step 3 Partner Preferences
+  // Embedded Nested Preferences & Privacy for backend mapping
+  preferences?: PartnerPreferences;
+  privacy?: PrivacySettings;
+
+  // Flattened properties for compatibility with existing components
+  partnerReligion?: 'all' | 'islam' | 'non_islam';
+  partnerSect?: 'all' | 'sunni' | 'shiaa' | 'none';
+  partnerEthnicity?: 'all' | 'arab' | 'kurdish' | 'others';
   partnerAgeRange?: string;
   partnerCountry?: string;
   partnerGovernorate?: string;
   partnerCity?: string;
-  partnerReligion?: 'all' | 'islam' | 'non_islam';
-  partnerSect?: 'all' | 'sunni' | 'shiaa' | 'none';
-  partnerEthnicity?: 'all' | 'arab' | 'kurdish' | 'others';
   partnerEducation?: string;
   partnerProfession?: string;
   partnerLanguage?: string[];
@@ -48,12 +91,9 @@ export interface UserProfile {
   partnerDealbreakers?: string[];
   locationSearchPreference?: string;
 
-  // Step 4 Photo Privacy
-  photoPrivacy: 'visible' | 'hidden_by_default' | 'private_mode' | 'hidden' | 'blurred' | 'initials' | 'floral' | 'mutual_approval';
+  photoPrivacy: PrivacySettings['photoPrivacy'];
   avatarUrl?: string;
-
-  // Step 5 Family/Privacy settings
-  trustedPerson?: string;
+  privateContactMode?: string;
   sendRequestsPermission?: string;
   seeProfilePermission?: string;
 }
@@ -74,17 +114,25 @@ export interface MatchProfile {
   intention?: string;
   timeline: string;
   wantsChildren: string;
-  familyInvolvement: string;
+  communicationPreference: string;
   valuesSummary: string[];
   verified: boolean;
-  photoStatus: 'visible' | 'blurred' | 'hidden' | 'unlocked';
-  avatarSeed: string; // Used to generate or reference stable images
-  avatarUrl: string; // Real Unsplash image reference
+  photoStatus: 'visible' | 'blurred' | 'hidden' | 'initials' | 'unlocked';
+  avatarSeed: string;
+  avatarUrl: string;
   compatibilityScore: number;
   languages: string[];
   aboutMe: string;
   dealbreakers?: string[];
   requestStatus: 'none' | 'sent' | 'accepted' | 'declined';
+}
+
+export interface IntroductionRequest {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: string;
 }
 
 export interface Conversation {
@@ -97,6 +145,15 @@ export interface Message {
   sender: 'user' | 'match';
   text: string;
   timestamp: string;
+}
+
+export type ReportReason = 'unserious' | 'harassment' | 'fake_profile' | 'commercial' | 'inappropriate_photo' | 'other';
+
+export interface BlockedUser {
+  id: string;
+  blockedUserId: string;
+  reason?: string;
+  createdAt: string;
 }
 
 export interface SearchFilters {
@@ -117,4 +174,6 @@ export interface SearchFilters {
   smoking: string;
   photoVisibility: string;
   verifiedOnly: boolean;
+  timeline?: string;
+  sortBy?: string;
 }

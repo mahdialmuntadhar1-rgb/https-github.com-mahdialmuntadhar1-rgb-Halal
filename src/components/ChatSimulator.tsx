@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { MatchProfile, Message, Conversation } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
-import { MOCK_GUIDED_PROMPTS, MOCK_CHATS_RESPONSES } from '../data/matches';
-import { Send, Sparkles, ShieldAlert, Heart, Lock, Check, SendIcon, DownloadCloud, AlertCircle } from 'lucide-react';
+import { MOCK_CHATS_RESPONSES } from '../data/matches';
+import { Send, Sparkles, AlertTriangle, ShieldCheck, Lock, Ban, Flag, Info, CheckCircle, MessagesSquare } from 'lucide-react';
+
+// Exact prompts requested in Chunk 6
+const EN_GUIDED_PROMPTS = [
+  "What are your expectations for marriage?",
+  "What does a peaceful home mean to you?",
+  "How do you handle disagreements?",
+  "What are your goals for the next five years?",
+  "What values are most important in your future family?",
+  "What are your expectations around work, study, and home life?"
+];
+
+const AR_GUIDED_PROMPTS = [
+  "ما هي توقعاتك لمؤسسة الزواج؟",
+  "ماذا يعني لك البيت الهادئ والمسالم؟",
+  "كيف تتعامل مع الخلافات ووجهات النظر المختلفة؟",
+  "ما هي أهدافك للسنوات الخمس القادمة؟",
+  "ما هي القيم الأكثر أهمية في عائلتك المستقبلية؟",
+  "ما هي تطلعاتك وتوقعاتك بخصوص العمل، الدراسة، والحياة المنزلية؟"
+];
+
+const CKB_GUIDED_PROMPTS = [
+  "توقعاتت چییە بۆ هاوسەرگیری؟",
+  "ماڵێکی ئارام لای تۆ چی دەگەیەنێت؟",
+  "چۆن ڕووبەڕووی ناکۆکییەکان دەبیتەوە؟",
+  "ئامانجەکانت بۆ پێنج ساڵی داهاتوو چییە؟",
+  "کام بەهایانە گرنگترینن لە خێزانی داهاتووتدا؟",
+  "توقعاتت چییە لەسەر کار، خوێندن و ژیانی ماڵەوە؟"
+];
 
 interface ChatSimulatorProps {
   locale: Language;
@@ -24,17 +52,39 @@ export default function ChatSimulator({
   const t = TRANSLATIONS[locale];
   
   const [typedMessage, setTypedMessage] = useState<string>('');
-  const [showWaliPopup, setShowWaliPopup] = useState<boolean>(false);
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
+  
+  // Local list of blocked matches so block feels real and functional
+  const [blockedMatchIds, setBlockedMatchIds] = useState<string[]>([]);
+  const [showBlockModal, setShowBlockModal] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportReason, setReportReason] = useState<string>('unserious');
+  const [reportDetails, setReportDetails] = useState<string>('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Set first accepted match active if none is active
+  // Filter out blocked matches from connections list
+  const activeConnections = acceptedMatches.filter(m => !blockedMatchIds.includes(m.id));
+
+  // Set first active connection if none selected
   useEffect(() => {
-    if (!activeMatchId && acceptedMatches.length > 0) {
-      setActiveMatchId(acceptedMatches[0].id);
+    if ((!activeMatchId || blockedMatchIds.includes(activeMatchId)) && activeConnections.length > 0) {
+      setActiveMatchId(activeConnections[0].id);
     }
-  }, [acceptedMatches, activeMatchId, setActiveMatchId]);
+  }, [activeConnections, activeMatchId, blockedMatchIds, setActiveMatchId]);
 
-  const activeMatch = acceptedMatches.find(m => m.id === activeMatchId);
+  const activeMatch = activeConnections.find(m => m.id === activeMatchId);
   const activeConversation = conversations.find(c => c.matchId === activeMatchId) || { matchId: '', messages: [] };
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const currentPrompts = locale === 'ar' 
+    ? AR_GUIDED_PROMPTS 
+    : locale === 'ckb' 
+      ? CKB_GUIDED_PROMPTS 
+      : EN_GUIDED_PROMPTS;
 
   const handleSendPrompt = (promptText: string) => {
     if (!activeMatchId) return;
@@ -42,17 +92,24 @@ export default function ChatSimulator({
     // Send user message
     onSendMessage(activeMatchId, promptText, 'user');
 
-    // Simulate response with timeout
+    // Simulate response with serious-toned timeout matching their profile
     setTimeout(() => {
-      // Find preset response list
       const possibleAnswers = MOCK_CHATS_RESPONSES[activeMatchId] || [];
-      // Pick based on prompt or length of conversation
       const currentMsgCount = activeConversation.messages.filter(m => m.sender === 'match').length;
-      const answer = possibleAnswers[currentMsgCount % possibleAnswers.length] || 
-                     `Thank you for asking. I believe having transparent intentions early on helps us evaluate compatibility. Let’s consult each other’s values.`;
+      
+      let answer = possibleAnswers[currentMsgCount % possibleAnswers.length];
+      if (!answer) {
+        if (locale === 'ar') {
+          answer = "أقدر هذا السؤال الجاد والمحترم. هذه الرؤية هامة جداً لضمان توافق البيئة الأسرية ودعم كل منا للآخر في رضا ومودة.";
+        } else if (locale === 'ckb') {
+          answer = "سوپاس بۆ پرسیارە گرنگ و جدییەکەت. ئەم گفتوگۆیە بەردی بناغەیە بۆ ڕوونبوونەوەی تێڕوانینی هەردوولامان بۆ هاوسەرگیری.";
+        } else {
+          answer = "Thank you for asking. I believe having transparent expectations early on helps us evaluate compatibility. Building a peaceful home is my highest commitment.";
+        }
+      }
       
       onSendMessage(activeMatchId, answer, 'match');
-    }, 1200);
+    }, 1300);
   };
 
   const handleSendFreestyle = (e: React.FormEvent) => {
@@ -64,82 +121,131 @@ export default function ChatSimulator({
     setTypedMessage('');
 
     setTimeout(() => {
-      onSendMessage(
-        activeMatchId,
-        `I appreciate your authentic message. That sounds wonderful and aligned with my overall expectations. What do you feel about involving our families?`,
-        'match'
-      );
-    }, 1500);
+      let reply = '';
+      if (locale === 'ar') {
+        reply = "أشكرك على رسالتك الواضحة والصادقة. هذا يعبر عن نضج وتفكير مسؤول. ما تطلعاتك بالنسبة للخطوات الشرعية والرسمية القادمة للتعارف؟";
+      } else if (locale === 'ckb') {
+        reply = "من پێزانینم هەیە بۆ پەیامە ڕاستگۆیانەکەت. ئەم تێڕوانینە هاوشێوەیە لەگەڵ هیوای مندا. هەنگاوەکانی داهاتوومان بەرەو هاوسەرگیری چۆن دەبینیت؟";
+      } else {
+        reply = "I appreciate your authentic message. That sounds aligned with my overall expectations. What do you see as our next steps towards formal marriage?";
+      }
+      onSendMessage(activeMatchId, reply, 'match');
+    }, 1600);
   };
 
-  const handleExportTranscript = () => {
-    setShowWaliPopup(true);
-    setTimeout(() => setShowWaliPopup(false), 3000);
+  const handleConfirmBlock = () => {
+    if (!activeMatchId) return;
+    const blockedName = activeMatch ? activeMatch.name : "Member";
+    setBlockedMatchIds(prev => [...prev, activeMatchId]);
+    setShowBlockModal(false);
+    
+    const feedback = locale === 'ar'
+      ? `Demo: تم حظر ${blockedName} محلياً بنجاح. لن يظهر هذا الملف في قائمة اتصالاتك.`
+      : locale === 'ckb'
+        ? `پیشاندان: ${blockedName} بلۆک کرا. ئەم پڕۆفایلە چیتر نابینیت.`
+        : `Demo: ${blockedName} has been blocked and removed from your connection list.`;
+    
+    triggerToast(feedback);
+    setActiveMatchId(null);
+    setMobileView('list');
+  };
+
+  const handleSendReport = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowReportModal(false);
+    
+    const reportedName = activeMatch ? activeMatch.name : "Member";
+    const feedback = locale === 'ar'
+      ? `Demo: تم إرسال البلاغ بخصوص ${reportedName} بنجاح إلى فريق مراجعة حلال لإجراء التحقيق الهوياتي.`
+      : locale === 'ckb'
+        ? `پیشاندان: ڕاپۆرتەکە لەسەر ${reportedName} نێردرا بۆ لێکۆڵینەوە.`
+        : `Demo: Report for ${reportedName} successfully submitted to review board. Thank you for keeping the courtship environment secure.`;
+    
+    triggerToast(feedback);
+    setReportDetails('');
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="chat-simulator">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6" id="chat-simulator-v2">
       
-      {acceptedMatches.length === 0 ? (
+      {/* Simulation Feedback Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 bg-stone-900 border border-stone-800 text-white text-xs font-bold px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 z-50 animate-bounce duration-500 max-w-sm">
+          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {activeConnections.length === 0 ? (
         <div className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-[2.5rem] p-10 text-center space-y-6 shadow-2xl relative z-10">
           <div className="w-16 h-16 bg-accent-coral/15 rounded-2xl flex items-center justify-center mx-auto text-accent-coral shadow-inner">
-            <ShieldAlert className="w-8 h-8" />
+            <MessagesSquare className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-serif font-black text-warm-charcoal font-display">No Secure Chats Unlocked Yet</h3>
+            <h3 className="text-xl font-serif font-black text-warm-charcoal font-display">
+              {locale === 'en' ? 'No Private Chats Unlocked Yet' : 'لم يتم إلغاء قفل أي محادثات خاصة بعد'}
+            </h3>
             <p className="text-[#6B635B] text-sm max-w-lg mx-auto leading-relaxed">
-              To start talking, browse profiles in the <strong>Match Explorer</strong>, click <strong>Send Respectful Request</strong>. 
-              Once mutual interest is accepted, the portrait is automatically unblurred and the secure chat environment opens!
+              {locale === 'en'
+                ? 'To begin talking, browse portfolios in the Match Explorer and click "Send Marriage Request". Once the request is mutually accepted, communication is unlocked in absolute privacy!'
+                : 'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف للزواج". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.'}
             </p>
           </div>
           
-          <div className="p-4 bg-white/55 border border-white/40 rounded-2xl max-w-md mx-auto text-left text-xs text-[#6B635B] space-y-1">
-            <p className="font-bold text-accent-coral">⭐ Pro-Tip for Simulator:</p>
+          <div className="p-4 bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl max-w-md mx-auto text-left text-xs text-[#6B635B] space-y-2">
+            <p className="font-bold text-accent-coral">⭐ Connection Simulation Tip:</p>
             <p className="font-medium">
-              Click "Browse matches" at the top, and send requests to <strong>Lina</strong> or <strong>Sara</strong>. We've built in a 2.5-second auto-approval simulator!
+              Click the **Match Explorer** tab above, choose any compatible profile (e.g. Lina or Sara or Zaid), and send a request. We've built in automated simulation approval so you can immediately return here to preview the private conversation!
             </p>
           </div>
         </div>
       ) : (
-        <div className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-[2rem] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[600px] max-h-[700px] items-stretch relative z-10">
+        <div className="bg-white/30 backdrop-blur-xl border border-white/45 rounded-[2rem] shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[620px] max-h-[750px] items-stretch relative z-10">
           
-          {/* LEFT COLUMN: Accepted connections list */}
-          <div className="md:col-span-4 border-r border-white/20 flex flex-col justify-between bg-white/10">
+          {/* LEFT PANEL: Accepted Serious Connections */}
+          <div className={`${mobileView === 'list' ? 'flex' : 'hidden md:flex'} md:col-span-4 border-r border-[#A2978C]/15 flex flex-col justify-between bg-white/15 h-full`}>
             <div>
-              <div className="p-4 border-b border-white/20 bg-white/30 backdrop-blur-md">
-                <h4 className="text-xs font-bold text-[#6B635B] font-mono tracking-widest uppercase">My Connections</h4>
-                <p className="text-[10px] text-[#C3BFB9]/85 font-medium">Mutual approval & photo unlocked</p>
+              <div className="p-4 border-b border-white/25 bg-white/30">
+                <h4 className="text-xs font-mono font-bold text-[#6B635B] tracking-widest uppercase">
+                  {locale === 'en' ? 'COURTSHIP CONNECTIONS' : 'قنوات التعارف المقبولة'}
+                </h4>
+                <p className="text-[10px] text-[#A2978C] font-semibold mt-0.5">
+                  {locale === 'en' ? 'Mutual intent accepted • Chat active' : 'تم القبول المتبادل • المحادثة مفعلة'}
+                </p>
               </div>
 
-              <div className="divide-y divide-white/10 overflow-y-auto">
-                {acceptedMatches.map((m) => {
+              <div className="divide-y divide-white/10 overflow-y-auto max-h-[500px]">
+                {activeConnections.map((m) => {
                   const isActive = m.id === activeMatchId;
                   const lastMessage = conversations.find(c => c.matchId === m.id)?.messages.slice(-1)[0];
 
                   return (
                     <button
                       key={m.id}
-                      onClick={() => setActiveMatchId(m.id)}
-                      className={`w-full p-4 text-left transition-all flex items-center space-x-3.5 focus:outline-none ${
-                        isActive ? 'bg-white/60 border-l-4 border-accent-coral' : 'hover:bg-white/25'
+                      onClick={() => {
+                        setActiveMatchId(m.id);
+                        setMobileView('chat');
+                      }}
+                      className={`w-full p-4 text-left rtl:text-right transition-all flex items-center gap-3 w-full border-b border-light-beige/25 focus:outline-none ${
+                        isActive ? 'bg-white/70 border-l-4 border-l-accent-coral' : 'hover:bg-white/30'
                       }`}
                     >
                       <img
                         src={m.avatarUrl}
                         alt={m.name}
-                        className="w-11 h-11 rounded-full object-cover border border-white/30 shrink-0"
+                        className="w-11 h-11 rounded-full object-cover border-2 border-white/50 shrink-0"
                         referrerPolicy="no-referrer"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline">
                           <h5 className="font-bold text-warm-charcoal text-xs sm:text-sm truncate flex items-center gap-1">
-                            <span>{m.name}</span>
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>{m.name}, {m.age}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           </h5>
-                          <span className="text-[9px] text-[#6B635B] font-bold uppercase">{m.compatibilityScore}%</span>
+                          <span className="text-[9px] text-accent-coral font-mono font-bold">{m.compatibilityScore}%</span>
                         </div>
-                        <p className="text-[11px] text-[#6B635B] truncate mt-0.5">
-                          {lastMessage ? lastMessage.text : `Joined conversation`}
+                        <p className="text-[11px] text-[#6B635B] truncate mt-0.5 italic font-medium">
+                          {lastMessage ? lastMessage.text : (locale === 'en' ? 'Conversation started' : 'بدأت المحادثة')}
                         </p>
                       </div>
                     </button>
@@ -148,64 +254,102 @@ export default function ChatSimulator({
               </div>
             </div>
 
-            {/* Bottom info banner */}
-            <div className="p-4 bg-white/20 border-t border-white/10 text-[#6B635B] text-[10px] space-y-1 font-medium">
-              <p className="font-bold text-warm-charcoal flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5 text-accent-coral" />
-                Dignity Assured
+            {/* Verification and respect footer bar inside connection manager */}
+            <div className="p-4 bg-white/20 border-t border-white/15 text-[#6B635B] text-[10px] space-y-1.5">
+              <div className="flex items-center gap-1 text-warm-charcoal font-bold">
+                <Lock className="w-3.5 h-3.5 text-accent-coral shrink-0" />
+                <span>{locale === 'en' ? 'Direct Connection Integrity' : 'صيانة الاتصال المباشر'}</span>
+              </div>
+              <p className="font-semibold leading-relaxed">
+                {locale === 'en' 
+                  ? 'Abusive scripts, unserious behaviors and spam trigger automatic review bans. Communicate with honor.'
+                  : 'الألفاظ الجارحة، انعدام الجدية أو محاولات الإزعاج تفعّل الحظر والمراجعة من قبل الإدارة.'}
               </p>
-              <p>Swear words & abusive behaviors are automatically flagged. Conversations must be pure and sincere.</p>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Chat screen area */}
-          <div className="md:col-span-8 flex flex-col justify-between bg-white/25 h-full relative">
+          {/* RIGHT PANEL: Chat Workspace */}
+          <div className={`${mobileView === 'chat' && activeMatch ? 'flex' : 'hidden md:flex'} md:col-span-8 flex flex-col justify-between bg-white/25 h-full relative`}>
             {activeMatch ? (
               <>
-                {/* Chat header info */}
-                <div className="p-4 bg-white/40 backdrop-blur-md border-b border-white/15 flex justify-between items-center shadow-sm">
-                  <div className="flex items-center space-x-3.5 text-left">
+                {/* Chat window Header Info with report and block buttons */}
+                <div className="p-4 bg-white/40 backdrop-blur-md border-b border-white/20 flex justify-between items-center shadow-sm">
+                  <div className="flex items-center gap-2.5 sm:gap-3 text-left rtl:text-right">
+                    <button
+                      type="button"
+                      onClick={() => setMobileView('list')}
+                      className="md:hidden flex items-center justify-center p-1.5 rounded-xl bg-warm-charcoal/5 hover:bg-warm-charcoal/10 text-warm-charcoal transition shrink-0"
+                      title="Back to list"
+                    >
+                      <span className="rtl:rotate-180 block text-xs font-bold">←</span>
+                    </button>
                     <img
                       src={activeMatch.avatarUrl}
                       alt={activeMatch.name}
-                      className="w-10 h-10 rounded-full object-cover border border-white/30"
+                      className="w-10 h-10 rounded-full object-cover border border-white/30 shrink-0"
                       referrerPolicy="no-referrer"
                     />
                     <div>
-                      <div className="flex items-center space-x-1.5">
-                        <h4 className="font-serif font-bold text-warm-charcoal text-sm">{activeMatch.name}</h4>
-                        <span className="text-[9px] bg-[#40798C]/15 text-[#40798C] font-bold px-1.5 py-0.5 rounded-full">
-                          Unlocked
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-serif font-black text-warm-charcoal text-sm">{activeMatch.name}</h4>
+                        <span className="text-[8px] bg-[#40798C] text-white font-mono font-bold px-1.5 py-0.5 rounded-full uppercase scale-90">
+                          {locale === 'en' ? 'Direct Match' : 'ثنائي متوافق'}
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#6B635B] font-semibold leading-none">{activeMatch.profession} • {activeMatch.governorate} • <span className="capitalize">{activeMatch.religion === 'islam' ? `${activeMatch.sect || 'Sunni'} Muslim` : 'Non-Muslim'} ({activeMatch.ethnicity})</span></p>
+                      <p className="text-[10px] text-[#6B635B] font-semibold leading-none mt-1">
+                        {activeMatch.profession} • {activeMatch.governorate}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Share button with Elder wali */}
-                  <button
-                    onClick={handleExportTranscript}
-                    className="p-2 sm:px-3.5 sm:py-2 rounded-xl border border-white/30 text-xs font-bold text-warm-charcoal bg-white/40 hover:bg-white/60 flex items-center gap-1.5 transition"
-                  >
-                    <DownloadCloud className="w-4 h-4 text-[#6B635B]" />
-                    <span className="hidden sm:inline">Export to Wali (Guardian)</span>
-                  </button>
+                  {/* Safety management buttons (Block & Report placeholders) */}
+                  <div className="flex items-center gap-1.5">
+                    
+                    {/* Block User Button */}
+                    <button
+                      type="button"
+                      onClick={() => setShowBlockModal(true)}
+                      className="p-2 rounded-xl text-stone-500 hover:text-red-600 hover:bg-stone-100/50 transition duration-150"
+                      title={locale === 'en' ? 'Block this partner' : 'حظر هذا الشريك'}
+                    >
+                      <Ban className="w-4.5 h-4.5" />
+                    </button>
+
+                    {/* Report User Button */}
+                    <button
+                      type="button"
+                      onClick={() => setShowReportModal(true)}
+                      className="p-2 rounded-xl text-stone-500 hover:text-amber-600 hover:bg-stone-100/50 transition duration-150"
+                      title={locale === 'en' ? 'Report violation' : 'أبلغ عن مخالفة'}
+                    >
+                      <Flag className="w-4.5 h-4.5" />
+                    </button>
+
+                  </div>
                 </div>
 
-                {/* Sincere reminder bar */}
-                <div className="bg-[#FF7F50]/10 py-2.5 px-4 text-[11px] text-accent-coral border-b border-[#FF7F50]/15 flex items-start space-x-2 text-left">
-                  <AlertCircle className="w-4 h-4 text-accent-coral shrink-0 mt-0.5" />
-                  <p>
-                    <strong>Ground Rules:</strong> Keep conversational goals targeted at marriage validation. Use the guided prompts below to ask meaningful compatibility questions.
+                {/* CRITICAL Safety banner requested exactly in Chunk 6 */}
+                <div className="bg-[#40798C]/10 py-3 px-4 text-xs text-warm-charcoal border-b border-stone-200/50 flex items-start gap-2 text-left rtl:text-right">
+                  <Info className="w-4 h-4 text-[#40798C] shrink-0 mt-0.5" />
+                  <p className="font-semibold leading-normal">
+                    {locale === 'en' 
+                      ? "Private respectful chat. Only mutual matches can message each other. Keep communication honest, serious, and marriage-focused."
+                      : locale === 'ckb'
+                        ? "چاتی تایبەتی بەڕێز. تەنها ئەو کەسانەی قبوڵکردنی یەکلاکهرەوەیان هەیە دەتوانن نامە گۆڕینەوە بکەن. ئامانجمان ڕاستگۆیی و نیازپاکی خێزانییە."
+                        : "محادثة خاصة ومحترمة. يمكن فقط للأعضاء المتوافقين بشكل متبادل تبادل الرسائل. يرجى الحفاظ على الصدق، والجدية، والتركيز على الزواج في تواصلكما."}
                   </p>
                 </div>
 
-                {/* Message logs view */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[350px] min-h-[300px]">
+                {/* Dialogue stream messages layout */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[380px] min-h-[300px]">
                   {activeConversation.messages.length === 0 ? (
                     <div className="text-center py-10 space-y-2">
-                      <p className="text-[#6B635B] text-xs font-semibold">Start the conservation with a sincere question.</p>
-                      <p className="text-[11px] text-[#C3BFB9] max-w-sm mx-auto">Use the quick Icebreaker Prompts below to get deep insights instantly.</p>
+                      <p className="text-[#6B635B] text-xs font-bold">
+                        {locale === 'en' ? 'Initialize discussion with an expectation check' : 'ابدأ الحوار بسؤال جاد حول البناء الأسري الكريـم'}
+                      </p>
+                      <p className="text-[10px] text-[#A2978C] max-w-sm mx-auto font-medium">
+                        {locale === 'en' ? 'Select any of the guided questions below to check alignment.' : 'انقر على أي من الأسئلة المتخصصة أدناه لقياس مدى التطابق.'}
+                      </p>
                     </div>
                   ) : (
                     activeConversation.messages.map((m) => {
@@ -218,12 +362,12 @@ export default function ChatSimulator({
                           <div
                             className={`max-w-xs sm:max-w-md p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                               isUser
-                                ? 'bg-gradient-to-br from-accent-coral to-accent-pink text-white rounded-br-none shadow-lg shadow-accent-coral/15 animate-slide-in'
-                                : 'bg-white/70 backdrop-blur-sm border border-white/40 text-warm-charcoal rounded-bl-none shadow-sm text-left'
+                                ? 'bg-gradient-to-br from-[#40798C] to-[#2E5968] text-white rounded-br-none shadow-md animate-slide-in'
+                                : 'bg-white/80 border border-stone-200/50 text-warm-charcoal rounded-bl-none shadow-sm text-left rtl:text-right'
                             }`}
                           >
                             <p className="font-semibold">{m.text}</p>
-                            <p className={`text-[8px] mt-1.5 font-mono text-right ${isUser ? 'text-white/85' : 'text-[#6B635B]'}`}>
+                            <p className={`text-[8px] mt-1.5 font-mono text-right ${isUser ? 'text-stone-200' : 'text-[#6B635B] font-bold'}`}>
                               {m.timestamp}
                             </p>
                           </div>
@@ -233,19 +377,19 @@ export default function ChatSimulator({
                   )}
                 </div>
 
-                {/* GUIDED PROMPTS SUB-DRAWER */}
-                <div className="bg-white/30 border-t border-white/10 p-4 space-y-2 text-left">
-                  <p className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider flex items-center gap-1 font-mono">
-                    <Sparkles className="w-3.5 h-3.5 text-accent-coral fill-accent-coral" />
-                    VALUES & EXPECTATIONS ICEBREAKERS
+                {/* GUIDED RESPECTFUL DISCUSSIONS DRAWER */}
+                <div className="bg-white/35 border-t border-[#A2978C]/15 p-4 space-y-2 text-left rtl:text-right">
+                  <p className="text-[9px] font-bold text-accent-coral uppercase tracking-wider flex items-center gap-1 font-mono">
+                    <Sparkles className="w-3.5 h-3.5 text-accent-coral fill-accent-coral shrink-0" />
+                    <span>{locale === 'en' ? 'GUIDED VALUE QUESTIONS' : 'أسئلة معايير التوافق والزواج الموصى بها'}</span>
                   </p>
                   
-                  <div className="flex flex-nowrap md:flex-wrap overflow-x-auto gap-2 pb-1.5 scrollbar-none">
-                    {MOCK_GUIDED_PROMPTS.map((prompt, idx) => (
+                  <div className="flex flex-nowrap md:flex-wrap overflow-x-auto gap-2 pb-1.5 scrollbar-none scroll-smooth">
+                    {currentPrompts.map((prompt, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSendPrompt(prompt)}
-                        className="bg-white/55 hover:bg-white/80 text-warm-charcoal border border-white/30 rounded-xl px-3.5 py-1.5 text-xs text-left font-medium shrink-0 max-w-[210px] md:max-w-none hover:border-accent-coral hover:text-accent-coral transition shadow-sm"
+                        className="bg-white/70 hover:bg-white text-warm-charcoal border border-stone-200/80 rounded-xl px-3.5 py-2 text-xs text-left rtl:text-right font-bold shrink-0 max-w-[230px] md:max-w-none hover:border-[#40798C] hover:text-[#40798C] transition-all shadow-sm"
                       >
                         {prompt}
                       </button>
@@ -253,39 +397,146 @@ export default function ChatSimulator({
                   </div>
                 </div>
 
-                {/* Message input bar */}
-                <form onSubmit={handleSendFreestyle} className="p-4 bg-white/40 backdrop-blur-md border-t border-white/15 flex space-x-3 items-center">
+                {/* Chat message input action bar */}
+                <form onSubmit={handleSendFreestyle} className="p-4 bg-white/50 border-t border-stone-200/60 flex gap-3 items-center">
                   <input
                     type="text"
                     value={typedMessage}
                     onChange={(e) => setTypedMessage(e.target.value)}
-                    placeholder="Type a respectful message..."
-                    className="flex-1 bg-white/50 border border-white/20 rounded-xl px-4 py-3 text-xs sm:text-sm text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-accent-coral"
+                    placeholder={locale === 'en' ? "Write your respectful response..." : "أكتب رسالة وقورة وبناءة..."}
+                    className="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral"
                   />
                   <button
                     type="submit"
-                    className="p-3.5 rounded-xl bg-accent-coral hover:opacity-90 text-white transition font-bold shadow-md shadow-accent-coral/20"
+                    className="p-3.5 rounded-xl bg-accent-coral hover:opacity-90 text-white transition font-bold shadow-md shadow-accent-coral/20 shrink-0"
                   >
                     <Send className="w-4 h-4" />
                   </button>
                 </form>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center p-10 text-[#6B635B] text-xs font-semibold">
-                Select a mutual partner from the left Connections panel to begin conversation.
+              <div className="flex-1 flex items-center justify-center p-10 text-[#6B635B] text-xs font-bold text-center">
+                {locale === 'en' 
+                  ? 'Select an active marriage connection from the sidebar to dialogue.' 
+                  : 'يرجى اختيار أحد الشركاء المتطابقين في القائمة الجانبية لبدء حوار بناء.'}
               </div>
             )}
-
-            {/* Wali popups confirmation */}
-            {showWaliPopup && (
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-warm-charcoal text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl border border-white/15 flex items-center gap-1.5 animate-bounce z-45">
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>Transcript successfully exported to your elder!</span>
-              </div>
-            )}
-
           </div>
 
+        </div>
+      )}
+
+      {/* MODAL 1: Block confirmation dialogue */}
+      {showBlockModal && activeMatch && (
+        <div className="fixed inset-0 bg-[#2D2A26]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white max-w-sm w-full p-6 sm:p-7 rounded-3xl border border-stone-200 shadow-2xl space-y-4 animate-fade-in text-left rtl:text-right">
+            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+              <Ban className="w-6 h-6" />
+            </div>
+            <div className="space-y-1.5 text-center">
+              <h4 className="text-lg font-serif font-black text-warm-charcoal">
+                {locale === 'en' ? `Block ${activeMatch.name}?` : `حظر ${activeMatch.name}؟`}
+              </h4>
+              <p className="text-xs text-[#6B635B] leading-relaxed font-semibold">
+                {locale === 'en' 
+                  ? 'Are you sure you want to block this user? They will be permanently removed from your active connections and matches.'
+                  : 'هل أنت متأكد من رغبتك في حظر هذا الشريك؟ سيتم حجب ملفه بالكامل وتطهير قنوات التعارف معه.'}
+              </p>
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowBlockModal(false)}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-[#4A443F] font-bold text-xs rounded-xl transition"
+              >
+                {locale === 'en' ? 'Cancel' : 'إلغاء'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBlock}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-600/15"
+              >
+                {locale === 'en' ? 'Yes, Block User' : 'نعم، قم بالحظر'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Report User dialogue */}
+      {showReportModal && activeMatch && (
+        <div className="fixed inset-0 bg-[#2D2A26]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white max-w-md w-full p-6 rounded-3xl border border-stone-200 shadow-2xl space-y-4 animate-fade-in text-left rtl:text-right">
+            <div className="flex justify-between items-center pb-3 border-b border-stone-150">
+              <h4 className="text-sm sm:text-base font-serif font-black text-warm-charcoal flex items-center gap-1.5">
+                <Flag className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
+                <span>{locale === 'en' ? `Report ${activeMatch.name}` : `تقديم بلاغ ضد ${activeMatch.name}`}</span>
+              </h4>
+              <button 
+                onClick={() => setShowReportModal(false)}
+                className="text-stone-400 hover:text-stone-600 font-extrabold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSendReport} className="space-y-4">
+              
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
+                  {locale === 'en' ? 'Reason for Reporting' : 'سبب البلاغ المباشر'}
+                </label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-200 p-2.5 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none"
+                  required
+                >
+                  <option value="unserious">{locale === 'en' ? 'Unserious / Casual player' : 'غير جاد / يتسلى بملء الأوقات'}</option>
+                  <option value="harassment">{locale === 'en' ? 'Harassment or Impolite speech' : 'إساءة استخدام أو ألفاظ غير لائقة'}</option>
+                  <option value="fake_profile">{locale === 'en' ? 'Fake identity / Catfish' : 'هوية مزورة أو كاذبة للتحقق'}</option>
+                  <option value="commercial">{locale === 'en' ? 'Commercial or spam advertise' : 'إعلان تجاري أو طلبات خارجية'}</option>
+                  <option value="other">{locale === 'en' ? 'Other policy violation' : 'أخرى تشكل خرقاً للقواعد'}</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
+                  {locale === 'en' ? 'Details and evidence (Required)' : 'التفاصيل والوقائع والملاحظات (هام للتأكيد)'}
+                </label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  required
+                  rows={3}
+                  className="w-full bg-stone-50 border border-stone-200 p-3 rounded-xl text-xs text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral"
+                  placeholder={locale === 'en' ? "Please outline specific statements or actions that violate marriage intention rules..." : "يرجى ذكر الوقائع والعبارات التي تمت كتابتها وتخالف ميثاق الشرف للخطوبة..."}
+                />
+              </div>
+
+              {/* Simulation warning notice inside report */}
+              <div className="p-3 bg-stone-50 rounded-xl text-[10px] text-stone-500 font-mono">
+                Notice: All reports are cross-checked against standard government ID verification rules. 
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-[#4A443F] font-bold text-xs rounded-xl transition"
+                >
+                  {locale === 'en' ? 'Close' : 'إغلاق'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-accent-coral hover:bg-opacity-95 text-white font-bold text-xs rounded-xl shadow-lg shadow-accent-coral/15"
+                >
+                  {locale === 'en' ? 'Submit Report for Review' : 'إرسال البلاغ للتدقيق'}
+                </button>
+              </div>
+
+            </form>
+          </div>
         </div>
       )}
 

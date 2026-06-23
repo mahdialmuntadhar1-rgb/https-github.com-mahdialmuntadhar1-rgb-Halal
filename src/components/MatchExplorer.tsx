@@ -665,21 +665,50 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
             </button>
 
             {/* Left Image Column */}
-            <div className="w-full md:w-5/12 relative bg-stone-100 min-h-[220px] md:min-h-full">
-              <img
-                src={selectedMatch.avatarUrl}
-                alt={selectedMatch.name}
-                className={`w-full h-full object-cover absolute inset-0 ${
-                  selectedMatch.photoStatus === 'blurred' && selectedMatch.requestStatus !== 'accepted' ? 'filter blur-[15px]' : ''
-                }`}
-                referrerPolicy="no-referrer"
-              />
-              {selectedMatch.photoStatus === 'blurred' && selectedMatch.requestStatus !== 'accepted' && (
-                <div className="absolute inset-0 bg-[#2D2A26]/40 flex flex-col items-center justify-center p-4 text-center">
-                  <Lock className="w-6 h-6 text-accent-coral mb-2 drop-shadow" />
-                  <p className="text-xs text-white font-bold uppercase tracking-wider">Portrait Protected</p>
-                  <p className="text-[10px] text-white/90">Unlocked automatically to accepted match partners.</p>
+            <div className="w-full md:w-5/12 relative bg-stone-100 min-h-[140px] md:min-h-full shrink-0">
+              {selectedMatch.photoStatus === 'hidden' && selectedMatch.requestStatus !== 'accepted' ? (
+                /* HIDDEN PORTRAIT DEFAULT */
+                <div className="absolute inset-0 bg-gradient-to-br from-[#ECE8E1] via-[#E1DDD5] to-[#D5CFB9] flex flex-col items-center justify-center p-4 text-center">
+                  <Lock className="w-6 h-6 text-[#40798C] mb-2" />
+                  <p className="text-xs text-warm-charcoal font-black uppercase tracking-wider">
+                    {locale === 'en' ? 'Portrait Hidden' : 'الصورة مخفية'}
+                  </p>
+                  <p className="text-[10px] text-stone-500 font-medium">
+                    {locale === 'en' ? 'Visible only with double consent.' : 'تظهر فقط للشركاء المقبولين بنية جادة.'}
+                  </p>
                 </div>
+              ) : selectedMatch.photoStatus === 'initials' && selectedMatch.requestStatus !== 'accepted' ? (
+                /* INITIALS DEFAULT */
+                <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECEA] via-[#D5E1DF] to-[#CAD3D2] flex flex-col items-center justify-center p-4 text-center">
+                  <div className="w-14 h-14 rounded-full bg-white/95 shadow-md flex items-center justify-center text-accent-coral mb-2 font-serif font-black text-xl border border-white">
+                    {selectedMatch.name ? selectedMatch.name.charAt(0).toUpperCase() : '?'}
+                  </div>
+                  <p className="text-xs text-warm-charcoal font-black uppercase tracking-wider">
+                    {locale === 'en' ? 'Initials Only' : 'الاسم الثنائي'}
+                  </p>
+                  <p className="text-[10px] text-stone-500 font-medium">
+                    {locale === 'en' ? 'Reveals after request is approved.' : 'تنكشف بالكامل فور قبول الطلب.'}
+                  </p>
+                </div>
+              ) : (
+                /* VISIBLE AND BLURRED */
+                <>
+                  <img
+                    src={selectedMatch.avatarUrl}
+                    alt={selectedMatch.name}
+                    className={`w-full h-full object-cover absolute inset-0 ${
+                      selectedMatch.photoStatus === 'blurred' && selectedMatch.requestStatus !== 'accepted' ? 'filter blur-[15px]' : ''
+                    }`}
+                    referrerPolicy="no-referrer"
+                  />
+                  {selectedMatch.photoStatus === 'blurred' && selectedMatch.requestStatus !== 'accepted' && (
+                    <div className="absolute inset-0 bg-[#2D2A26]/40 flex flex-col items-center justify-center p-4 text-center">
+                      <Lock className="w-6 h-6 text-accent-coral mb-2 drop-shadow" />
+                      <p className="text-xs text-white font-bold uppercase tracking-wider">Portrait Protected</p>
+                      <p className="text-[10px] text-white/90">Unlocked automatically to accepted match partners.</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -726,8 +755,8 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                     <strong className="text-warm-charcoal block leading-tight mt-0.5">{selectedMatch.wantsChildren}</strong>
                   </div>
                   <div>
-                    <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Family Integration</span>
-                    <strong className="text-warm-charcoal block leading-tight mt-0.5">{selectedMatch.familyInvolvement}</strong>
+                    <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Privacy Preference</span>
+                    <strong className="text-warm-charcoal block leading-tight mt-0.5">{selectedMatch.communicationPreference}</strong>
                   </div>
                 </div>
 

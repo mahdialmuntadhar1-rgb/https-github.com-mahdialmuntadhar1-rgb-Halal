@@ -3,52 +3,59 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { UserProfile, MatchProfile, Conversation, Message } from './types';
-import { INITIAL_MATCHES } from './data/matches';
+import React, { useState, useEffect } from 'react';
+import { UserProfile, MatchProfile, Conversation } from './types';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import HowItWorks from './components/HowItWorks';
-import OnboardingWizard from './components/OnboardingWizard';
-import PhotoPrivacyModule from './components/PhotoPrivacyModule';
-import MatchExplorer from './components/MatchExplorer';
-import ChatSimulator from './components/ChatSimulator';
-import TrustSafety from './components/TrustSafety';
-import { Language, TRANSLATIONS } from './lib/translations';
-import { Heart, Sparkles, Check, Info, Lock, ShieldCheck, Mail, Sliders } from 'lucide-react';
+import LandingScreen from './screens/LandingScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
+import MatchExplorerScreen from './screens/MatchExplorerScreen';
+import ChatScreen from './screens/ChatScreen';
+import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
+import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
+import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
+import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
+import { useLocale } from './hooks/useLocale';
+import { mockApi } from './services/mockApi';
+import { Sparkles, Check, Heart } from 'lucide-react';
 
 export default function App() {
-  const [currentTab, setTab] = useState<'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy'>('landing');
-  const [locale, setLocale] = useState<Language>('ar');
+  const { locale, setLocale, t } = useLocale('ar');
+  const [currentTab, setTab] = useState<'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'trust_safety'>('landing');
 
-  const t = TRANSLATIONS[locale];
-  
-  // Initialize standard User Profile
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: '',
-    age: 0,
-    gender: 'male',
-    country: '',
-    religion: 'islam',
-    sect: 'sunni',
-    ethnicity: 'arab',
-    education: '',
-    profession: '',
-    languages: ['Arabic', 'English'],
-    intention: 'Seeking serious marriage introduces.',
-    timeline: 'Within 1 year',
-    wantsChildren: 'Yes, definitely',
-    relocation: 'Yes, open globally',
-    familyInvolvement: 'Moderate combined with support',
-    values: [],
-    photoPrivacy: 'visible',
-    partnerReligion: 'islam',
-    partnerSect: 'sunni',
-    partnerEthnicity: 'arab'
-  });
+  // Async States
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [matches, setMatches] = useState<MatchProfile[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Calculate profile completion score based on entered fields
+  // Load Initial API Data
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [profile, matchesList, convs] = await Promise.all([
+          mockApi.getCurrentUser(),
+          mockApi.getMatches(),
+          mockApi.getConversations()
+        ]);
+        setUserProfile(profile);
+        setMatches(matchesList);
+        setConversations(convs);
+      } catch (err) {
+        console.error("Failed to load initial data", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  // Profile strength indicator
   const calculateProfileStrength = (): number => {
+    if (!userProfile) return 0;
     let score = 0;
     if (userProfile.name) score += 15;
     if (userProfile.age > 0) score += 15;
@@ -59,118 +66,91 @@ export default function App() {
     return score;
   };
 
-  // State elements for active pool and notifications
-  const [matches, setMatches] = useState<MatchProfile[]>(INITIAL_MATCHES);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4500);
+  // Onboarding wizard completion
+  const handleOnboardingComplete = async (updatedProfile: UserProfile) => {
+    try {
+      const saved = await mockApi.updateCurrentUserProfile(updatedProfile);
+      setUserProfile(saved);
+      triggerToast(`✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`);
+      setTab('explore');
+    } catch (err) {
+      console.error("Failed to complete onboarding", err);
+    }
   };
 
-  // Onboarding compilation
-  const handleOnboardingComplete = (updatedProfile: UserProfile) => {
-    setUserProfile(updatedProfile);
-    triggerToast(`✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`);
-    setTab('explore');
+  // Direct profile/privacy/nesting changes from screens
+  const handleUpdateUserProfile = async (updatedValues: Partial<UserProfile>) => {
+    if (!userProfile) return;
+    try {
+      const saved = await mockApi.updateCurrentUserProfile(updatedValues);
+      setUserProfile(saved);
+    } catch (err) {
+      console.error("Failed to update profile values", err);
+    }
   };
 
-  // Request dispatch with automated mock responsive approval simulation
-  const handleSendRequest = (matchId: string) => {
-    // Set pending status
-    setMatches((prevMatches) =>
-      prevMatches.map((m) =>
-        m.id === matchId ? { ...m, requestStatus: 'sent' } : m
-      )
-    );
-    triggerToast(`✉️ Introduction request sent securely. Acknowledging respect rules...`);
+  // Send request with simulation response
+  const handleSendRequest = async (matchId: string) => {
+    try {
+      await mockApi.sendIntroductionRequest(matchId);
+      // Reload matches list immediately to show "pending" state
+      const updatedMatches = await mockApi.getMatches();
+      setMatches(updatedMatches);
+      triggerToast(`✉️ Introduction request sent securely. Acknowledging respect rules...`);
 
-    // Simulate 2.5s review approval
-    setTimeout(() => {
-      setMatches((prevMatches) =>
-        prevMatches.map((m) => {
-          if (m.id === matchId) {
-            triggerToast(`🎉 Mutual interest! ${m.name} accepted your request. Chat unlocked! 🔓`);
-            return {
-              ...m,
-              requestStatus: 'accepted',
-              photoStatus: 'unlocked'
-            };
-          }
-          return m;
-        })
-      );
+      // Trigger auto-approval response simulation
+      setTimeout(async () => {
+        try {
+          const { match } = await mockApi.acceptIntroductionRequest(matchId);
+          // Reload matches & conversations list immediately
+          const [updatedMatchesList, updatedConvs] = await Promise.all([
+            mockApi.getMatches(),
+            mockApi.getConversations()
+          ]);
+          setMatches(updatedMatchesList);
+          setConversations(updatedConvs);
+          triggerToast(`🎉 Mutual interest! ${match.name} accepted your request. Chat unlocked! 🔓`);
+        } catch (simErr) {
+          console.error("Failed simulator auto-approval", simErr);
+        }
+      }, 2800);
 
-      // Bootstrap Conversation
-      setConversations((prev) => {
-        if (prev.some(c => c.matchId === matchId)) return prev;
-        const targetMatch = matches.find(m => m.id === matchId);
-        const name = targetMatch ? targetMatch.name : 'your partner';
-        return [
-          ...prev,
-          {
-            matchId,
-            messages: [
-              {
-                id: `welcome_${matchId}`,
-                sender: 'match',
-                text: `Assalamu Alaikum. Thank you for connecting with serious intentions. I liked your profile and compatibility values! What does a peaceful married life look like to you?`,
-                timestamp: 'Just now'
-              }
-            ]
-          }
-        ];
-      });
-    }, 2800);
+    } catch (err) {
+      console.error("Failed to send introduction request", err);
+    }
   };
 
+  // Quick navigation into deep Chat
   const handleInitiateChat = (matchId: string) => {
     setActiveMatchId(matchId);
     setTab('chat');
   };
 
-  // Chat message logging
-  const handleSendMessage = (matchId: string, text: string, sender: 'user' | 'match') => {
-    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    setConversations((prev) =>
-      prev.map((c) => {
-        if (c.matchId === matchId) {
-          return {
-            ...c,
-            messages: [
-              ...c.messages,
-              {
-                id: `msg_${Date.now()}`,
-                sender,
-                text,
-                timestamp: timeNow
-              }
-            ]
-          };
-        }
-        return c;
-      })
-    );
-  };
-
-  // Helper filters accepted list
-  const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
-  const profileStrength = calculateProfileStrength();
-
-  const handleScrollToRules = () => {
-    const el = document.getElementById('photo-privacy-rules');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      setTab('landing');
-      setTimeout(() => {
-        document.getElementById('photo-privacy-rules')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+  // Send message API mapping
+  const handleSendMessage = async (matchId: string, text: string, sender: 'user' | 'match') => {
+    try {
+      await mockApi.sendMessage(matchId, text, sender);
+      const updatedConvs = await mockApi.getConversations();
+      setConversations(updatedConvs);
+    } catch (err) {
+      console.error("Failed to dispatch chat log message", err);
     }
   };
+
+  if (!userProfile) {
+    return (
+      <div className="bg-warm-ivory min-h-screen flex items-center justify-center">
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 bg-accent-coral rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-3 h-3 bg-accent-pink rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-3 h-3 bg-[#40798C] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        </div>
+      </div>
+    );
+  }
+
+  const profileStrength = calculateProfileStrength();
+  const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
 
   return (
     <div 
@@ -194,7 +174,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Primary Header Component */}
+      {/* Header bar component */}
       <Header
         currentTab={currentTab}
         setTab={setTab}
@@ -204,125 +184,94 @@ export default function App() {
         setLocale={setLocale}
       />
 
-      {/* Main Content Render Switcher */}
+      {/* Primary switcher layout */}
       <main className="flex-grow">
         {currentTab === 'landing' && (
-          <div className="animate-fade-in">
-            <Hero
-              locale={locale}
-              onSelectGender={(gender) => {
-                setUserProfile(prev => ({
-                  ...prev,
-                  gender,
-                  photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible'
-                }));
-                triggerToast(locale === 'en' ? `✨ Gender set to ${gender}. Let's fill out your parameters!` : locale === 'ar' ? `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ بملء المعايير!` : `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست بکەین بە پڕکردنەوەی پێوەرەکان!`);
-                setTab('onboarding');
-              }}
-              onExploreMatches={() => setTab('explore')}
-            />
-            <HowItWorks locale={locale} />
-            <PhotoPrivacyModule locale={locale} />
-            <TrustSafety locale={locale} />
-
-            {/* In-Depth Core Philosophy Section (Chunk 12) */}
-            <section className="bg-transparent py-16" id="core-philosophy">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-gradient-to-br from-accent-coral to-accent-pink rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden shadow-2xl">
-                  {/* Decorative element */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2" />
-                  
-                  <div className="max-w-2xl space-y-6 relative z-10 text-start">
-                    <span className="text-[10px] uppercase bg-white/20 px-3 py-1 rounded-full font-mono font-bold tracking-widest">
-                      {t.philSub}
-                    </span>
-                    <h3 className="text-3xl sm:text-4xl font-serif font-black tracking-tight font-display">
-                      {t.philTitle}
-                    </h3>
-                    <p className="text-sm sm:text-base text-white/90 font-medium leading-relaxed">
-                      {t.philDesc}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-xs font-semibold text-white/90">
-                      <div className="flex items-center space-x-2">
-                        <Check className="w-4 h-4 text-white shrink-0" />
-                        <span>{t.philPoint1}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Check className="w-4 h-4 text-white shrink-0" />
-                        <span>{t.philPoint2}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Check className="w-4 h-4 text-white shrink-0" />
-                        <span>{t.philPoint3}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Check className="w-4 h-4 text-white shrink-0" />
-                        <span>{t.philPoint4}</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-6">
-                      <button
-                        onClick={() => setTab('onboarding')}
-                        className="px-8 py-4 rounded-2xl bg-white text-warm-charcoal font-bold hover:bg-warm-ivory transition active:scale-95 shadow-lg shadow-black/10 text-xs sm:text-sm"
-                      >
-                        {t.philBtn}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
+          <LandingScreen
+            locale={locale}
+            onSelectGender={async (gender) => {
+              const updatedProfile = {
+                ...userProfile,
+                gender,
+                photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible' as const
+              };
+              await handleUpdateUserProfile(updatedProfile);
+              triggerToast(locale === 'en' ? `✨ Gender set to ${gender}. Let's fill out your parameters!` : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`);
+              setTab('onboarding');
+            }}
+            onExploreMatches={() => setTab('explore')}
+            setTab={setTab}
+          />
         )}
 
         {currentTab === 'onboarding' && (
-          <section className="py-12 px-4 animate-fade-in relative z-10">
-            <div className="max-w-3xl mx-auto text-center mb-8 space-y-2">
-              <h2 className="text-3xl font-serif font-black text-warm-charcoal font-display">{t.wizardTitle}</h2>
-              <p className="text-[#6B635B] text-sm font-medium">
-                {t.wizardSub}
-              </p>
-            </div>
-            <OnboardingWizard
-              locale={locale}
-              onComplete={handleOnboardingComplete}
-              initialProfile={userProfile}
-            />
-          </section>
+          <OnboardingScreen
+            locale={locale}
+            userProfile={userProfile}
+            onComplete={handleOnboardingComplete}
+          />
         )}
 
         {currentTab === 'explore' && (
-          <section className="py-4 animate-fade-in">
-            <MatchExplorer
-              locale={locale}
-              matches={matches}
-              onSendRequest={handleSendRequest}
-              onInitiateChat={handleInitiateChat}
-              userGender={userProfile.gender}
-            />
-          </section>
+          <MatchExplorerScreen
+            locale={locale}
+            matches={matches}
+            onSendRequest={handleSendRequest}
+            onInitiateChat={handleInitiateChat}
+            userGender={userProfile.gender}
+            userGovernorate={userProfile.governorate}
+          />
         )}
 
         {currentTab === 'chat' && (
-          <section className="py-4 animate-fade-in">
-            <ChatSimulator
-              locale={locale}
-              acceptedMatches={acceptedMatches}
-              conversations={conversations}
-              onSendMessage={handleSendMessage}
-              activeMatchId={activeMatchId}
-              setActiveMatchId={setActiveMatchId}
-            />
-          </section>
+          <ChatScreen
+            locale={locale}
+            acceptedMatches={acceptedMatches}
+            conversations={conversations}
+            onSendMessage={handleSendMessage}
+            activeMatchId={activeMatchId}
+            setActiveMatchId={setActiveMatchId}
+          />
+        )}
+
+        {currentTab === 'profile' && (
+          <ProfilePreviewScreen
+            locale={locale}
+            profile={userProfile}
+            profileStrength={profileStrength}
+            onEditClick={() => setTab('onboarding')}
+          />
+        )}
+
+        {currentTab === 'privacy' && (
+          <PrivacySettingsScreen
+            locale={locale}
+            profile={userProfile}
+            onUpdatePrivacy={handleUpdateUserProfile}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {currentTab === 'account' && (
+          <AccountPlaceholderScreen
+            locale={locale}
+            userName={userProfile.name}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {currentTab === 'trust_safety' && (
+          <TrustPrivacyScreen
+            locale={locale}
+            onBackToOverview={() => setTab('landing')}
+          />
         )}
       </main>
 
-      {/* PERSISTENT FOOTER (Chunk 13) */}
-      <footer className="bg-warm-charcoal text-[#C3BFB9] py-12 border-t border-white/10 relative z-10">
+      {/* PERSISTENT FOOTER */}
+      <footer className="bg-warm-charcoal text-[#C3BFB9] py-12 border-t border-white/10 relative z-10 text-start">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-white/10 text-start">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-white/10">
             
             {/* Branding */}
             <div className="md:col-span-5 space-y-4">
@@ -358,9 +307,9 @@ export default function App() {
 
             {/* Respect rules disclaimer */}
             <div className="md:col-span-4 space-y-3">
-              <h5 className="text-white text-xs font-bold uppercase tracking-widest font-mono">{t.footerPledgeTitle}</h5>
+              <h5 className="text-white text-xs font-bold uppercase tracking-widest font-mono">App Mission</h5>
               <p className="text-xs text-[#C3BFB9]/80 leading-relaxed font-normal">
-                {t.footerPledgeDesc}
+                HALAL is designed for serious people seeking marriage with privacy, dignity, and mutual respect.
               </p>
             </div>
 
@@ -369,12 +318,17 @@ export default function App() {
           {/* Copyrights and meta */}
           <div className="flex flex-col sm:flex-row justify-between items-center pt-8 text-xs font-medium">
             <p>{t.copyright}</p>
-            <div className="flex space-x-4 mt-4 sm:mt-0">
-              <a href="#" className="hover:text-white transition">{t.privacyPolicy}</a>
+            <div className="flex flex-wrap gap-4 mt-4 sm:mt-0 justify-center items-center">
+              <button 
+                onClick={() => setTab('trust_safety')} 
+                className="hover:text-white transition font-extrabold underline decoration-accent-coral decoration-2 underline-offset-4 flex items-center gap-1 text-xs"
+              >
+                🛡️ {locale === 'en' ? 'Trust & Privacy Center' : locale === 'ar' ? 'مركز الأمان والموثوقية' : 'ڕێبەری ئاسایش ومتمانە'}
+              </button>
               <span>•</span>
-              <a href="#" className="hover:text-white transition">{t.terms}</a>
+              <button onClick={() => setTab('privacy')} className="hover:text-white transition">{t.privacyPolicy}</button>
               <span>•</span>
-              <a href="#" className="hover:text-white transition">{t.idVerify}</a>
+              <button onClick={() => setTab('account')} className="hover:text-white transition">{t.idVerify}</button>
             </div>
           </div>
         </div>

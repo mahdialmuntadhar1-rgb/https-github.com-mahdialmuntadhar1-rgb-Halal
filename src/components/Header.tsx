@@ -1,18 +1,26 @@
 import React from 'react';
-import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages } from 'lucide-react';
-import { Language, TRANSLATIONS } from '../lib/translations';
+import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield } from 'lucide-react';
+import { Language } from '../lib/translations';
+import { TRANSLATIONS } from '../lib/translations';
 
 interface HeaderProps {
-  currentTab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy';
-  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy') => void;
+  currentTab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account';
+  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account') => void;
   profileStrength: number;
   userProfileName?: string;
   locale: Language;
   setLocale: (locale: Language) => void;
 }
 
-export default function Header({ currentTab, setTab, profileStrength, userProfileName, locale, setLocale }: HeaderProps) {
-  const t = TRANSLATIONS[locale];
+export default function Header({ 
+  currentTab, 
+  setTab, 
+  profileStrength, 
+  userProfileName, 
+  locale, 
+  setLocale 
+}: HeaderProps) {
+  const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
 
   return (
     <header className="sticky top-0 z-50 w-full bg-warm-ivory/60 backdrop-blur-md border-b border-white/20 shadow-sm" id="main-header">
@@ -20,7 +28,7 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
         <div className="flex justify-between items-center h-20">
           
           {/* Logo & Slogan */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer" onClick={() => setTab('landing')}>
+          <div className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center shadow-lg shadow-accent-coral/20 shrink-0">
               <span className="text-white font-serif font-bold text-xl">H</span>
             </div>
@@ -83,12 +91,15 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
             </button>
           </nav>
 
-          {/* Right Action Menu: Profile Strength bar */}
+          {/* Right Action Menu: Profile Strength bar & Shortcuts */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             
             {/* Profile Info block */}
             <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
-              <span className="text-xs font-semibold text-warm-charcoal flex items-center gap-1">
+              <span 
+                className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
+                onClick={() => setTab('profile')}
+              >
                 <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
                 {userProfileName ? `${t.welcome}, ${userProfileName}` : t.guestProfile}
               </span>
@@ -99,9 +110,53 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
                     style={{ width: `${profileStrength}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-[#6B635B] font-mono font-bold">{profileStrength}% {t.completeScore}</span>
+                <span 
+                  className="text-[10px] text-[#6B635B] font-mono font-bold cursor-pointer hover:text-[#40798C] transition-colors"
+                  onClick={() => setTab('profile')}
+                >
+                  {profileStrength}% {t.completeScore}
+                </span>
               </div>
             </div>
+
+            {/* Quick settings switches (Dossier, Privacy, Account) */}
+            {profileStrength > 0 && (
+              <div className="flex items-center gap-1 bg-white/30 p-1 rounded-xl border border-white/40">
+                <button
+                  onClick={() => setTab('profile')}
+                  title="My Dossier"
+                  className={`p-2 rounded-lg transition-all ${
+                    currentTab === 'profile' 
+                      ? 'bg-[#40798C] text-white shadow-sm scale-102' 
+                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setTab('privacy')}
+                  title="Privacy Settings"
+                  className={`p-2 rounded-lg transition-all ${
+                    currentTab === 'privacy' 
+                      ? 'bg-[#FF7F50] text-white shadow-sm scale-102' 
+                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setTab('account')}
+                  title="Account Verification Center"
+                  className={`p-2 rounded-lg transition-all ${
+                    currentTab === 'account' 
+                      ? 'bg-emerald-600 text-white shadow-sm scale-102' 
+                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
@@ -115,64 +170,88 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
           </div>
         </div>
 
-        {/* Elegant Language Sub-Taskbar Sitting Directly Below Main Row */}
-        <div className="bg-gradient-to-r from-white/70 via-white/55 to-white/45 backdrop-blur-xl border border-white/60 px-5 py-2.5 rounded-[1.5rem] shadow-lg shadow-[#40798C]/5 my-3 flex flex-col sm:flex-row justify-between items-center gap-3 transition-all duration-300">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <div className="w-6 h-6 rounded-lg bg-white/70 flex items-center justify-center border border-white/50 shadow-inner">
+        {/* Beautiful Elegant Language Sub-Taskbar sitting directly below Main Row */}
+        <div className="bg-gradient-to-r from-white/90 via-white/80 to-white/70 backdrop-blur-2xl border border-[#40798C]/15 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-lg shadow-[#40798C]/5 my-2.5 sm:my-3.5 flex flex-row justify-between items-center gap-2.5 transition-all duration-300">
+          <div className="hidden xs:flex items-center space-x-2.5 rtl:space-x-reverse">
+            <div className="w-7 h-7 rounded-xl bg-[#40798C]/10 flex items-center justify-center border border-[#40798C]/20 shadow-inner">
               <Languages className="w-3.5 h-3.5 text-[#40798C]" />
             </div>
-            <span className="text-[11px] font-mono font-bold text-[#6B635B] uppercase tracking-wider">
-              {locale === 'en' ? 'Select Language:' : locale === 'ar' ? 'اختر اللغة:' : 'زمان دیاری بکە:'}
-            </span>
+            <div className="flex flex-col text-left rtl:text-right">
+              <span className="text-[9px] font-mono font-bold text-[#6B635B] uppercase tracking-wider leading-tight">
+                Language / زمان / اللغة
+              </span>
+              <span className="text-[11px] font-black text-warm-charcoal">
+                {locale === 'en' ? 'Gateway Interface' : locale === 'ar' ? 'واجهة المنصة' : 'ڕووکاری سەرەکی'}
+              </span>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 rtl:space-x-reverse w-full xs:w-auto justify-around xs:justify-end">
             {/* Arabic Link */}
             <button
               onClick={() => setLocale('ar')}
-              className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-[9px] sm:text-[11px] font-black transition-all duration-300 min-w-[65px] sm:min-w-[80px] cursor-pointer ${
                 locale === 'ar'
-                  ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-md shadow-accent-coral/20 scale-105'
-                  : 'bg-white/50 border border-white/30 text-warm-charcoal hover:bg-white/80 hover:scale-102 hover:shadow-sm'
+                  ? 'bg-gradient-to-br from-[#40798C] to-[#316070] text-white shadow-md shadow-[#40798C]/15 border border-[#40798C]/40 scale-102'
+                  : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-base select-none">🇮🇶</span>
-              <span>العربية</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">🇮🇶</span>
+              <span className="tracking-wide">العربية</span>
             </button>
 
             {/* Kurdish Link */}
             <button
               onClick={() => setLocale('ckb')}
-              className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-[9px] sm:text-[11px] font-black transition-all duration-300 min-w-[65px] sm:min-w-[80px] cursor-pointer ${
                 locale === 'ckb'
-                  ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-md shadow-accent-coral/20 scale-105'
-                  : 'bg-white/50 border border-white/30 text-warm-charcoal hover:bg-white/80 hover:scale-102 hover:shadow-sm'
+                  ? 'bg-gradient-to-br from-[#40798C] to-[#316070] text-white shadow-md shadow-[#40798C]/15 border border-[#40798C]/40 scale-102'
+                  : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-base select-none">☀️</span>
-              <span>کوردی</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">☀️</span>
+              <span className="tracking-wide">کوردی</span>
             </button>
 
             {/* English Link */}
             <button
               onClick={() => setLocale('en')}
-              className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-[9px] sm:text-[11px] font-black transition-all duration-300 min-w-[65px] sm:min-w-[80px] cursor-pointer ${
                 locale === 'en'
-                  ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-md shadow-accent-coral/20 scale-105'
-                  : 'bg-white/50 border border-white/30 text-warm-charcoal hover:bg-white/80 hover:scale-102 hover:shadow-sm'
+                  ? 'bg-gradient-to-br from-[#40798C] to-[#316070] text-white shadow-md shadow-[#40798C]/15 border border-[#40798C]/40 scale-102'
+                  : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-base select-none">🇬🇧</span>
-              <span>English</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">🇬🇧</span>
+              <span className="tracking-wide">English</span>
             </button>
           </div>
         </div>
 
+        {/* Beautiful Hero Section Rectangle Banner (Without any overlay text or button) */}
+        {currentTab === 'landing' && (
+          <div className="w-full mt-1.5 mb-5 animate-fade-in" id="header-hero-banner">
+            <div className="relative w-full aspect-[21/9] md:aspect-[24/7] bg-gradient-to-br from-[#EAE3D2] via-[#E1DDD5] to-[#CED9D8] rounded-[1.8rem] overflow-hidden border border-stone-200/60 shadow-xl shadow-[#40798C]/5 group">
+              {/* Premium, silent, textless photographic representation of elegant companionship or geometry */}
+              <img
+                src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&q=80&w=1600"
+                alt="HALAL Matrimonial Serene Architectural Gateway"
+                className="w-full h-full object-cover opacity-90 group-hover:scale-[1.015] transition-transform duration-[6000ms] ease-out select-none"
+                referrerPolicy="no-referrer"
+              />
+              {/* Subtle ambient lighting vignette overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/10 via-transparent to-white/10 pointer-events-none" />
+              {/* Left/Right ambient lighting */}
+              <div className="absolute inset-0 bg-radial-gradient from-transparent to-stone-900/5 pointer-events-none" />
+            </div>
+          </div>
+        )}
+
         {/* Mobile Navigation Row */}
-        <div className="flex md:hidden border-t border-white/20 py-2.5 overflow-x-auto scrollbar-none justify-around items-center text-xs space-x-1 rtl:space-x-reverse">
+        <div className="flex md:hidden border-t border-white/20 py-2.5 overflow-x-auto scrollbar-none justify-start sm:justify-around items-center text-xs space-x-1 rtl:space-x-reverse px-2 gap-1">
           <button
             onClick={() => setTab('landing')}
-            className={`px-3 py-1.5 font-bold rounded-lg ${
+            className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
               currentTab === 'landing' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
@@ -180,16 +259,16 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
           </button>
           <button
             onClick={() => setTab('onboarding')}
-            className={`px-3 py-1.5 font-bold rounded-lg flex items-center space-x-0.5 rtl:space-x-reverse ${
+            className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap flex items-center space-x-0.5 rtl:space-x-reverse ${
               currentTab === 'onboarding' ? 'bg-accent-coral text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{locale === 'en' ? 'Onboarding' : t.onboarding}</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="shrink-0">{locale === 'en' ? 'Onboarding' : t.onboarding}</span>
           </button>
           <button
             onClick={() => setTab('explore')}
-            className={`px-3 py-1.5 font-bold rounded-lg ${
+            className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
               currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
@@ -197,12 +276,40 @@ export default function Header({ currentTab, setTab, profileStrength, userProfil
           </button>
           <button
             onClick={() => setTab('chat')}
-            className={`px-3 py-1.5 font-bold rounded-lg ${
+            className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
               currentTab === 'chat' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
             {locale === 'en' ? 'Chats' : t.chat}
           </button>
+          {profileStrength > 0 && (
+            <>
+              <button
+                onClick={() => setTab('profile')}
+                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
+                  currentTab === 'profile' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80'
+                }`}
+              >
+                {locale === 'en' ? 'Profile' : 'الملف'}
+              </button>
+              <button
+                onClick={() => setTab('privacy')}
+                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
+                  currentTab === 'privacy' ? 'bg-[#FF7F50] text-[#FF7F50] bg-[#FF7F50]/10' : 'text-[#4A443F]/80'
+                }`}
+              >
+                {locale === 'en' ? 'Privacy' : 'السرية'}
+              </button>
+              <button
+                onClick={() => setTab('account')}
+                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
+                  currentTab === 'account' ? 'bg-emerald-600 text-white' : 'text-[#4A443F]/80'
+                }`}
+              >
+                {locale === 'en' ? 'Verification' : 'التوثيق'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

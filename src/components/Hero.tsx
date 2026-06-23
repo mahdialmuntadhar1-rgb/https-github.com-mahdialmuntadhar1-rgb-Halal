@@ -22,12 +22,25 @@ export default function Hero({ locale, onSelectGender, onExploreMatches }: HeroP
         </div>
 
         {/* Emotionally Connective Header */}
-        <div className="max-w-3xl mx-auto space-y-4 mb-12">
-          <h1 className="text-3xl sm:text-6xl font-serif text-warm-charcoal tracking-tight leading-[1.2] sm:leading-[1.1] font-display">
-            {t.heroTitle}
+        <div className="max-w-4xl mx-auto space-y-6 mb-12">
+          <h1 className="text-3xl sm:text-6xl font-serif text-warm-charcoal tracking-tight leading-[1.2] sm:leading-[1.1] font-display font-black">
+            {locale === 'en' ? 'Private marriage matchmaking for serious people' : locale === 'ar' ? 'زواج حلال وقور لأصحاب النوايا الجادة' : 'کۆبوونەوەی هاوسەرگیری تایبەت بۆ کەسانی جدی'}
           </h1>
-          <p className="text-sm sm:text-lg text-[#6B635B] max-w-xl mx-auto font-medium leading-relaxed">
-            {t.heroSub}
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium text-[#6B635B] pt-2">
+            <span className="flex items-center gap-1.5 bg-white/40 px-3 py-1.5 rounded-full border border-white/50 shadow-sm">
+              🚫 {locale === 'en' ? 'No swiping' : locale === 'ar' ? 'بدون تمرير عشوائي' : 'بێ سواپکردن'}
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/40 px-3 py-1.5 rounded-full border border-white/50 shadow-sm">
+              🛡️ {locale === 'en' ? 'No public exposure' : locale === 'ar' ? 'بدون كشف علني' : 'بێ بڵاوکردنەوەی گشتی'}
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/40 px-3 py-1.5 rounded-full border border-white/50 shadow-sm">
+              🔏 {locale === 'en' ? 'No family monitoring' : locale === 'ar' ? 'دون رقابة عائلية مُحرجة' : 'بێ چاودێری ناوزڕێنەر'}
+            </span>
+          </div>
+
+          <p className="text-xs sm:text-sm font-bold text-[#40798C] font-mono tracking-wider uppercase mt-4 flex items-center justify-center gap-1.5 bg-[#40798C]/10 w-fit mx-auto px-4.5 py-2 rounded-full border border-[#40798C]/20">
+            💬 {locale === 'en' ? 'Only mutual matches can chat.' : locale === 'ar' ? 'المحادثة والدردشة فقط بعد التوافق والقبول الثنائي المتبادل.' : 'تەنها لەگەڵ پەسەندکردنی دوولایەنە دەتوانن دەست بە چات بکەن.'}
           </p>
         </div>
 

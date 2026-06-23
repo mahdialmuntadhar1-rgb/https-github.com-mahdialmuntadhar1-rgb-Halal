@@ -94,7 +94,7 @@ export interface Translations {
   marriageGoal: string;
   courtshipTimeline: string;
   wantsChildren: string;
-  familyInvolvement: string;
+  communicationPreference: string;
   photoPrivacySettings: string;
   valuesPrompt: string;
 
@@ -134,11 +134,11 @@ export interface Translations {
   // Chat Simulator
   chatTitle: string;
   chatSub: string;
-  waliConsole: string;
-  waliConsoleDesc: string;
-  exportTranscript: string;
-  exportLocked: string;
-  exportSuccess: string;
+  privacyConsole: string;
+  privacyConsoleDesc: string;
+  privateChatNotice: string;
+  chatMutualAgreement: string;
+  consentConfirmed: string;
   typeMessage: string;
   sendBtn: string;
   noConnectedMatches: string;
@@ -180,7 +180,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     iamMan: 'I am a man',
     iamManDesc: 'Sincere intentions to identify a partner of intellectual harmony, values, and mutual care.',
     iamWoman: 'I am a woman',
-    iamWomanDesc: 'Full photo control, Wali support, and secure compatibility algorithms designed for your comfort and dignity.',
+    iamWomanDesc: 'Full photo control, user-controlled privacy, and secure compatibility algorithms designed for your comfort and dignity.',
     respectPortrayal: 'Respectful portrayal',
     protectedOptions: 'Protected options',
     startBtn: 'Start Matching with Sincerity',
@@ -193,7 +193,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     step2Title: '2. Values-Based Matching',
     step2Desc: 'Explore profiles across Iraqi governorates filtered precisely by compatibility index, educational background, and shared vision.',
     step3Title: '3. Secure, Respectful Courtship',
-    step3Desc: 'Initiate interaction with photo-unlock options and structured, Wali-integrable chat transcripts that support family participation.',
+    step3Desc: 'Initiate interaction with photo-unlock options and private, respectful conversation rooms built for serious prospects.',
 
     privacyTitle: 'Absolute Portrait Command',
     privacySub: 'Traditional boundaries dictate comfort. We make sure you control who views your introduction portraits.',
@@ -216,10 +216,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     philTitle: 'Where Serious Intentions Find Dignified Partners',
     philSub: 'Our Philosophy',
     philDesc: 'We developed HALAL because modern courtship apps treat humans like endless catalog items to be swiped. By starting with private expectations, respecting women\'s photo comfort default, and providing guided spiritual parameters, we pave a dignified route to stable family foundation.',
-    philPoint1: 'Designed with cultural and family awareness',
+    philPoint1: 'Designed with cultural respect and local context',
     philPoint2: 'Zero Swiping. Matching strictly on values',
     philPoint3: 'Women completely command profile views',
-    philPoint4: 'Instant Wali/Elder transcript export triggers',
+    philPoint4: 'User-controlled privacy bounds and absolute secrecy',
     philBtn: 'Start Your Free Validation Onboarding',
 
     wizardTitle: 'Guided Onboarding',
@@ -240,7 +240,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     marriageGoal: 'Marital & Lifetime Intentions',
     courtshipTimeline: 'Target Courtship Timeline',
     wantsChildren: 'Stance on Having Children',
-    familyInvolvement: 'Wali / Family Involvement Style',
+    communicationPreference: 'Privacy & Communication Preferences',
     photoPrivacySettings: 'Photo Visibility Preference',
     valuesPrompt: 'Select your Core Values & Traits (At least 2)',
 
@@ -254,7 +254,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     educationLevel: 'Education Level',
     professionCat: 'Profession Category',
     seriousnessLevel: 'Seriousness Level',
-    courtshipValues: 'Courtship Values Style',
+    courtshipValues: 'Communication Style Preference',
     wantsKidsFilter: 'Wants Children',
     smokePref: 'Smoking Preference',
     photoVisibilityState: 'Photo Visibility State',
@@ -276,20 +276,20 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     absoluteDealbreakers: 'Absolute Dealbreakers',
     languagesText: 'Languages:',
 
-    chatTitle: 'Guided Connection Rooms',
-    chatSub: 'A safe, respectful, and family-aligned dialogue space. Transparent intentions and respectful language are guaranteed.',
-    waliConsole: 'Islamic Wali / Family Integration Center',
-    waliConsoleDesc: 'In traditional matchmaking, family awareness provides safety and blessings. Use our Wali helper controls below.',
-    exportTranscript: 'Export Secure Chat PDF for Wali Review',
-    exportLocked: 'Wali Transcript locked. (Send at least 3 genuine replies to unlock)',
-    exportSuccess: '✅ Export successful! PDF Transcript with Wali safety hashing generated.',
+    chatTitle: 'Private Connection Rooms',
+    chatSub: 'A respectful, private dialogue space. Serious intentions and respectful language are encouraged through built-in guides.',
+    privacyConsole: 'Privacy & Communication Preferences',
+    privacyConsoleDesc: 'Designed for privacy. Controls are built directly into the client-side experience flow.',
+    privateChatNotice: 'Private introduction request',
+    chatMutualAgreement: 'Introductions and communication remain strictly between both of you.',
+    consentConfirmed: 'Mutual match required for chat.',
     typeMessage: 'Type a modern, respectful message...',
     sendBtn: 'Send',
     noConnectedMatches: 'No connected matches yet',
     noConnectedMatchesDesc: 'Go to the Match Explorer, find compatible partners, and send an introduction request. Once accepted, your chat room activates!',
     noActiveConversation: 'No Active Conversation Dialed',
     noActiveConversationDesc: 'Select an approved partner from the roster sidebar to start a guided, dignified dialogue.',
-    safetyNotice: '🔒 Chats are end-to-end respect audited. Exportable to Wali at any point with hashed integrity indicators.',
+    safetyNotice: '🔒 Chats are private and respectful. Only you and your mutual match can see this conversation.',
 
     footerDesc: 'Modern matchmaking designed for serious individuals who respect traditional principles, mutual growth, and lifelong marital commitment.',
     footerPledgeTitle: 'Dignity Pledge',
@@ -321,7 +321,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     iamMan: 'أنا رجل',
     iamManDesc: 'أسعى بجدية للعثور على شريكة حياة تناسب قيمي وتطلعاتي الفكرية، يسود بيننا الود والاحترام المتبادل.',
     iamWoman: 'أنا امرأة',
-    iamWomanDesc: 'تحكم كامل في ظهور الصور، دعم الولي، وخوارزميات توافق متطورة صُممت للحفاظ على راحتك وكرامتك أولاً.',
+    iamWomanDesc: 'تحكم كامل في ظهور الصور، خيارات خصوصية متكاملة تحت تحكمك، وخوارزميات توافق متطورة صُممت للحفاظ على راحتك وكرامتك أولاً.',
     respectPortrayal: 'تجسيد محترم للأشخاص',
     protectedOptions: 'خيارات حماية معززة',
     startBtn: 'ابدأ البحث بنوايا صادقة',
@@ -330,11 +330,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     howItWorksTitle: 'رحلة منظمة ومشرفة',
     howItWorksSub: 'نبتعد تماماً عن أسلوب التعارف العشوائي. نوجهك بأسلوب ميسر عبر خطوات واضحة ومبنية على التوافق القيمي الأخلاقي.',
     step1Title: '١. تحديد معايير واضحة',
-    step1Desc: 'أنشئ ملفاً شخصياً حقيقياً ومفصلاً يركز على أهدافك الحياتية، ودور العائلة، والجدول الزمني للزواج، وخصوصية صورك.',
+    step1Desc: 'أنشئ ملفاً شخصياً حقيقياً ومفصلاً يركز على أهدافك الحياتية، وتفضيلات الخصوصية والتواصل، والجدول الزمني للزواج، وخصوصية صورك.',
     step2Title: '٢. البحث القائم على التوافق',
     step2Desc: 'استكشف الملفات الشخصية في مختلف المحافظات العراقية المصفاة بدقة حسب نسبة التوافق، المؤهلات العلمية، والرؤية المشتركة.',
     step3Title: '٣. تواصل آمن ومحترم',
-    step3Desc: 'ابدأ التواصل مع خيارات طلب فتح الصور ومحادثات آمنة تتيح إشراك الولي من خلال تصدير سجل المحادثة لدعم قرار الأسرة.',
+    step3Desc: 'ابدأ التواصل مع خيارات طلب فتح الصور ومحادثات خاصة وآمنة تماماً تتيح لكما التعارف بجدية وفي إطار من الوقار والخصوصية المتبادلة.',
 
     privacyTitle: 'تحكم مطلق في خصوصية الصور',
     privacySub: 'الحدود التقليدية تحدد راحتك. نحن نضمن لك السيطرة الكاملة على من يحق له مشاهدة صورك التعريفية.',
@@ -357,10 +357,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     philTitle: 'حيث تلتقي النوايا الصادقة في إطار من الوقار والكرامة',
     philSub: 'فلسفتنا وغايتنا',
     philDesc: 'لقد قمنا بتطوير "حلال" لأن تطبيقات التعارف المعاصرة تعامل الإنسان كسلعة في كتالوج بلا نهاية. من خلال البدء بتحديد التوقعات التفصيلية، واحترام رغبة النساء في حماية الخصوصية بشكل افتراضي، وتوفير آليات تواصل جادة، فإننا نمهد طريقاً شريفاً لتأسيس أسرة عراقية مستقرة.',
-    philPoint1: 'مصمم مع الفهم التام للثقافة والقيم العائلية العراقية',
+    philPoint1: 'مصمم مع الاحترام التام للثقافة والقيم العراقية الرصينة',
     philPoint2: 'بدون تمرير عشوائي. توافق مبني كلياً على القيم الثنائية',
     philPoint3: 'تحكم مطلق للمرأة في الخواص وجوانب الخصوصية',
-    philPoint4: 'إمكانية تصدير فوري وموثق لسجل المحادثة للولي أو العائلة',
+    philPoint4: 'خصوصية متكاملة وتحكم كامل بقنوات التواصل والبيانات دون أي تدخل خارجي',
     philBtn: 'ابدأ خطوات الدخول والتسجيل المجاني',
 
     wizardTitle: 'خطوات التسجيل المستنير',
@@ -381,7 +381,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     marriageGoal: 'سقف التطلعات والأمنيات لبيت الزوجية والمستقبل',
     courtshipTimeline: 'الجدول الزمني المرتجى للخطوبة والإكليل',
     wantsChildren: 'الموقف من الإنجاب وتكوين البنين',
-    familyInvolvement: 'أسلوب ودور العائلة أو الولي في ترتيبات الرؤية',
+    communicationPreference: 'الخصوصية وتفضيلات التواصل المتبادل',
     photoPrivacySettings: 'الرغبة في خصوصية وظهور صورتك الشخصية',
     valuesPrompt: 'اختر أهم القيم والصفات التي تمثلك (اختر ٢ على الأقل)',
 
@@ -395,7 +395,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     educationLevel: 'المستوى الأكاديمي والتعليمي',
     professionCat: 'تصنيف مجالات العمل والمهن',
     seriousnessLevel: 'مستوى الجدية والالتزام بالوقت',
-    courtshipValues: 'أسلوب إشراك العائلة المفضل في التواصل',
+    courtshipValues: 'أسلوب وتفضيلات التواصل المفضلة',
     wantsKidsFilter: 'موقف الرغبة بالأطفال',
     smokePref: 'موقفه من التدخين والأركيلة',
     photoVisibilityState: 'حالة ظهور وحجب الصورة',
@@ -417,22 +417,22 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     absoluteDealbreakers: 'أبرز الخطوط الحمراء والرفض المطلق',
     languagesText: 'اللغات المنطوقة:',
 
-    chatTitle: 'غرفة المحادثة والتواصل الموجه',
-    chatSub: 'مساحة حوار آمنة ومحترمة تركز على توضيح الرؤى المستقبلية. الاحترام، غض البصر، والنوايا الجلية شعارنا.',
-    waliConsole: 'منصة إدماج الولي والعائلة والتحقق الشرعي',
-    waliConsoleDesc: 'في تقاليدنا العراقية وأخلاقنا، وضوح الوالدين والولي يجلب الرضا والبركة والأمان. استخدم لوحة تحكم الولي أدناه.',
-    exportTranscript: 'تصدير نسخة مشفرة وموثقة للمحادثة لمراجعتها مع الولي',
-    exportLocked: 'سجل تصدير المحادثة مقفل حالياً. (أرسل ٣ ردود فعلية على الأقل للتمكن من الفتح والتصدير)',
-    exportSuccess: '✅ تم التصدير بنجاح! تم إنشاء مستند المحادثة وحمايته بأكواد الأمان والتحقق.',
+    chatTitle: 'غرفة المحادثة الخاصة والتواصل',
+    chatSub: 'مساحة حوار وقورة ومبنية للخصوصية تركز على تشجيع الخطاب البناء.',
+    privacyConsole: 'تفضيلات الخصوصية والتواصل الموجه',
+    privacyConsoleDesc: 'مصمم خصيصاً للخصوصية؛ ميزات التحكم بالخصوصية مدمجة كلياً في تجربة الطرفين.',
+    privateChatNotice: 'طلب تواصل وتعريف خاص ومحمي',
+    chatMutualAgreement: 'المراسلات والتفاصيل تعريفيّة تخضع لإشرافكم واختياراتكم المتبادلة.',
+    consentConfirmed: 'يتطلب توافق ثنائي متبادل لبدء الحوار.',
     typeMessage: 'اكتب رسالة محترمة وبناءة تناقش مستقبلكما...',
     sendBtn: 'إرسال',
     noConnectedMatches: 'لا يوجد شركاء توافق متصلين حتى الآن',
     noConnectedMatchesDesc: 'تفضل بزيارة صفحة "استكشاف الشركاء" للبحث عن من يطابق قيمك، ثم أرسل طلب تواصل. حالما يقبلون، ستفتح الغرفة فوراً!',
     noActiveConversation: 'لم يتم تفعيل أي محادثة جارية',
     noActiveConversationDesc: 'الرجاء اختيار أحد الشركاء المقبولين من القائمة الجانبية لبدء حوار وقور يهدف لتأسيس حياة سعيدة.',
-    safetyNotice: '🔒 المحادثات تخضع لآليات مراجعة أخلاقية مشفرة. وهي قابلة للتصدير للوالدين في أي وقت مع تأكيد سلامة النص.',
+    safetyNotice: '🔒 مصمم لحفظ الخصوصية؛ المحادثات ثنائية وخيار حظر التطفل مبرمج في واجهة التطبيق.',
 
-    footerDesc: 'خطوبة وزواج جاد يهدف لربط القلوب والعقول الطامحة في بناء علاقة زوجية مبنية على المودة، الرحمة، والتوافق الراسخ مدى الحياة.',
+    footerDesc: 'حلال مصمم للأشخاص الجادين الباحثين عن الزواج في إطار من الخصوصية، الكرامة، والاحترام المتبادل والمستقبل الواعد.',
     footerPledgeTitle: 'ميثاق الشرف الأخلاقي',
     footerPledgeDesc: 'باستخدامك لمنصة "حلال"، تتعهد أمام الله والجميع بالصدق التام، والبعد عن التسلية، وعدم تضييع الأوقات، والاعتذار المهذب والراقي في حال انعدام النصيب.',
     copyright: '© ٢٠٢٦ منصة حلال للزواج السعيد. بني بوعي تام وصوناً للكرامة.',
@@ -462,7 +462,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     iamMan: 'من پیاوم',
     iamManDesc: 'بە جدییەوە لە هەوڵی دۆزینەوەی هاوبەشێکم کە بگونجێت لەگەڵ بیرکردنەوە و بەهاکانمدا، بە خۆشەویستی و ڕێزەوە.',
     iamWoman: 'من ئافرەتم',
-    iamWomanDesc: 'کۆنترۆڵی ڕەهای وێنەکان، پشتگیریکردنی سەرپەرشتیار (وەلی)، و سیستمێکی هاوتاکردنی پێشکەوتوو بۆ پاراستنی کەرامەتت.',
+    iamWomanDesc: 'کۆنترۆڵی ڕەهای وێنەکان، بژاردەی گرنگی تایبەتگیری بە تەواوی لە ژێر دەسەڵاتت، و سیستمێکی هاوتاکردنی پێشکەوتوو بۆ پاراستنی کەرامەتت.',
     respectPortrayal: 'پیشاندانی شیاو و بەڕێز',
     protectedOptions: 'بژاردەی پاراستنی بەهێز',
     startBtn: 'بە نیازی پاکەوە دەست پێبکە',
@@ -471,11 +471,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     howItWorksTitle: 'گەشتێکی ڕێکخراو و بەڕێز',
     howItWorksSub: 'بە تەواوی دوور دەکەوینەوە لە پەیوەندی بێ بنەما و عەشوائی. ڕێگریت دەکەین بەرەو هەنگاوگەلێکی ڕوون و بەهادار.',
     step1Title: '١. دیاریکردنی پێوەرەکان',
-    step1Desc: 'پڕۆفایلێکی ڕاستەقینە و ورد دروست بکە کە تیشک بخاتە سەر ئامانجەکانی ژیانت، ڕۆڵی خێزان، کاتی هاوسەرگیری، و نیشاندانی وێنەکەت.',
+    step1Desc: 'پڕۆفایلێکی ڕاستەقینە و ورد دروست بکە کە تیشک بخاتە سەر ئامانجەکانی ژیانت، خواستی تایبەتمەندێتی و پەیوەندیکردن، کاتی هاوسەرگیری، و نیشاندانی وێنەکەت.',
     step2Title: '٢. هاوتاکردن لەسەر بنەمای بەهاکان',
     step2Desc: 'پڕۆفایلی گونجاو لەسەرانسەری پارێزگاکانی عێراقدا بدۆزەرەوە، پاڵێوراو بە وردی لەسەر بنەمای زانستی و هاوبەشی بەهاکان.',
     step3Title: '٣. پەیوەندییەکی ئارام و پارێزراو',
-    step3Desc: 'پەیوەندی دەستپێبکە بە ناردنی داخوازی بۆ بینینی وێنەکان و چاتی ئارام کە یارمەتیدەرە بۆ ئاگادارکردنەوەی ولی/خێزان بە ناردنی دەقەکە بۆیان.',
+    step3Desc: 'دەستپێکردنی پەیوەندی بە ناردنی داواکاری بۆ بینینی وێنەکان و ژووری گفتوگۆی تایبەتی و پارێزراو بۆ پێکهێنانی خێزان.',
 
     privacyTitle: 'کۆنترۆڵی کامڵی وێنەکان',
     privacySub: 'دابونەریت و ئاسودەیی تۆ هێڵی سوورمانە. ئێمە کۆنترۆڵکردنی وێنەکانت دەسپێرین بە دەستی خۆتەوە.',
@@ -491,17 +491,17 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     pledgeTitle: 'بەڵێننامەی پێبەندبوون بە ڕازیبوون',
     pledgeDesc: 'هەموو ئەندامێک بەڵێن دەدات بە ڕاستگۆیی ڕەها و وەڵامدانەوەی شیاو و بەخشینی وەڵامی ڕێزدارانە لە کاتی گونجان یان نەگونجاندا.',
     verificationTitle: 'سەلماندنی ناسنامە بە گرنگییەوە',
-    verificationDesc: 'داواکاری سەلماندنی هۆنامەی نیشتمانی یان کارتی نیشتمانی دەکەین تا دڵنیا بینەوە لە نیازی ڕاستەقینەی بەشداربووان.',
+    verificationDesc: 'دڵنیابوون لە ڕاستی ناسنامە عێراقیەکان تا حساباتی بێبایەخ قەدەغە بکەین.',
     privacyLockedTitle: 'پاراستن و پارێزگاری زانیاریەکان',
     privacyLockedDesc: 'ئێمە بەهیچ شێوەیەک زانیارییەکانت نافرۆشینەوە. هۆکارەکانی پەیوەندیکردنت بە شاراوەیی دەمێننەوە مەگەر خۆت ڕازی بیت.',
 
     philTitle: 'لەو شوێنەی کە مەبەستی جدی لە چوارچێوەیەکی پڕ کەرامەتدا بەدی دێت',
     philSub: 'فەلسەفە و پەیامی ئێمە',
     philDesc: 'ئێمە ئەپی "حەڵاڵ"مان دروستکرد چونکە ئەپەکانی تری ناسیاوی تەنها وەک کات بەسەربردن سەیری مرۆڤ دەکەن. لێرە بە دیاریکردنی زانیاری ورد، ڕێزگرتن لە تایبەتمەندی ئافرەتان، و دروستکردنی کەرەستەی دروستی پەیوەندیکردن، ڕێگەیەکی شەرەفمەندانە دەکشێنین بۆ پێکهێنانی خێزانێکی جێگیر.',
-    philPoint1: 'دیزاین کراوە بە تێگەیشتنی تەواو لە کلتور و بەهای خێزانی عێراقی',
+    philPoint1: 'دیزاین کراوە بە ڕێزگرتنی تەواو لە کلتور و دابونەریتی عێراقی',
     philPoint2: 'بێ بوونی پێوەرە گێژکەرەکان. گونجان تەنها لەسەر بناغەی بەهاکانە',
     philPoint3: 'کۆنترۆڵی ڕەهای ئافرەتان بەسەر بەشی تایبەتمەندێتی',
-    philPoint4: 'توانای ناردنی دەستبەجێی پێڕستی گفتوگۆ بۆ سەرپەرشتیار یان خێزان',
+    philPoint4: 'کۆنترۆڵی جدی لەسەر تایبەتمەندێتی و ڕێگری لە هەر چاودێرییەکی دەرەکی',
     philBtn: 'دەست بکە بە تۆمارکردنی ناوی بێبەرامبەر',
 
     wizardTitle: 'هەنگاوەکانی تۆمارکردنی ناو بە ڕێبەرایەتی',
@@ -522,7 +522,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     marriageGoal: 'ئاوات و تێڕوانینەکانت بۆ هاوسەرگیری و پاشەڕۆژ',
     courtshipTimeline: 'ماوەی خوازراو بۆ گەیشتن بە هاوسەرگیری',
     wantsChildren: 'بۆچوون لەسەر منداڵبوون',
-    familyInvolvement: 'ڕۆڵی خێزان یان سەرپەرشتیار لە کاتی یەکتر بینیندا',
+    communicationPreference: 'تایبەتمەندێتی و خواستی پەيوەندیکردنی دوولایەنە',
     photoPrivacySettings: 'خواستی نیشاندانی وێنەی سەرەکیت',
     valuesPrompt: 'بەها و سیفاتە گرنگەکانی خۆت هەڵبژێرە (کەمترین ٢ بەها)',
 
@@ -536,7 +536,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     educationLevel: 'ئاستی خوێندەواری',
     professionCat: 'پۆلێنکردنی کارەکان',
     seriousnessLevel: 'ئاستی جدیات و کات بەسەربردن',
-    courtshipValues: 'شێوازی گونجاوی ئاگادارکردنەوەی خێزان',
+    courtshipValues: 'خواستی پەیوەندیکردنی تایبەت',
     wantsKidsFilter: 'خواستی منداڵبوون',
     smokePref: 'کێشانی جگەرە یان نێرگەلە',
     photoVisibilityState: 'دۆخی نیشاندانی وێنەکان',
@@ -558,22 +558,22 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     absoluteDealbreakers: 'هێڵە سوورەکان و نەگونجانی ڕەها',
     languagesText: 'زمانەکان:',
 
-    chatTitle: 'ژووری گفتوگۆ و بەڕێوەچوونی پەیوەندی جدی',
-    chatSub: 'شوێنێکی ئارام و بەڕێز بۆ پێکەوە گفتوگۆکردنی داهاتوو. ڕوانینی ڕوون و ڕێزگرتن دروشممانە.',
-    waliConsole: 'شوێنی ئاگادارکردنەوەی سەرپەرشتیار و خێزان',
-    waliConsoleDesc: 'لە دابونەریتی ئێمەدا، ئاگاداربوونی دایک و باوک یان سەرپەرشتیار دەبێتە هۆی پڕ بەرهەمی و ئارامی خێزانەکە. ئەم بەشە بەکاربێنە.',
-    exportTranscript: 'تەنزیمکردن و یەکپارچەکردنی نووسینەکان بە مشفەری بۆ سەرپەرشتیار',
-    exportLocked: 'بەشی هەناردەکردنی دەقی گفتوگۆ ئێستا کڵۆمە (کەمترین ٣ وەڵامی ڕاستەقینە بنووسە بۆ چالاک بوونی ئەم بەشە)',
-    exportSuccess: '✅ بە سەرکەوتوویی ناردرا! دەقی گفتوگۆکە دروستکرا و بە کۆدی ئاسایشی پارێزرا.',
+    chatTitle: 'ژووری گفتوگۆی تایبەتی و پەیوەندی متمانە',
+    chatSub: 'ژوورێکی گفتوگۆی تایبەت و ڕێزگرتن کە بۆ پاراستنی نهێنی و هاندانی گفتوگۆی جدی دروستکراوە.',
+    privacyConsole: 'تایبەتمەندێتی و ئاسایشی پەیوەندیکردن',
+    privacyConsoleDesc: 'تایبەتمەندییەکان بە شێوازی لۆکاڵی بۆ پاراستنی نهێنی تۆ دروستکراون پێش بەستنەوەی سێرڤەر.',
+    privateChatNotice: 'داواکاری ناساندنی تایبەت و پارێزرا',
+    chatMutualAgreement: 'گفتوگۆ تەنها لە نێوان خۆتان و کەسی گونجاودا دەمێنێتەوە بە خواستی خۆتان.',
+    consentConfirmed: 'ڕەزامەندی دوولایەنە پێویستە بۆ دەستپێکردنی چات.',
     typeMessage: 'پەیامێکی کورت و بەڕێز بنووسە لەسەر داهاتووتان...',
     sendBtn: 'ناردن',
     noConnectedMatches: 'تاکو ئێستا هیچ هاوبەشێکی گونجاو نادۆزراوەتەوە',
     noConnectedMatchesDesc: 'تکایە بچۆ بەشی دۆزینەوەی شەریک تا داواکاری بنێریت. کاتێک بە دەم وەڵامەکەتەوە دێن ژوورەکە بە دەستبەجێ چالاک دەبێت.',
     noActiveConversation: 'گفتوگۆیەکی چالاک نییە',
     noActiveConversationDesc: 'تکایە یەکێک لە هاوبەشەکان هەڵبژێرە لەم لایەوە تا گفتوگۆیەکی شیاو و بەپلان دەست پێبکەن.',
-    safetyNotice: '🔒 گفتوگۆکان پشکنینی پڕ لە ڕێزگرتنیان بۆ دەکرێت. توانای ناردنی دەقەکە هەیە بۆ باوان لە هەر کاتێکدا.',
+    safetyNotice: '🔒 نەخشەی تایبەت بۆ پاراستنی نهێنی لەناو بەرنامەکەدا بەکار دێت.',
 
-    footerDesc: 'هاوسەرگیری جدی بە مەبەستی پێکەوە گرێدانی دڵ و مێشکی بەشداربووان بۆ دروستکردنی پەیوەندییەکی هاوسەری هاوبەش لەسەر بناغەی ڕێز و خۆشەویستی.',
+    footerDesc: 'هاوسەرگیری جدی بە مەبەستی پێکەوە گرێدانی دڵ و مێشکی بەشداربووان بۆ دروستکردنی پەیوەندییەکی هاوسەری هاوبەش لەسەر بناغەی ڕێز و خۆشەویستی بێ چاودێری دەرەکی.',
     footerPledgeTitle: 'بەڵێننامەی بەهادار و کەرامەت',
     footerPledgeDesc: 'بە بەکارهێنانی "حەڵاڵ"، بەڵێن دەدەیت لەبەردەم خوا و ویژدانی خۆتدا بە تەواوی ڕاستگۆ بیت، دووربکەویتەوە لە گاڵتەجاڕی، و داوای لێبوردنی بەڕێز بکەیت لە کاتی نەگونجاندا.',
     copyright: '© ٢٠٢٦ پلاتفۆرمی حەڵاڵ بۆ هاوسەرگیری بەختەوەر. بە تەواوی بۆ پاراستنی کەرامەت دروستکراوە .',
