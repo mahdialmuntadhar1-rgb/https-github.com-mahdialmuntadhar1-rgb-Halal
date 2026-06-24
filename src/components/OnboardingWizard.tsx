@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
+import { displayValue } from '../lib/displayValue';
 import { 
   Check, 
   ArrowRight, 
@@ -367,7 +368,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
                   className="w-full bg-white border border-stone-200 p-3 rounded-xl text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-[#40798C] text-sm shadow-sm font-semibold text-warm-charcoal"
                 >
                   {GOVERNORATES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
+                  <option key={g} value={g}>{displayValue(g, locale)}</option>
                   ))}
                 </select>
               </div>
@@ -442,7 +443,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
                 className="w-full bg-white border border-stone-200 p-3 rounded-xl text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-[#40798C] text-sm shadow-sm"
               >
                 {EDUCATION_LEVELS.map((el) => (
-                  <option key={el} value={el}>{el}</option>
+                  <option key={el} value={el}>{displayValue(el, locale)}</option>
                 ))}
               </select>
             </div>
@@ -1070,23 +1071,23 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
               <div className="space-y-2 text-xs">
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Name' : 'الاسم والسن'}</span>
-                  <p className="font-bold text-warm-charcoal text-sm">{profile.name}, {profile.age} &bull; <span className="capitalize">{profile.gender}</span></p>
+                  <p className="font-bold text-warm-charcoal text-sm">{profile.name}, {profile.age} &bull; <span className="capitalize">{displayValue(profile.gender, locale)}</span></p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Location' : 'المكان السكني'}</span>
                   <p className="font-bold text-warm-charcoal">
-                    {profile.country === 'Iraq' ? `${profile.governorate}, Iraq ${profile.city ? `(${profile.city})` : ''}` : `${profile.country}`}
+                    {profile.country === 'Iraq' ? `${displayValue(profile.governorate, locale)}, ${displayValue('Iraq', locale)} ${profile.city ? `(${displayValue(profile.city, locale)})` : ''}` : `${displayValue(profile.country, locale)}`}
                   </p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Religion & Ethnicity' : 'الديانة والقومية'}</span>
                   <p className="font-bold text-warm-charcoal capitalise">
-                    {profile.religion === 'islam' ? `${profile.sect || 'Sunni'} Muslim` : 'Non-Muslim'} / {profile.ethnicity}
+                    {profile.religion === 'islam' ? `${displayValue(profile.sect || 'Sunni', locale)} ${displayValue('islam', locale)}` : displayValue('non_islam', locale)} / {displayValue(profile.ethnicity, locale)}
                   </p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Occupation & Education' : 'العمل والتحصيل العلمي'}</span>
-                  <p className="font-bold text-[#40798C]">{profile.education} &bull; {profile.profession}</p>
+                  <p className="font-bold text-[#40798C]">{displayValue(profile.education, locale)} &bull; {displayValue(profile.profession, locale)}</p>
                 </div>
               </div>
             </div>
@@ -1099,22 +1100,22 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
               <div className="space-y-2 text-xs">
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Sought Goal' : 'الرؤية والجاهزية'}</span>
-                  <p className="font-bold text-warm-charcoal">{profile.lookingFor}</p>
+                  <p className="font-bold text-warm-charcoal">{displayValue(profile.lookingFor, locale)}</p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Estimated Timeline' : 'الجدول الزمني المقترح'}</span>
-                  <p className="font-bold text-accent-coral">{profile.timeline}</p>
+                  <p className="font-bold text-accent-coral">{displayValue(profile.timeline, locale)}</p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Children & Relocation' : 'الأطفال والانتقال والمسكن'}</span>
                   <p className="font-bold text-warm-charcoal">
-                    {isEn ? `Children: ${profile.wantsChildren} | Relocate: ${profile.relocation}` : `إنجاب الأطفال: ${profile.wantsChildren} | الانتقال: ${profile.relocation}`}
+                    {isEn ? `Children: ${displayValue(profile.wantsChildren, locale)} | Relocate: ${displayValue(profile.relocation, locale)}` : `إنجاب الأطفال: ${displayValue(profile.wantsChildren, locale)} | الانتقال: ${displayValue(profile.relocation, locale)}`}
                   </p>
                 </div>
                 <div>
                   <span className="text-stone-400 font-bold font-mono text-[9px] uppercase tracking-wider">{isEn ? 'Matched Age Limits' : 'شروط الشريك المستهدف'}</span>
                   <p className="font-bold text-warm-charcoal">
-                    {isEn ? `Age ${profile.partnerAgeRange} | Degree: ${profile.partnerEducation}` : `عمر شريك الحياة: ${profile.partnerAgeRange} | مستوى التعليم المطلوب: ${profile.partnerEducation}`}
+                    {isEn ? `Age ${profile.partnerAgeRange} | Degree: ${displayValue(profile.partnerEducation, locale)}` : `عمر شريك الحياة: ${profile.partnerAgeRange} | مستوى التعليم المطلوب: ${displayValue(profile.partnerEducation, locale)}`}
                   </p>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import { SearchFilters, AppLanguage } from '../types';
 import { GOVERNORATES, SECTS, ETHNICITIES, EDUCATION_LEVELS, PROFESSION_CATEGORIES } from '../constants';
 import { SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { TRANSLATIONS } from '../lib/translations';
+import { displayValue } from '../lib/displayValue';
 
 interface FilterPanelProps {
   filters: SearchFilters;
@@ -193,7 +194,7 @@ export default function FilterPanel({
             >
               <option value="All Iraq">{txt('Across all Iraq', 'كل المحافظات', 'هەموو پارێزگاکان')}</option>
               {GOVERNORATES.map((g) => (
-                <option key={g} value={g}>{g}</option>
+                <option key={g} value={g}>{displayValue(g, locale)}</option>
               ))}
             </select>
           </div>
@@ -216,7 +217,7 @@ export default function FilterPanel({
               >
                 {availableCities.map((c) => (
                   <option key={c} value={c}>
-                    {c === 'All Cities' ? txt('All Cities', 'كل المدن', 'هەموو شارەکان') : c}
+                    {c === 'All Cities' ? txt('All Cities', 'كل المدن', 'هەموو شارەکان') : displayValue(c, locale)}
                   </option>
                 ))}
               </select>
@@ -285,7 +286,7 @@ export default function FilterPanel({
               >
                 <option value="All Education Levels">{txt('All Education Levels', 'كل المستويات التعليمية', 'هەموو ئاستەکانی خوێندن')}</option>
                 {EDUCATION_LEVELS.map((level) => (
-                  <option key={level} value={level}>{level}</option>
+                  <option key={level} value={level}>{displayValue(level, locale)}</option>
                 ))}
               </select>
             </div>
@@ -302,7 +303,7 @@ export default function FilterPanel({
               >
                 <option value="All Professions">{txt('All Professions', 'كل المهن والوظائف', 'هەموو پیشەکان')}</option>
                 {PROFESSION_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>{displayValue(cat, locale)}</option>
                 ))}
               </select>
             </div>
