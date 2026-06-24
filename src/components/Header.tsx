@@ -2,18 +2,19 @@ import React from 'react';
 import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield } from 'lucide-react';
 import { Language } from '../lib/translations';
 import { TRANSLATIONS } from '../lib/translations';
-import { HeroImage } from '../types';
+import { HeroImage, AppTab } from '../types';
 import HeroSlideshow from './HeroSlideshow';
 
 interface HeaderProps {
-  currentTab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'community' | 'admin';
-  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'community' | 'admin') => void;
+  currentTab: AppTab;
+  setTab: (tab: AppTab) => void;
   profileStrength: number;
   userProfileName?: string;
   locale: Language;
   setLocale: (locale: Language) => void;
   isAdmin?: boolean;
   heroImages?: HeroImage[];
+  onLogout?: () => void;
 }
 
 export default function Header({ 
@@ -24,7 +25,8 @@ export default function Header({
   locale, 
   setLocale,
   isAdmin = false,
-  heroImages = []
+  heroImages = [],
+  onLogout
 }: HeaderProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
 
@@ -133,13 +135,24 @@ export default function Header({
             
             {/* Profile Info block */}
             <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
-              <span 
-                className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
-                onClick={() => setTab('profile')}
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
-                {userProfileName ? `${t.welcome}, ${userProfileName}` : t.guestProfile}
-              </span>
+              <div className="flex items-center gap-2">
+                <span 
+                  className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
+                  onClick={() => setTab('profile')}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
+                  {userProfileName ? `${t.welcome}, ${userProfileName}` : t.guestProfile}
+                </span>
+                {onLogout && userProfileName && (
+                  <button 
+                    onClick={onLogout}
+                    className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
+                    title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
+                  >
+                    {locale === 'en' ? 'Logout' : locale === 'ar' ? 'خروج' : 'دەرچوون'}
+                  </button>
+                )}
+              </div>
               <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
                 <div className="w-20 bg-white/40 border border-white/20 h-2 rounded-full overflow-hidden">
                   <div
@@ -338,7 +351,7 @@ export default function Header({
               <button
                 onClick={() => setTab('privacy')}
                 className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'privacy' ? 'bg-[#FF7F50] text-[#FF7F50] bg-[#FF7F50]/10' : 'text-[#4A443F]/80'
+                  currentTab === 'privacy' ? 'bg-[#FF7F50] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
                 {txt('Privacy', 'السرية', 'نهێنیپارێزی')}
@@ -351,6 +364,14 @@ export default function Header({
               >
                 {txt('Verification', 'التوثيق', 'سەلماندن')}
               </button>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap bg-red-50 text-red-600 border border-red-100 hover:bg-red-100"
+                >
+                  {locale === 'en' ? 'Logout 🚪' : locale === 'ar' ? 'خروج 🚪' : 'دەرچوون 🚪'}
+                </button>
+              )}
             </>
           )}
         </div>

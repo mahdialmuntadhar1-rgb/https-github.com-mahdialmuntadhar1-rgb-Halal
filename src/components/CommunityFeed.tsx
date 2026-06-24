@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CommunityPost, PostComment, AppLanguage } from '../types';
-import { mockApi } from '../services/mockApi';
+import { apiClient } from '../services/apiClient';
 import { 
   MessageSquare, 
   Heart, 
@@ -68,6 +68,7 @@ export default function CommunityFeed({
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Post Thread Expanders
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
@@ -84,11 +85,13 @@ export default function CommunityFeed({
   // Load Community Posts
   const fetchPosts = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const list = await mockApi.getCommunityPosts();
+      const list = await apiClient.getCommunityPosts();
       setPosts(list);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load community feed", err);
+      setError(err.message || "Failed to load community discussion posts");
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +109,7 @@ export default function CommunityFeed({
     }
 
     try {
-      await mockApi.createCommunityPost(newTitle.trim(), newContent.trim(), newCategory);
+      await apiClient.createCommunityPost(newTitle.trim(), newContent.trim(), newCategory);
       setNewTitle('');
       setNewContent('');
       setNewCategory('advice');
@@ -121,7 +124,7 @@ export default function CommunityFeed({
   const handleLikePost = async (postId: string) => {
     const userDisplayName = currentUserProfile.name || 'A Serious Member';
     try {
-      await mockApi.likePost(postId, userDisplayName);
+      await apiClient.likePost(postId, userDisplayName);
       await fetchPosts();
     } catch (err) {
       console.error(err);
@@ -135,7 +138,7 @@ export default function CommunityFeed({
     try {
       const userDisplayName = currentUserProfile.name || 'Sincere Member';
       const userGender = currentUserProfile.gender;
-      await mockApi.addComment(postId, commentText.trim(), userDisplayName, userGender);
+      await apiClient.addComment(postId, commentText.trim(), userDisplayName, userGender);
       
       // Clear input
       setCommentInputs(prev => ({ ...prev, [postId]: '' }));
@@ -149,7 +152,7 @@ export default function CommunityFeed({
   const handleReportPost = async (postId: string) => {
     if (!confirm(isEn ? "Report this post as inappropriate or unserious?" : "هل أنت متأكد من الإبلاغ عن هذه المادة لعدم ملاءمتها؟")) return;
     try {
-      await mockApi.reportPost(postId);
+      await apiClient.reportPost(postId);
       triggerToast(isEn ? "🛡️ Thank you. The post was flagged for admin manual audit review." : "🛡️ شكراً لتعاونك؛ تم إرسال البلاغ لمشرفي التطبيق للتدقيق المباشر.");
       await fetchPosts();
     } catch (err) {
@@ -159,7 +162,7 @@ export default function CommunityFeed({
 
   const handleReportComment = async (postId: string, commentId: string) => {
     try {
-      await mockApi.reportComment(postId, commentId);
+      await apiClient.reportComment(postId, commentId);
       triggerToast(isEn ? "🛡️ Comment flagged for moderation." : "🛡️ تم الإبلاغ عن التعليق وتوجيهه للمشرفين.");
       await fetchPosts();
     } catch (err) {
@@ -429,6 +432,17 @@ export default function CommunityFeed({
         {isLoading ? (
           <div className="p-12 text-center text-stone-400 text-xs">
             {isEn ? 'Refreshing community feed...' : 'جاري تحميل المشورات الأخلاقية...'}
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-800 rounded-3xl p-8 text-center space-y-3" id="community-error-state">
+            <h3 className="font-serif font-black text-lg">{isEn ? 'Failed to Load Feed' : 'فشل في تحميل المشورات'}</h3>
+            <p className="text-xs text-stone-500">{error}</p>
+            <button
+              onClick={fetchPosts}
+              className="px-4 py-2 bg-[#40798C] text-white font-bold rounded-xl text-xs hover:bg-[#316070] transition"
+            >
+              {isEn ? 'Try Again' : 'إعادة المحاولة'}
+            </button>
           </div>
         ) : filteredPosts.length === 0 ? (
           /* E. RESPECTFUL EMPTY STATE */

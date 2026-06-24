@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MatchProfile, SearchFilters, AppLanguage } from '../types';
+import { apiClient } from '../services/apiClient';
 import FilterPanel from '../components/FilterPanel';
 import MatchCard from '../components/MatchCard';
 import Modal from '../components/Modal';
@@ -98,133 +99,70 @@ export default function MatchExplorerScreen({
     return score;
   };
 
-  // 1. Thorough Filtering Logic
-  const filteredMatches = matches.filter((m) => {
-    // Saved Matches Filter
-    if (showSavedOnly && !savedMatchIds.includes(m.id)) return false;
+  // States for backend pagination and filtering
+  const [loadedMatches, setLoadedMatches] = useState<MatchProfile[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [limit] = useState<number>(20);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-    // Gender Filter
-    if (filters.gender !== 'all' && m.gender !== filters.gender) return false;
-
-    // Age Spectrum Range
-    if (m.age < filters.minAge || m.age > filters.maxAge) return false;
-
-    // Governorate
-    if (filters.governorate !== 'All Iraq' && m.governorate !== filters.governorate) return false;
-
-    // City
-    if (filters.city && filters.city !== 'All Cities' && m.city && m.city !== filters.city) {
-      // Also check simple substring match in case city text was parsed differently
-      const inCity = m.city.toLowerCase().includes(filters.city.toLowerCase());
-      if (!inCity) return false;
+  const fetchMatches = async (currentPage: number, currentFilters: SearchFilters, append: boolean = false) => {
+    if (currentPage === 1) {
+      setIsLoading(true);
+    } else {
+      setLoadingMore(true);
     }
-
-    // Religion
-    if (filters.religion !== 'all' && m.religion !== filters.religion) return false;
-
-    // Islamic Sect
-    if (filters.sect !== 'all' && m.religion === 'islam' && m.sect !== filters.sect) return false;
-
-    // Ethnicity
-    if (filters.ethnicity !== 'all' && m.ethnicity !== filters.ethnicity) return false;
-
-    // Education degree categorization
-    if (filters.education && filters.education !== 'All Education Levels') {
-      const matchEd = m.education.toLowerCase();
-      const filterEd = filters.education.toLowerCase();
-      if (filterEd === 'high school' && !matchEd.includes('high school')) return false;
-      if (filterEd === 'diploma / institute' && !matchEd.includes('diploma') && !matchEd.includes('institute')) return false;
-      if (filterEd === 'bachelor degree' && !matchEd.includes('bachelor') && !matchEd.includes('b.sc') && !matchEd.includes('ba')) return false;
-      if (filterEd === 'master degree' && !matchEd.includes('master') && !matchEd.includes('m.a') && !matchEd.includes('m.sc')) return false;
-      if (filterEd === 'phd / doctorate' && !matchEd.includes('phd') && !matchEd.includes('doctor') && !matchEd.includes('ph.d')) return false;
-    }
-
-    // Profession category search
-    if (filters.profession && filters.profession !== 'All Professions' && filters.profession !== 'Other') {
-      const profCat = filters.profession.toLowerCase();
-      const mProf = m.profession.toLowerCase();
-      if (profCat.includes('health') || profCat.includes('medicine')) {
-        if (!mProf.includes('doctor') && !mProf.includes('pharmacist') && !mProf.includes('cardiologist') && !mProf.includes('surgeon') && !mProf.includes('nurse') && !mProf.includes('healthcare') && !mProf.includes('clinical')) return false;
-      } else if (profCat.includes('education') || profCat.includes('academia')) {
-        if (!mProf.includes('teacher') && !mProf.includes('professor') && !mProf.includes('educator') && !mProf.includes('education') && !mProf.includes('school')) return false;
-      } else if (profCat.includes('engineering') || profCat.includes('technology')) {
-        if (!mProf.includes('engineer') && !mProf.includes('tech') && !mProf.includes('developer') && !mProf.includes('software')) return false;
-      } else if (profCat.includes('business') || profCat.includes('finance')) {
-        if (!mProf.includes('business') && !mProf.includes('finance') && !mProf.includes('founder') && !mProf.includes('startup') && !mProf.includes('corporate') && !mProf.includes('legal')) return false;
-      } else if (profCat.includes('art') || profCat.includes('design')) {
-        if (!mProf.includes('art') && !mProf.includes('design') && !mProf.includes('architect') && !mProf.includes('creative')) return false;
+    setError(null);
+    try {
+      const result = await apiClient.getMatches(currentFilters, currentPage, limit);
+      if (append) {
+        setLoadedMatches((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id));
+          const uniqueNew = result.matches.filter((m) => !existingIds.has(m.id));
+          return [...prev, ...uniqueNew];
+        });
+      } else {
+        setLoadedMatches(result.matches);
       }
+      setHasMore(result.hasMore);
+    } catch (err: any) {
+      console.error("Failed to load matches:", err);
+      setError(err.message || "Failed to load candidates");
+    } finally {
+      setIsLoading(false);
+      setLoadingMore(false);
     }
+  };
 
-    // Wants Children stance
-    if (filters.wantsChildren !== 'All') {
-      const isYesFilter = filters.wantsChildren === 'Yes';
-      const mChildren = m.wantsChildren.toLowerCase();
-      const matchWants = mChildren.includes('yes') || mChildren.includes('willing') || mChildren.includes('looking forward') || mChildren.includes('parenting');
-      if (isYesFilter && !matchWants) return false;
-      if (!isYesFilter && matchWants) return false;
+  // Reset page and fetch matches on filters change
+  useEffect(() => {
+    setPage(1);
+    fetchMatches(1, filters, false);
+  }, [filters]);
+
+  // Sync prop updates (e.g., when request status changes)
+  useEffect(() => {
+    if (matches && matches.length > 0) {
+      setLoadedMatches((prev) => {
+        if (prev.length === 0) return matches;
+        return prev.map((localMatch) => {
+          const propMatch = matches.find((m) => m.id === localMatch.id);
+          return propMatch ? { ...localMatch, ...propMatch } : localMatch;
+        });
+      });
     }
+  }, [matches]);
 
-    // Marriage Timeline Filter
-    if (filters.timeline && filters.timeline !== 'all') {
-      const tFilter = filters.timeline;
-      const mTimeline = m.timeline.toLowerCase();
-      if (tFilter === 'soon' && !mTimeline.includes('6 months') && !mTimeline.includes('soon')) return false;
-      if (tFilter === '1year' && !mTimeline.includes('1 year') && !mTimeline.includes('6 months') && !mTimeline.includes('soon')) return false;
-      if (tFilter === '2years' && !mTimeline.includes('1-2 years') && !mTimeline.includes('1 year') && !mTimeline.includes('6 months')) return false;
-      if (tFilter === 'flexible' && !mTimeline.includes('flexible')) return false;
-    }
-
-    // Smoking status
-    if (filters.smoking === 'Strictly Non-smoker') {
-      // If dealbreakers explicitly require no smoking, they are non-smokers (and we expect they don't smoke)
-      const nonSmoker = m.dealbreakers?.some(d => d.toLowerCase().includes('smoking')) || true;
-      if (!nonSmoker) return false;
-    }
-
-    // Photo Visibility Status
-    if (filters.photoVisibility && filters.photoVisibility !== 'All') {
-      if (filters.photoVisibility === 'Blurred Only' && m.photoStatus !== 'blurred') return false;
-      if (filters.photoVisibility === 'Visible Only' && m.photoStatus !== 'visible') return false;
-    }
-
-    // Verified Status
-    if (filters.verifiedOnly && !m.verified) return false;
-
-    return true;
-  });
-
-  // 2. Sorting Logic
-  const sortedMatches = [...filteredMatches].sort((a, b) => {
-    const sortBy = filters.sortBy || 'compatibility';
-
-    if (sortBy === 'newest') {
-      // Sort newly registered profiles first
-      return b.id.localeCompare(a.id);
-    }
-
-    if (sortBy === 'closest') {
-      // Sort partners in the same governorate higher
-      const aClosest = a.governorate && a.governorate === userGov ? 1 : 0;
-      const bClosest = b.governorate && b.governorate === userGov ? 1 : 0;
-      if (aClosest !== bClosest) {
-        return bClosest - aClosest; // same governorate first
-      }
-      return b.compatibilityScore - a.compatibilityScore; // secondary tie breaker
-    }
-
-    if (sortBy === 'completeness') {
-      // Sort by richness of their profile fields
-      return getCompleteness(b) - getCompleteness(a);
-    }
-
-    // Default 'compatibility'
-    return b.compatibilityScore - a.compatibilityScore;
-  });
+  // Derived matches after applying client-side bookmark filtering if requested
+  const displayedMatches = showSavedOnly
+    ? loadedMatches.filter((m) => savedMatchIds.includes(m.id))
+    : loadedMatches;
 
   // Synchronized view for selected match to capture live state changes
   const activeSelectedMatch = selectedMatch 
-    ? matches.find(m => m.id === selectedMatch.id) || selectedMatch
+    ? loadedMatches.find(m => m.id === selectedMatch.id) || selectedMatch
     : null;
 
   return (
@@ -237,14 +175,14 @@ export default function MatchExplorerScreen({
         showAdvancedFilters={showAdvancedFilters}
         setShowAdvancedFilters={setShowAdvancedFilters}
         handleResetFilters={handleResetFilters}
-        filteredCount={sortedMatches.length}
+        filteredCount={displayedMatches.length}
         locale={locale}
       />
 
       {/* Demo Warning Label */}
       <div className="bg-amber-500/10 border border-amber-500/20 text-amber-800 rounded-2xl p-3.5 text-center text-xs flex flex-col sm:flex-row items-center justify-center gap-2 font-mono">
         <span className="font-bold flex items-center gap-1 shrink-0">
-          ⚠️ {locale === 'en' ? 'Demo profiles for frontend testing.' : locale === 'ar' ? 'الملفات المعروضة تجريبية لاختبار الواجهة.' : 'پڕۆفایلەکان تاقیکارین بۆ تێستکردنی ڕووکاری بەرنامەکە.'}
+          ⚠️ {locale === 'en' ? 'Demo profiles for testing.' : locale === 'ar' ? 'الملفات المعروضة تجريبية لاختبار الواجهة.' : 'پڕۆفایلەکان تاقیکارین بۆ تێستکردنی ڕووکاری بەرنامەکە.'}
         </span>
         <span className="opacity-80">
           {locale === 'en' 
@@ -267,7 +205,7 @@ export default function MatchExplorerScreen({
         >
           <span>📋 {txt('All Candidates', 'جميع المحترمين', 'هەموو بەربژێرەکان')}</span>
           <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono text-center shrink-0">
-            {matches.filter(m => filters.gender === 'all' || m.gender === filters.gender).length}
+            {loadedMatches.length}
           </span>
         </button>
 
@@ -287,8 +225,33 @@ export default function MatchExplorerScreen({
         </button>
       </div>
 
-      {/* Grid of Match Dossier Cards */}
-      {sortedMatches.length === 0 ? (
+      {/* Grid of Match Dossier Cards or Loading/Error/Empty States */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse" id="matches-loading-skeleton">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white/60 border border-stone-200 rounded-[2rem] p-5 h-[340px] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-16 h-16 rounded-full bg-stone-200 mx-auto" />
+                <div className="h-4 bg-stone-200 rounded w-2/3 mx-auto" />
+                <div className="h-3 bg-stone-200 rounded w-1/2 mx-auto" />
+              </div>
+              <div className="h-8 bg-stone-200 rounded-xl w-full" />
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-6 text-center max-w-lg mx-auto space-y-3" id="matches-error-state">
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
+          <h3 className="font-bold text-base">{txt('Failed to load matches', 'فشل في تحميل الملفات المطابقة', 'کێشە لە بارکردنی پڕۆفایلەکان')}</h3>
+          <p className="text-xs text-stone-500">{error}</p>
+          <button
+            onClick={() => fetchMatches(page, filters, false)}
+            className="px-4 py-2 bg-[#40798C] text-white font-bold rounded-xl text-xs hover:bg-[#346271] transition"
+          >
+            {txt('Try Again', 'إعادة المحاولة', 'دووبارە هەوڵ بدەرەوە')}
+          </button>
+        </div>
+      ) : displayedMatches.length === 0 ? (
         showSavedOnly ? (
           <EmptyState
             title={txt('Your Bookmarks are Empty', 'لا توجد محفوظات عائلية حالياً', 'هیچ پڕۆفایلێکی پاشەکەوتکراو نییە')}
@@ -311,19 +274,45 @@ export default function MatchExplorerScreen({
           />
         )
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sortedMatches.map((m) => (
-            <MatchCard
-              key={m.id}
-              match={m}
-              locale={locale}
-              onSendRequest={onSendRequest}
-              onInitiateChat={onInitiateChat}
-              onOpenDetails={(profile) => setSelectedMatch(profile)}
-              savedMatchIds={savedMatchIds}
-              onToggleSaveMatch={onToggleSaveMatch}
-            />
-          ))}
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayedMatches.map((m) => (
+              <MatchCard
+                key={m.id}
+                match={m}
+                locale={locale}
+                onSendRequest={onSendRequest}
+                onInitiateChat={onInitiateChat}
+                onOpenDetails={(profile) => setSelectedMatch(profile)}
+                savedMatchIds={savedMatchIds}
+                onToggleSaveMatch={onToggleSaveMatch}
+              />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center pt-4 pb-8" id="matches-load-more-container">
+              <button
+                onClick={() => {
+                  const nextPage = page + 1;
+                  setPage(nextPage);
+                  fetchMatches(nextPage, filters, true);
+                }}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-stone-100 hover:bg-stone-200 disabled:opacity-50 text-warm-charcoal font-bold rounded-2xl text-xs transition duration-200 border border-stone-200 shadow-sm flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
+                    <span>{txt('Loading...', 'جاري التحميل...', 'باردەکرێتەوە...')}</span>
+                  </>
+                ) : (
+                  <span>{txt('Load More Candidates', 'تحميل المزيد من المحترمين', 'بینینی بەربژێری زیاتر')}</span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

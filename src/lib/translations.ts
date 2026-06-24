@@ -155,6 +155,38 @@ export interface Translations {
   privacyPolicy: string;
   terms: string;
   idVerify: string;
+
+  // New translations for clean production-ready improvements
+  loginTitle: string;
+  loginSub: string;
+  emailLabel: string;
+  passwordLabel: string;
+  signInBtn: string;
+  signUpBtn: string;
+  noAccount: string;
+  haveAccount: string;
+  registerTitle: string;
+  registerSub: string;
+  forgotPasswordLabel: string;
+  forgotPasswordSub: string;
+  sessionLoading: string;
+  unauthorizedTitle: string;
+  unauthorizedDesc: string;
+  backendUnavailableTitle: string;
+  backendUnavailableDesc: string;
+
+  photoUploadTitle: string;
+  photoUploadDesc: string;
+  photoSelectBtn: string;
+  photoSizeError: string;
+  photoFormatError: string;
+  photoPreview: string;
+
+  demoBannerTitle: string;
+  demoBannerDesc: string;
+  demoBadge: string;
+  toggleDemoMode: string;
+  realModeBtn: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -297,7 +329,39 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     copyright: '© 2026 HALAL Matchmaking Inc. Designed for serious intentions.',
     privacyPolicy: 'Privacy Policy',
     terms: 'Terms of Service',
-    idVerify: 'ID Verification Guide'
+    idVerify: 'ID Verification Guide',
+
+    // English additions
+    loginTitle: 'Sign In to Your Halal Account',
+    loginSub: 'Ensure serious marital intentions. Proceed with dignity.',
+    emailLabel: 'Email Address',
+    passwordLabel: 'Password',
+    signInBtn: 'Sign In Securely',
+    signUpBtn: 'Create a Serious Account',
+    noAccount: "Don't have an account yet?",
+    haveAccount: 'Already have an account?',
+    registerTitle: 'Establish Your Halal Account',
+    registerSub: 'Create an account to begin finding serious marital matches with full security.',
+    forgotPasswordLabel: 'Forgot your password?',
+    forgotPasswordSub: 'Enter your email to request recovery link simulation.',
+    sessionLoading: 'Securing user credentials...',
+    unauthorizedTitle: 'Authentication Required',
+    unauthorizedDesc: 'This section is strictly protected. Please sign in or register to access.',
+    backendUnavailableTitle: 'Real Server Offline',
+    backendUnavailableDesc: 'The real API server is currently unavailable. Please check back later or use local demo mode.',
+
+    photoUploadTitle: 'Upload Your Sincere Portrait',
+    photoUploadDesc: 'Portraits are protected by default based on your selected privacy rules. Accepted formats: JPG, PNG, WebP. Max size: 5MB.',
+    photoSelectBtn: 'Choose Photo File',
+    photoSizeError: 'File size must be less than 5MB.',
+    photoFormatError: 'Invalid format. Only JPG, PNG, and WebP are allowed.',
+    photoPreview: 'Protected Portrait Preview',
+
+    demoBannerTitle: 'Local Demo State Active',
+    demoBannerDesc: 'Connecting to virtual simulation sandbox. Toggle to force real backend mode below if available.',
+    demoBadge: 'Demo Mode Only',
+    toggleDemoMode: 'Switch Mode',
+    realModeBtn: 'Attempt Real Backend API Integration'
   },
   ar: {
     dir: 'rtl',
@@ -438,7 +502,39 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     copyright: '© ٢٠٢٦ منصة حلال للزواج السعيد. بني بوعي تام وصوناً للكرامة.',
     privacyPolicy: 'سياسة الخصوصية',
     terms: 'شروط واستخدام الخدمة',
-    idVerify: 'دليل توثيق الهوية والبطاقات'
+    idVerify: 'دليل توثيق الهوية والبطاقات',
+
+    // Arabic additions
+    loginTitle: 'تسجيل الدخول إلى حساب حلال',
+    loginSub: 'ضمان النوايا الصادقة والجدية وبناء بيت كريم ووقور.',
+    emailLabel: 'البريد الإلكتروني',
+    passwordLabel: 'كلمة المرور',
+    signInBtn: 'دخول آمن وموثق',
+    signUpBtn: 'إنشاء حساب جاد وجديد',
+    noAccount: 'ليس لديك حساب مسبق؟',
+    haveAccount: 'لديك حساب بالفعل؟',
+    registerTitle: 'إنشاء حسابك في حلال',
+    registerSub: 'أنشئ حساباً لبدء البحث عن شركاء التوافق بخصوصية تامة وحماية معززة.',
+    forgotPasswordLabel: 'نسيت كلمة المرور؟',
+    forgotPasswordSub: 'أدخل بريدك الإلكتروني للحصول على رابط استعادة كلمة المرور.',
+    sessionLoading: 'جاري التحقق من بيانات الدخول...',
+    unauthorizedTitle: 'يتطلب تسجيل الدخول',
+    unauthorizedDesc: 'هذا القسم مغلق ومحمي. يرجى تسجيل الدخول أو إكمال التسجيل للوصول.',
+    backendUnavailableTitle: 'الخادم الحقيقي غير متاح',
+    backendUnavailableDesc: 'خادم API الحقيقي غير متصل حالياً. يرجى المحاولة لاحقاً أو التبديل إلى وضع التجربة المحلي.',
+
+    photoUploadTitle: 'تحميل صورتك التعريفية الوقورة',
+    photoUploadDesc: 'الصور محمية بشكل افتراضي وتخضع لشروط الخصوصية التي تختارها. الصيغ المقبولة: JPG, PNG, WebP. الحجم الأقصى: ٥ ميغابايت.',
+    photoSelectBtn: 'اختر ملف الصورة',
+    photoSizeError: 'يجب أن يكون حجم الصورة أقل من ٥ ميغابايت.',
+    photoFormatError: 'صيغة غير مدعومة. ندعم JPG, PNG, WebP فقط.',
+    photoPreview: 'معاينة صورتك المحمية',
+
+    demoBannerTitle: 'وضع التجربة والمحاكاة نشط',
+    demoBannerDesc: 'أنت تتصفح حسابات تجريبية ومحاكاة محلية لتبسيط التجربة. يمكنك محاولة الاتصال بالخادم الحقيقي أدناه.',
+    demoBadge: 'وضع تجريبي فقط',
+    toggleDemoMode: 'تغيير وضع التشغيل',
+    realModeBtn: 'الاتصال بخادم API الحقيقي للإنتاج'
   },
   ckb: {
     dir: 'rtl',
@@ -579,6 +675,38 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     copyright: '© ٢٠٢٦ پلاتفۆرمی حەڵاڵ بۆ هاوسەرگیری بەختەوەر. بە تەواوی بۆ پاراستنی کەرامەت دروستکراوە .',
     privacyPolicy: 'یاسای پاراستنی نهێنی',
     terms: 'مەرجەکانی بەکارهێنان',
-    idVerify: 'ڕێبەری سەلماندنی ناسنامە'
+    idVerify: 'ڕێبەری سەلماندنی ناسنامە',
+
+    // Kurdish additions
+    loginTitle: 'چوونە ژوورەوە بۆ هەژماری حەڵاڵ',
+    loginSub: 'دڵنیابوون لە نیازی هاوسەرگیری جدی. بە کەرامەتەوە بەردەوام بە.',
+    emailLabel: 'ناونیشانی ئیمەیڵ',
+    passwordLabel: 'وشەی تێپەڕ',
+    signInBtn: 'چوونە ژوورەوەی پارێزراو',
+    signUpBtn: 'دروستکردنی هەژمارێکی جدی',
+    noAccount: 'تاکو ئێستا هەژمارت نییە؟',
+    haveAccount: 'پێشتر هەژمارت دروستکردووە؟',
+    registerTitle: 'دروستکردنی هەژماری حەڵاڵ',
+    registerSub: 'هەژمارێک دروست بکە بۆ دەستپێکردنی دۆزینەوەی هاوبەشی جدی بە تەواوی ئاسایشەوە.',
+    forgotPasswordLabel: 'وشەی تێپەڕت لەبیرچووە؟',
+    forgotPasswordSub: 'ئیمەیڵەکەت بنووسە بۆ ناردنی بەستەری نوێکردنەوە.',
+    sessionLoading: 'پشکنینی ناسنامە و دڵنیابوونەوە...',
+    unauthorizedTitle: 'چوونە ژوورەوە پێویستە',
+    unauthorizedDesc: 'ئەم بەشە بە تەواوی پارێزراوە. تکایە بچۆ ژوورەوە یان خۆت تۆمار بکە.',
+    backendUnavailableTitle: 'سێرڤەری ڕاستەقینە ناچالاکە',
+    backendUnavailableDesc: 'سێرڤەری سەرەکی ئێستا لەکاردا نییە. تکایە دواتر هەوڵ بدەرەوە یان دۆخی تاقیکردنەوە بەکاربهێنە.',
+
+    photoUploadTitle: 'بارکردنی وێنەی سەرەکیت',
+    photoUploadDesc: 'وێنەکان بە شێوەیەکی بنەڕەتی پارێزراون بەپێی یاساکانی تۆ. فۆرماتەکان: JPG, PNG, WebP. زۆرترین قەبارە: ٥ مێگابایت.',
+    photoSelectBtn: 'هەڵبژاردنی پەڕگەی وێنە',
+    photoSizeError: 'قەبارەی وێنەکە دەبێت لە ٥ مێگابایت کەمتر بێت.',
+    photoFormatError: 'فۆرماتەکە ڕاست نییە. تەنها JPG, PNG و WebP ڕێگەپێدراون.',
+    photoPreview: 'پێشبینینی وێنەی پارێزراو',
+
+    demoBannerTitle: 'دۆخی تاقیکردنەوەی لۆکاڵی چالاکە',
+    demoBannerDesc: 'تۆ پڕۆفایلە تاقیکاریەکان دەبینیت بۆ ئاسانکاری پلاتفۆرمەکە. دەتوانیت هەوڵی بەستنەوەی سێرڤەری سەرەکی بدەیت لە خوارەوە.',
+    demoBadge: 'تەنها پڕۆفایلی تاقیکاری',
+    toggleDemoMode: 'گۆڕینی دۆخ',
+    realModeBtn: 'هەوڵدان بۆ بەستنەوەی سێرڤەری سەرەکی'
   }
 };

@@ -5,12 +5,15 @@
 
 export type AppLanguage = 'en' | 'ar' | 'ckb';
 
+export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin';
+
 export interface User {
   id: string;
   email: string;
   name: string;
   membershipStatus: 'free' | 'premium' | 'verified';
   createdAt: string;
+  role?: 'admin' | 'user';
 }
 
 export interface PrivacySettings {
@@ -59,6 +62,7 @@ export interface UserProfile {
   maritalStatus?: string;
   intention?: string;
   email?: string;
+  role?: 'admin' | 'user';
   badges?: string[];
   savedMatches?: string[]; // Array of match profile IDs that are bookmarked
   

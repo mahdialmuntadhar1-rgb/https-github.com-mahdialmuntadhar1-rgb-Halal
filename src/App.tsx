@@ -16,16 +16,19 @@ import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
 import CommunityFeed from './components/CommunityFeed';
 import AdminPanel from './components/AdminPanel';
+import AuthScreen from './screens/AuthScreen';
 import { useLocale } from './hooks/useLocale';
-import { mockApi } from './services/mockApi';
+import { apiClient } from './services/apiClient';
 import { Sparkles, Check, Heart } from 'lucide-react';
-import { HeroImage } from './types';
+import { HeroImage, AppTab } from './types';
 
 export default function App() {
   const { locale, setLocale, t } = useLocale('ar');
-  const [currentTab, setTab] = useState<'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin'>('landing');
+  const [currentTab, setTab] = useState<AppTab>('landing');
 
   // Async States
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [savedMatchIds, setSavedMatchIds] = useState<string[]>([]);
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
@@ -37,7 +40,7 @@ export default function App() {
   // Load Slideshow photos
   const loadHeroImages = async () => {
     try {
-      const imgs = await mockApi.getHeroImages();
+      const imgs = await apiClient.getHeroImages();
       setHeroImages(imgs);
     } catch (err) {
       console.error("Failed loading hero photos", err);
@@ -54,27 +57,79 @@ export default function App() {
   // Load Initial API Data
   useEffect(() => {
     async function loadData() {
+      setIsLoadingSession(true);
+      const token = localStorage.getItem('halal_token');
       try {
-        const [profile, matchesList, convs] = await Promise.all([
-          mockApi.getCurrentUser(),
-          mockApi.getMatches(),
-          mockApi.getConversations()
-        ]);
-        setUserProfile(profile);
-        setMatches(matchesList);
-        setConversations(convs);
         await loadHeroImages();
+        if (token) {
+          const [profile, matchesResult, convs] = await Promise.all([
+            apiClient.getCurrentUser(),
+            apiClient.getMatches(),
+            apiClient.getConversations()
+          ]);
+          setUserProfile(profile);
+          setIsAuthenticated(true);
+          setMatches(matchesResult.matches);
+          setConversations(convs);
+        } else {
+          setIsAuthenticated(false);
+          setUserProfile(null);
+        }
       } catch (err) {
         console.error("Failed to load initial data", err);
+        if (token) {
+          localStorage.removeItem('halal_token');
+        }
+        setIsAuthenticated(false);
+        setUserProfile(null);
+      } finally {
+        setIsLoadingSession(false);
       }
     }
     loadData();
   }, []);
 
+  const handleAuthSuccess = async (token: string, profile: UserProfile) => {
+    setIsLoadingSession(true);
+    localStorage.setItem('halal_token', token);
+    try {
+      setUserProfile(profile);
+      setIsAuthenticated(true);
+      const [matchesResult, convs] = await Promise.all([
+        apiClient.getMatches(),
+        apiClient.getConversations()
+      ]);
+      setMatches(matchesResult.matches);
+      setConversations(convs);
+      setTab('explore');
+    } catch (err) {
+      console.error("Failed loading data after auth", err);
+    } finally {
+      setIsLoadingSession(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setIsLoadingSession(true);
+    try {
+      await apiClient.logout();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAuthenticated(false);
+      setUserProfile(null);
+      setMatches([]);
+      setConversations([]);
+      setTab('landing');
+      setIsLoadingSession(false);
+      triggerToast("🚪 Logged out securely. Come back soon!");
+    }
+  };
+
   // Bookmark Toggler
   const handleToggleSaveMatch = async (matchId: string) => {
     try {
-      const updatedUser = await mockApi.toggleSaveProfile(matchId);
+      const updatedUser = await apiClient.toggleSaveProfile(matchId);
       setUserProfile(updatedUser);
       const savedIds = updatedUser.savedMatches || [];
       setSavedMatchIds(savedIds);
@@ -111,7 +166,7 @@ export default function App() {
   // Onboarding wizard completion
   const handleOnboardingComplete = async (updatedProfile: UserProfile) => {
     try {
-      const saved = await mockApi.updateCurrentUserProfile(updatedProfile);
+      const saved = await apiClient.updateCurrentUserProfile(updatedProfile);
       setUserProfile(saved);
       triggerToast(`✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`);
       setTab('explore');
@@ -124,7 +179,7 @@ export default function App() {
   const handleUpdateUserProfile = async (updatedValues: Partial<UserProfile>) => {
     if (!userProfile) return;
     try {
-      const saved = await mockApi.updateCurrentUserProfile(updatedValues);
+      const saved = await apiClient.updateCurrentUserProfile(updatedValues);
       setUserProfile(saved);
     } catch (err) {
       console.error("Failed to update profile values", err);
@@ -134,22 +189,22 @@ export default function App() {
   // Send request with simulation response
   const handleSendRequest = async (matchId: string) => {
     try {
-      await mockApi.sendIntroductionRequest(matchId);
+      await apiClient.sendIntroductionRequest(matchId);
       // Reload matches list immediately to show "pending" state
-      const updatedMatches = await mockApi.getMatches();
-      setMatches(updatedMatches);
+      const updatedMatchesRes = await apiClient.getMatches();
+      setMatches(updatedMatchesRes.matches);
       triggerToast(`✉️ Introduction request sent securely. Acknowledging respect rules...`);
 
       // Trigger auto-approval response simulation
       setTimeout(async () => {
         try {
-          const { match } = await mockApi.acceptIntroductionRequest(matchId);
+          const { match } = await apiClient.acceptIntroductionRequest(matchId);
           // Reload matches & conversations list immediately
-          const [updatedMatchesList, updatedConvs] = await Promise.all([
-            mockApi.getMatches(),
-            mockApi.getConversations()
+          const [updatedMatchesListRes, updatedConvs] = await Promise.all([
+            apiClient.getMatches(),
+            apiClient.getConversations()
           ]);
-          setMatches(updatedMatchesList);
+          setMatches(updatedMatchesListRes.matches);
           setConversations(updatedConvs);
           triggerToast(`🎉 Mutual interest! ${match.name} accepted your request. Chat unlocked! 🔓`);
         } catch (simErr) {
@@ -171,21 +226,26 @@ export default function App() {
   // Send message API mapping
   const handleSendMessage = async (matchId: string, text: string, sender: 'user' | 'match') => {
     try {
-      await mockApi.sendMessage(matchId, text, sender);
-      const updatedConvs = await mockApi.getConversations();
+      await apiClient.sendMessage(matchId, text, sender);
+      const updatedConvs = await apiClient.getConversations();
       setConversations(updatedConvs);
     } catch (err) {
       console.error("Failed to dispatch chat log message", err);
     }
   };
 
-  if (!userProfile) {
+  if (isLoadingSession) {
     return (
       <div className="bg-warm-ivory min-h-screen flex items-center justify-center">
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 bg-accent-coral rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-3 h-3 bg-accent-pink rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-3 h-3 bg-[#40798C] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div className="flex flex-col items-center space-y-4">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 bg-accent-coral rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-3 h-3 bg-accent-pink rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-3 h-3 bg-[#40798C] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs font-serif font-black tracking-widest text-[#6B635B] animate-pulse uppercase">
+            {locale === 'en' ? 'Verifying Sincere Connection...' : locale === 'ar' ? 'جاري التحقق من الاتصال الآمن...' : 'پێداچوونەوە بە پەیوەندی پارێزراو...'}
+          </p>
         </div>
       </div>
     );
@@ -193,6 +253,7 @@ export default function App() {
 
   const profileStrength = calculateProfileStrength();
   const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
+  const isProtectedTab = ['onboarding', 'explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin'].includes(currentTab);
 
   return (
     <div 
@@ -221,120 +282,140 @@ export default function App() {
         currentTab={currentTab}
         setTab={setTab}
         profileStrength={profileStrength}
-        userProfileName={userProfile.name}
+        userProfileName={userProfile ? userProfile.name : undefined}
         locale={locale}
         setLocale={setLocale}
-        isAdmin={userProfile?.email?.trim().toLowerCase() === 'safaribosafar@gmail.com' || localStorage.getItem('simulate_admin') === 'true'}
+        isAdmin={userProfile?.role === 'admin'}
         heroImages={heroImages}
+        onLogout={isAuthenticated ? handleLogout : undefined}
       />
 
       {/* Primary switcher layout */}
       <main className="flex-grow">
-        {currentTab === 'landing' && (
-          <LandingScreen
+        {isProtectedTab && !isAuthenticated ? (
+          <AuthScreen
             locale={locale}
-            onSelectGender={async (gender) => {
-              const updatedProfile = {
-                ...userProfile,
-                gender,
-                photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible' as const
-              };
-              await handleUpdateUserProfile(updatedProfile);
-              triggerToast(
-                locale === 'en' 
-                  ? `✨ Gender set to ${gender}. Let's fill out your parameters!` 
-                  : locale === 'ckb'
-                    ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
-                    : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
-              );
-              setTab('onboarding');
-            }}
-            onExploreMatches={() => setTab('explore')}
-            setTab={setTab}
-          />
-        )}
-
-        {currentTab === 'onboarding' && (
-          <OnboardingScreen
-            locale={locale}
-            userProfile={userProfile}
-            onComplete={handleOnboardingComplete}
-          />
-        )}
-
-        {currentTab === 'explore' && (
-          <MatchExplorerScreen
-            locale={locale}
-            matches={matches}
-            onSendRequest={handleSendRequest}
-            onInitiateChat={handleInitiateChat}
-            userGender={userProfile.gender}
-            userGovernorate={userProfile.governorate}
-            savedMatchIds={savedMatchIds}
-            onToggleSaveMatch={handleToggleSaveMatch}
-          />
-        )}
-
-        {currentTab === 'chat' && (
-          <ChatScreen
-            locale={locale}
-            acceptedMatches={acceptedMatches}
-            conversations={conversations}
-            onSendMessage={handleSendMessage}
-            activeMatchId={activeMatchId}
-            setActiveMatchId={setActiveMatchId}
-          />
-        )}
-
-        {currentTab === 'profile' && (
-          <ProfilePreviewScreen
-            locale={locale}
-            profile={userProfile}
-            profileStrength={profileStrength}
-            onEditClick={() => setTab('onboarding')}
-          />
-        )}
-
-        {currentTab === 'privacy' && (
-          <PrivacySettingsScreen
-            locale={locale}
-            profile={userProfile}
-            onUpdatePrivacy={handleUpdateUserProfile}
+            onAuthSuccess={handleAuthSuccess}
             triggerToast={triggerToast}
           />
-        )}
+        ) : (
+          <>
+            {currentTab === 'landing' && (
+              <LandingScreen
+                locale={locale}
+                onSelectGender={async (gender) => {
+                  if (!isAuthenticated || !userProfile) {
+                    triggerToast(
+                      locale === 'en' 
+                        ? `💍 Please authenticate first to seal your profile and select matches!` 
+                        : `💍 يرجى تسجيل الدخول أولاً لتحديد تفضيلاتك وتصفح الملفات!`
+                    );
+                    setTab('onboarding');
+                    return;
+                  }
+                  const updatedProfile = {
+                    ...userProfile,
+                    gender,
+                    photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible' as const
+                  };
+                  await handleUpdateUserProfile(updatedProfile);
+                  triggerToast(
+                    locale === 'en' 
+                      ? `✨ Gender set to ${gender}. Let's fill out your parameters!` 
+                      : locale === 'ckb'
+                        ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
+                        : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
+                  );
+                  setTab('onboarding');
+                }}
+                onExploreMatches={() => setTab('explore')}
+                setTab={setTab}
+              />
+            )}
 
-        {currentTab === 'account' && (
-          <AccountPlaceholderScreen
-            locale={locale}
-            userName={userProfile.name}
-            triggerToast={triggerToast}
-          />
-        )}
+            {currentTab === 'onboarding' && userProfile && (
+              <OnboardingScreen
+                locale={locale}
+                userProfile={userProfile}
+                onComplete={handleOnboardingComplete}
+              />
+            )}
 
-        {currentTab === 'trust_safety' && (
-          <TrustPrivacyScreen
-            locale={locale}
-            onBackToOverview={() => setTab('landing')}
-          />
-        )}
+            {currentTab === 'explore' && userProfile && (
+              <MatchExplorerScreen
+                locale={locale}
+                matches={matches}
+                onSendRequest={handleSendRequest}
+                onInitiateChat={handleInitiateChat}
+                userGender={userProfile.gender}
+                userGovernorate={userProfile.governorate}
+                savedMatchIds={savedMatchIds}
+                onToggleSaveMatch={handleToggleSaveMatch}
+              />
+            )}
 
-        {currentTab === 'community' && (
-          <CommunityFeed
-            locale={locale}
-            currentEmail={userProfile.email}
-            currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
-            triggerToast={triggerToast}
-          />
-        )}
+            {currentTab === 'chat' && userProfile && (
+              <ChatScreen
+                locale={locale}
+                acceptedMatches={acceptedMatches}
+                conversations={conversations}
+                onSendMessage={handleSendMessage}
+                activeMatchId={activeMatchId}
+                setActiveMatchId={setActiveMatchId}
+              />
+            )}
 
-        {currentTab === 'admin' && (
-          <AdminPanel
-            locale={locale}
-            currentEmail={userProfile.email}
-            triggerToast={triggerToast}
-            onRefreshHero={loadHeroImages}
-          />
+            {currentTab === 'profile' && userProfile && (
+              <ProfilePreviewScreen
+                locale={locale}
+                profile={userProfile}
+                profileStrength={profileStrength}
+                onEditClick={() => setTab('onboarding')}
+              />
+            )}
+
+            {currentTab === 'privacy' && userProfile && (
+              <PrivacySettingsScreen
+                locale={locale}
+                profile={userProfile}
+                onUpdatePrivacy={handleUpdateUserProfile}
+                triggerToast={triggerToast}
+              />
+            )}
+
+            {currentTab === 'account' && userProfile && (
+              <AccountPlaceholderScreen
+                locale={locale}
+                userName={userProfile.name}
+                triggerToast={triggerToast}
+              />
+            )}
+
+            {currentTab === 'trust_safety' && (
+              <TrustPrivacyScreen
+                locale={locale}
+                onBackToOverview={() => setTab('landing')}
+              />
+            )}
+
+            {currentTab === 'community' && userProfile && (
+              <CommunityFeed
+                locale={locale}
+                currentEmail={userProfile.email}
+                currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
+                triggerToast={triggerToast}
+              />
+            )}
+
+            {currentTab === 'admin' && userProfile && (
+              <AdminPanel
+                locale={locale}
+                currentEmail={userProfile.email}
+                triggerToast={triggerToast}
+                onRefreshHero={loadHeroImages}
+              />
+            )}
+          </>
         )}
       </main>
 

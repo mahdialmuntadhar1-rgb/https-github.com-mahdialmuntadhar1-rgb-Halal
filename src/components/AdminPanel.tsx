@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HeroImage, CommunityPost, AppLanguage } from '../types';
-import { mockApi } from '../services/mockApi';
+import { apiClient } from '../services/apiClient';
 import { 
   ShieldCheck, 
   Trash2, 
@@ -49,8 +49,8 @@ export default function AdminPanel({
     setIsLoading(true);
     try {
       const [images, posts] = await Promise.all([
-        mockApi.getHeroImages(),
-        mockApi.getCommunityPosts()
+        apiClient.getHeroImages(),
+        apiClient.getCommunityPosts()
       ]);
       setHeroImages(images);
       
@@ -80,7 +80,7 @@ export default function AdminPanel({
       return;
     }
     try {
-      await mockApi.addHeroImage(newUrl.trim(), newTitle.trim() || 'New Slideshow Image', newIsActive);
+      await apiClient.addHeroImage(newUrl.trim(), newTitle.trim() || 'New Slideshow Image', newIsActive);
       setNewUrl('');
       setNewTitle('');
       setNewIsActive(true);
@@ -95,7 +95,7 @@ export default function AdminPanel({
   // Toggle Slide Active
   const handleToggleSlideActive = async (id: string, currentStatus: boolean) => {
     try {
-      await mockApi.updateHeroImage(id, { isActive: !currentStatus });
+      await apiClient.updateHeroImage(id, { isActive: !currentStatus });
       triggerToast(!currentStatus ? '🟢 Slideshow image activated!' : '🟡 Slideshow image deactivated!');
       await loadAdminData();
       onRefreshHero();
@@ -108,7 +108,7 @@ export default function AdminPanel({
   const handleDeleteSlide = async (id: string) => {
     if (!confirm("Are you sure you want to delete this slideshow image?")) return;
     try {
-      await mockApi.deleteHeroImage(id);
+      await apiClient.deleteHeroImage(id);
       triggerToast("🗑️ Slideshow image removed from gallery.");
       await loadAdminData();
       onRefreshHero();
@@ -131,7 +131,7 @@ export default function AdminPanel({
     reordered[targetIndex] = temp;
 
     try {
-      await mockApi.reorderHeroImages(reordered);
+      await apiClient.reorderHeroImages(reordered);
       triggerToast("🔄 Image execution order updated!");
       await loadAdminData();
       onRefreshHero();
@@ -144,7 +144,7 @@ export default function AdminPanel({
   const handleDeletePost = async (postId: string) => {
     if (!confirm("Are you sure you want to delete this community post permanently?")) return;
     try {
-      await mockApi.deletePost(postId);
+      await apiClient.deletePost(postId);
       triggerToast("🗑️ Reported post removed from current feed.");
       await loadAdminData();
     } catch (err) {
@@ -156,7 +156,7 @@ export default function AdminPanel({
   const handleDismissPost = async (postId: string) => {
     try {
       // Set post reported status to false
-      await mockApi.updateHeroImage(postId, {}); // simulated ignore
+      await apiClient.updateHeroImage(postId, {}); // simulated ignore
       // Let's implement directly by mocking clean status on backend
       triggerToast("💡 Post cleared of reports.");
       // Just demo ignore by reloading mock state
@@ -170,7 +170,7 @@ export default function AdminPanel({
   const handleDeleteComment = async (postId: string, commentId: string) => {
     if (!confirm("Are you sure you want to delete this comment permanently?")) return;
     try {
-      await mockApi.deleteComment(postId, commentId);
+      await apiClient.deleteComment(postId, commentId);
       triggerToast("🗑️ Comment deleted from community post.");
       await loadAdminData();
     } catch (err) {
@@ -181,8 +181,8 @@ export default function AdminPanel({
   // Preset Seeder Helper
   const seedSamplePhotos = async () => {
     try {
-      await mockApi.addHeroImage('https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=1200', 'Elegant Wedding Pathway', true);
-      await mockApi.addHeroImage('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1200', 'Traditional Courtyard Ceremony', true);
+      await apiClient.addHeroImage('https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=1200', 'Elegant Wedding Pathway', true);
+      await apiClient.addHeroImage('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1200', 'Traditional Courtyard Ceremony', true);
       triggerToast("✨ Seeded two creative wedding portrait backgrounds!");
       await loadAdminData();
       onRefreshHero();
@@ -208,21 +208,6 @@ export default function AdminPanel({
           <p className="text-xs text-stone-400">
             (Current Profile Status: <span className="font-bold underline">{currentEmail || 'Anonymous Guest'}</span>)
           </p>
-          
-          <div className="border-t border-stone-200/60 pt-6">
-            <span className="text-[11px] font-mono font-bold text-stone-500 uppercase block mb-3">Simulation Bypass Mode</span>
-            <button
-              onClick={async () => {
-                await mockApi.updateCurrentUserProfile({ email: 'safaribosafar@gmail.com', name: 'Al-Admin Safar' });
-                triggerToast("⚡ Logged in dynamically as SafariboSafar@gmail.com");
-                window.location.reload(); // Refresh to propagate
-              }}
-              className="py-3 px-6 bg-[#40798C] hover:bg-[#316070] text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 mx-auto"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Simulate Admin Account Access</span>
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -251,16 +236,6 @@ export default function AdminPanel({
           >
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Reload Database</span>
-          </button>
-          <button
-            onClick={async () => {
-              await mockApi.updateCurrentUserProfile({ email: 'user@example.com', name: 'Regular Member' });
-              triggerToast("👋 Checked out as Normal User.");
-              window.location.reload();
-            }}
-            className="p-2 sm:px-4 sm:py-2 bg-stone-800 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow-sm"
-          >
-            Switch to Regular User
           </button>
         </div>
       </div>
