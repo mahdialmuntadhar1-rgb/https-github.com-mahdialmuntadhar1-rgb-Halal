@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppLanguage } from '../types';
+import { AppLanguage, AppTab } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
@@ -11,7 +11,7 @@ interface LandingScreenProps {
   locale: AppLanguage;
   onSelectGender: (gender: 'male' | 'female') => void;
   onExploreMatches: () => void;
-  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'privacy' | 'account') => void;
+  setTab: (tab: AppTab) => void;
 }
 
 export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab }: LandingScreenProps) {

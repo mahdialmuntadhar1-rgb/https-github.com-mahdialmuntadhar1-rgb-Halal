@@ -35,7 +35,7 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-warm-ivory/60 backdrop-blur-md border-b border-white/20 shadow-sm" id="main-header">
+    <header className="relative md:sticky top-0 z-50 w-full bg-warm-ivory/60 backdrop-blur-md border-b border-white/20 shadow-sm" id="main-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           

@@ -180,18 +180,33 @@ export default function MatchExplorerScreen({
       />
 
       {/* Demo Warning Label */}
-      <div className="bg-amber-500/10 border border-amber-500/20 text-amber-800 rounded-2xl p-3.5 text-center text-xs flex flex-col sm:flex-row items-center justify-center gap-2 font-mono">
-        <span className="font-bold flex items-center gap-1 shrink-0">
-          ⚠️ {locale === 'en' ? 'Demo profiles for testing.' : locale === 'ar' ? 'الملفات المعروضة تجريبية لاختبار الواجهة.' : 'پڕۆفایلەکان تاقیکارین بۆ تێستکردنی ڕووکاری بەرنامەکە.'}
-        </span>
-        <span className="opacity-80">
-          {locale === 'en' 
-            ? 'Candidate search filters conform to strict Iraqi governorate parameters.' 
-            : locale === 'ar' 
-            ? 'معايير البحث تلتزم بالمحددات الجغرافية للمحافظات العراقية بطريقة مصانة.' 
-            : 'پێوەرەکانی گەڕان پابەندە بە سنوورە دیاریکراوەکانی پارێزگاکانی عێراق.'}
-        </span>
-      </div>
+      {apiClient.isDemoMode() ? (
+        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-800 rounded-2xl p-3.5 text-center text-xs flex flex-col sm:flex-row items-center justify-center gap-2 font-mono">
+          <span className="font-bold flex items-center gap-1 shrink-0">
+            ⚠️ {locale === 'en' ? 'Demo profiles only' : locale === 'ar' ? 'ملفات تجريبية فقط' : 'تەنها پڕۆفایلی تاقیکاری'}
+          </span>
+          <span className="opacity-80">
+            {locale === 'en' 
+              ? 'Connecting to virtual simulation sandbox. Toggle to force real backend mode in Account settings.' 
+              : locale === 'ar' 
+              ? 'متصل ببيئة المحاكاة الافتراضية. يمكنك تغيير وضع التشغيل من إعدادات الحساب.' 
+              : 'پەیوەستە بە دۆخی تاقیکاری بەڕێوەبردن. دەتوانیت دۆخی کارکردن لە ڕێکخستنەکانی هەژمارەکە بگۆڕیت.'}
+          </span>
+        </div>
+      ) : (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 rounded-2xl p-3.5 text-center text-xs flex flex-col sm:flex-row items-center justify-center gap-2 font-mono">
+          <span className="font-bold flex items-center gap-1 shrink-0">
+            🛡️ {locale === 'en' ? 'Live Matches Mode Active' : locale === 'ar' ? 'وضع البحث المباشر نشط' : 'دۆخی گەڕانی ڕاستەوخۆ چالاکە'}
+          </span>
+          <span className="opacity-80">
+            {locale === 'en' 
+              ? 'Browsing real active users from the backend production database.' 
+              : locale === 'ar' 
+              ? 'تتصفح حالياً حسابات حقيقية ونشطة من قاعدة بيانات الإنتاج.' 
+              : 'ئێستا پڕۆفایلە ڕاستەقینە و چالاکەکان دەبینیت لە بنکەی زانیارییەکانی سێرڤەر.'}
+          </span>
+        </div>
+      )}
 
       {/* Browsing modes tabs (All vs Saved portfolios) */}
       <div className="flex gap-2.5 pb-2 border-b border-stone-200 text-left">
@@ -361,10 +376,17 @@ export default function MatchExplorerScreen({
                   <h3 className="text-xl font-serif font-black text-warm-charcoal flex items-center flex-wrap gap-1.5">
                     <span>{activeSelectedMatch.name}, {activeSelectedMatch.age}</span>
                     {activeSelectedMatch.verified && (
-                      <span className="text-xs bg-[#40798C] text-white px-2 py-0.5 rounded flex items-center gap-0.5 shadow-sm">
-                        <ShieldCheck className="w-3 h-3 text-white shrink-0" />
-                        <span className="text-[9px] font-bold">Demo Verified</span>
-                      </span>
+                      apiClient.isDemoMode() ? (
+                        <span className="text-xs bg-[#40798C] text-white px-2 py-0.5 rounded flex items-center gap-0.5 shadow-sm">
+                          <ShieldCheck className="w-3 h-3 text-white shrink-0" />
+                          <span className="text-[9px] font-bold">Demo Verified</span>
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-[#FF7F50] text-white px-2 py-0.5 rounded flex items-center gap-0.5 shadow-sm">
+                          <ShieldCheck className="w-3 h-3 text-white shrink-0" />
+                          <span className="text-[9px] font-bold">{txt('Verified Portfolio', 'ملف موثق', 'پڕۆفایلی سەلمێنراو')}</span>
+                        </span>
+                      )
                     )}
                     {activeSelectedMatch.isOnline && (
                       <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200/50 px-2 py-0.5 rounded text-[10px] font-semibold shadow-xs">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { MatchProfile, AppLanguage } from '../types';
 import { Heart, Lock, ShieldCheck, CheckCircle, Star } from 'lucide-react';
+import { apiClient } from '../services/apiClient';
 
 interface MatchCardProps {
   key?: string | number;
@@ -164,10 +165,17 @@ export default function MatchCard({
             {match.compatibilityScore}% {txt('Compatibility', 'توافق', 'گونجان')}
           </span>
           {match.verified && (
-            <span className="bg-[#40798C] text-white flex items-center gap-1 text-[8px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-white/20 select-none">
-              <ShieldCheck className="w-3 h-3 text-white shrink-0" />
-              <span>{txt('Demo Verified', 'موثق تجريبي', 'سەلمێنراوی تاقیکاری')}</span>
-            </span>
+            apiClient.isDemoMode() ? (
+              <span className="bg-[#40798C] text-white flex items-center gap-1 text-[8px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-white/20 select-none">
+                <ShieldCheck className="w-3 h-3 text-white shrink-0" />
+                <span>{txt('Demo Verified', 'موثق تجريبي', 'سەلمێنراوی تاقیکاری')}</span>
+              </span>
+            ) : (
+              <span className="bg-[#FF7F50] text-white flex items-center gap-1 text-[8px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-white/20 select-none">
+                <ShieldCheck className="w-3 h-3 text-white shrink-0" />
+                <span>{txt('Verified Portfolio', 'ملف موثق', 'پڕۆفایلی سەلمێنراو')}</span>
+              </span>
+            )
           )}
         </div>
 

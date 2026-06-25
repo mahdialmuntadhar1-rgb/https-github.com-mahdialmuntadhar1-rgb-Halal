@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
 import { 
@@ -105,6 +105,10 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
   });
 
   const [simulatedFile, setSimulatedFile] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [pledgeChecked, setPledgeChecked] = useState<boolean>(false);
@@ -186,8 +190,48 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
     updateProfile({ partnerDealbreakers: fresh });
   };
 
+  const validateAndSetFile = (file: File) => {
+    setFileError(null);
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type.toLowerCase()) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
+      setFileError(isEn 
+        ? "Unsupported file format. Please upload JPG, PNG, or WebP." 
+        : isAr 
+          ? "صيغة غير مدعومة. يرجى رفع صورة بصيغة JPG أو PNG أو WebP." 
+          : "پێکهاتەی وێنەکە پشتگیری ناکرێت. تکایە وێنەی JPG یان PNG یان WebP دابنێ.");
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setFileError(isEn 
+        ? "File size exceeds the 5MB limit. Please choose a smaller image." 
+        : isAr 
+          ? "حجم الملف يتجاوز الحد المسموح به (5 ميجابايت). يرجى اختيار صورة أصغر." 
+          : "قەبارەی وێنەکە لە ٥ مێگابایت زیاترە. تکایە وێنەیەکی بچووکتر دیاری بکە.");
+      return;
+    }
+
+    setProfilePhoto(file);
+    setSimulatedFile(file.name);
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePhotoPreview(reader.result as string);
+      updateProfile({ avatarUrl: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const selectSimulatedPhoto = () => {
+    setFileError(null);
     setSimulatedFile('respectful_marital_portrait.jpg');
+    const mockPhotoUrl = profile.gender === 'female' 
+      ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400'
+      : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400';
+    setProfilePhotoPreview(mockPhotoUrl);
+    updateProfile({ avatarUrl: mockPhotoUrl });
   };
 
   const onDragOver = (e: React.DragEvent) => {
@@ -203,7 +247,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
     e.preventDefault();
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSimulatedFile(e.dataTransfer.files[0].name);
+      validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -896,24 +940,56 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
               onDrop={onDrop}
-              className={`border-2 border-dashed border-stone-200 rounded-2xl p-6 text-center cursor-pointer transition ${
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed border-stone-200 rounded-2xl p-6 text-center cursor-pointer transition relative group ${
                 isDragOver ? 'bg-[#40798C]/10 border-[#40798C]' : 'hover:bg-stone-50'
               }`}
             >
-              <UploadCloud className="w-8 h-8 text-stone-400 mx-auto mb-2" />
-              {simulatedFile ? (
-                <div>
-                  <p className="text-xs font-bold text-warm-charcoal">{simulatedFile}</p>
-                  <p className="text-[10px] text-emerald-600 font-bold mt-1">✓ Digital image staged securely</p>
+              <input
+                type="file"
+                name="profilePhoto"
+                ref={fileInputRef}
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    validateAndSetFile(e.target.files[0]);
+                  }
+                }}
+              />
+              
+              {profilePhotoPreview ? (
+                <div className="space-y-3">
+                  <div className="relative mx-auto w-24 h-24 rounded-full overflow-hidden border-2 border-[#40798C] shadow-md">
+                    <img 
+                      src={profilePhotoPreview} 
+                      alt="Profile preview" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-warm-charcoal">{simulatedFile}</p>
+                    <p className="text-[10px] text-emerald-600 font-bold mt-1">✓ {isEn ? "Ready for secure backend staging" : "جاهزة للرفع الآمن"}</p>
+                  </div>
                 </div>
               ) : (
-                <div>
-                  <p className="text-xs font-medium text-warm-charcoal">
-                    {isEn ? "Choose your profile photo files (Accepts JPG/PNG)" : "انقر لاختيار صورة وقورة للمطابقة (أو قم بإفلاتها هنا)"}
-                  </p>
-                  <p className="text-[10px] text-stone-400 mt-1">
-                    {isEn ? "Only verified matches who have accepted dynamic request parameters will eventually request to view it." : "لن يشاهد صورتكِ الفتيات المدخلة سوى الشركاء المتوافقين تماماً وعقب كشفها الإرادي الفردي."}
-                  </p>
+                <>
+                  <UploadCloud className="w-8 h-8 text-stone-400 mx-auto mb-2 group-hover:text-[#40798C] transition-colors" />
+                  <div>
+                    <p className="text-xs font-medium text-warm-charcoal">
+                      {isEn ? "Choose your profile photo files (Accepts JPG/PNG/WebP)" : "انقر لاختيار صورة وقورة للمطابقة (أو قم بإفلاتها هنا)"}
+                    </p>
+                    <p className="text-[10px] text-stone-400 mt-1">
+                      {isEn ? "Max size 5MB. Accepts JPG, PNG, and WebP formats." : "الحد الأقصى 5 ميجابايت. التنسيقات المقبولة: JPG, PNG, WebP."}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {fileError && (
+                <div className="mt-2 text-xs font-bold text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
+                  ⚠️ {fileError}
                 </div>
               )}
             </div>
