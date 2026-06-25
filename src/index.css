@@ -74,3 +74,32 @@
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+.input-basic {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(231 229 228);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.75rem;
+  color: #2D2A26;
+  font-size: 0.875rem;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(45, 42, 38, 0.03);
+}
+
+.input-basic:focus {
+  border-color: #40798C;
+  box-shadow: 0 0 0 2px rgba(64, 121, 140, 0.12);
+}
+
+.admin-icon-btn {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(231 229 228);
+  background: white;
+  padding: 0.65rem;
+  color: #2D2A26;
+  transition: 160ms ease;
+}
+
+.admin-icon-btn:hover:not(:disabled) {
+  background: #FAF9F6;
+}

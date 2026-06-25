@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppLanguage } from '../types';
+import { AppLanguage, AppTab, HeroImage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
@@ -9,20 +9,22 @@ import { Check } from 'lucide-react';
 
 interface LandingScreenProps {
   locale: AppLanguage;
+  heroImages: HeroImage[];
   onSelectGender: (gender: 'male' | 'female') => void;
   onExploreMatches: () => void;
-  setTab: (tab: 'landing' | 'onboarding' | 'explore' | 'chat' | 'philosophy' | 'privacy' | 'account') => void;
+  setTab: (tab: AppTab) => void;
 }
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab }: LandingScreenProps) {
+export default function LandingScreen({ locale, heroImages, onSelectGender, onExploreMatches, setTab }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
 
   return (
     <div className="animate-fade-in space-y-4" id="landing-screen">
       <Hero
         locale={locale}
+        heroImages={heroImages}
         onSelectGender={onSelectGender}
-        onExploreMatches={onExploreMatches}
+        onExploreMembers={onExploreMatches}
       />
       <HowItWorks locale={locale} />
       <PhotoPrivacyModule locale={locale} />

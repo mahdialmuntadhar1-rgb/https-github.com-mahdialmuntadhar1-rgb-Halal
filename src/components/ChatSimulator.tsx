@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MatchProfile, Message, Conversation } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
-import { MOCK_CHATS_RESPONSES } from '../data/matches';
 import { Send, Sparkles, AlertTriangle, ShieldCheck, Lock, Ban, Flag, Info, CheckCircle, MessagesSquare } from 'lucide-react';
 
 // Exact prompts requested in Chunk 6
@@ -23,7 +22,7 @@ const AR_GUIDED_PROMPTS = [
   "ما هي تطلعاتك وتوقعاتك بخصوص العمل، الدراسة، والحياة المنزلية؟"
 ];
 
-const CKB_GUIDED_PROMPTS = [
+const ku_GUIDED_PROMPTS = [
   "توقعاتت چییە بۆ هاوسەرگیری؟",
   "ماڵێکی ئارام لای تۆ چی دەگەیەنێت؟",
   "چۆن ڕووبەڕووی ناکۆکییەکان دەبیتەوە؟",
@@ -36,7 +35,7 @@ interface ChatSimulatorProps {
   locale: Language;
   acceptedMatches: MatchProfile[];
   conversations: Conversation[];
-  onSendMessage: (matchId: string, text: string, sender: 'user' | 'match') => void;
+  onSendMessage: (matchId: string, text: string) => void;
   activeMatchId: string | null;
   setActiveMatchId: (id: string | null) => void;
 }
@@ -50,10 +49,10 @@ export default function ChatSimulator({
   setActiveMatchId,
 }: ChatSimulatorProps) {
   const t = TRANSLATIONS[locale];
-  
+
   const [typedMessage, setTypedMessage] = useState<string>('');
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
-  
+
   // Local list of blocked matches so block feels real and functional
   const [blockedMatchIds, setBlockedMatchIds] = useState<string[]>([]);
   const [showBlockModal, setShowBlockModal] = useState<boolean>(false);
@@ -80,36 +79,16 @@ export default function ChatSimulator({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const currentPrompts = locale === 'ar' 
-    ? AR_GUIDED_PROMPTS 
-    : locale === 'ckb' 
-      ? CKB_GUIDED_PROMPTS 
+  const currentPrompts = locale === 'ar'
+    ? AR_GUIDED_PROMPTS
+    : locale === 'ku'
+      ? ku_GUIDED_PROMPTS
       : EN_GUIDED_PROMPTS;
 
   const handleSendPrompt = (promptText: string) => {
     if (!activeMatchId) return;
 
-    // Send user message
-    onSendMessage(activeMatchId, promptText, 'user');
-
-    // Simulate response with serious-toned timeout matching their profile
-    setTimeout(() => {
-      const possibleAnswers = MOCK_CHATS_RESPONSES[activeMatchId] || [];
-      const currentMsgCount = activeConversation.messages.filter(m => m.sender === 'match').length;
-      
-      let answer = possibleAnswers[currentMsgCount % possibleAnswers.length];
-      if (!answer) {
-        if (locale === 'ar') {
-          answer = "أقدر هذا السؤال الجاد والمحترم. هذه الرؤية هامة جداً لضمان توافق البيئة الأسرية ودعم كل منا للآخر في رضا ومودة.";
-        } else if (locale === 'ckb') {
-          answer = "سوپاس بۆ پرسیارە گرنگ و جدییەکەت. ئەم گفتوگۆیە بەردی بناغەیە بۆ ڕوونبوونەوەی تێڕوانینی هەردوولامان بۆ هاوسەرگیری.";
-        } else {
-          answer = "Thank you for asking. I believe having transparent expectations early on helps us evaluate compatibility. Building a peaceful home is my highest commitment.";
-        }
-      }
-      
-      onSendMessage(activeMatchId, answer, 'match');
-    }, 1300);
+    onSendMessage(activeMatchId, promptText);
   };
 
   const handleSendFreestyle = (e: React.FormEvent) => {
@@ -117,20 +96,8 @@ export default function ChatSimulator({
     if (!typedMessage.trim() || !activeMatchId) return;
 
     const textToSend = typedMessage;
-    onSendMessage(activeMatchId, textToSend, 'user');
+    onSendMessage(activeMatchId, textToSend);
     setTypedMessage('');
-
-    setTimeout(() => {
-      let reply = '';
-      if (locale === 'ar') {
-        reply = "أشكرك على رسالتك الواضحة والصادقة. هذا يعبر عن نضج وتفكير مسؤول. ما تطلعاتك بالنسبة للخطوات الشرعية والرسمية القادمة للتعارف؟";
-      } else if (locale === 'ckb') {
-        reply = "من پێزانینم هەیە بۆ پەیامە ڕاستگۆیانەکەت. ئەم تێڕوانینە هاوشێوەیە لەگەڵ هیوای مندا. هەنگاوەکانی داهاتوومان بەرەو هاوسەرگیری چۆن دەبینیت؟";
-      } else {
-        reply = "I appreciate your authentic message. That sounds aligned with my overall expectations. What do you see as our next steps towards formal marriage?";
-      }
-      onSendMessage(activeMatchId, reply, 'match');
-    }, 1600);
   };
 
   const handleConfirmBlock = () => {
@@ -138,13 +105,13 @@ export default function ChatSimulator({
     const blockedName = activeMatch ? activeMatch.name : "Member";
     setBlockedMatchIds(prev => [...prev, activeMatchId]);
     setShowBlockModal(false);
-    
+
     const feedback = locale === 'ar'
       ? `Demo: تم حظر ${blockedName} محلياً بنجاح. لن يظهر هذا الملف في قائمة اتصالاتك.`
-      : locale === 'ckb'
+      : locale === 'ku'
         ? `پیشاندان: ${blockedName} بلۆک کرا. ئەم پڕۆفایلە چیتر نابینیت.`
         : `Demo: ${blockedName} has been blocked and removed from your connection list.`;
-    
+
     triggerToast(feedback);
     setActiveMatchId(null);
     setMobileView('list');
@@ -153,21 +120,21 @@ export default function ChatSimulator({
   const handleSendReport = (e: React.FormEvent) => {
     e.preventDefault();
     setShowReportModal(false);
-    
+
     const reportedName = activeMatch ? activeMatch.name : "Member";
     const feedback = locale === 'ar'
       ? `Demo: تم إرسال البلاغ بخصوص ${reportedName} بنجاح إلى فريق مراجعة حلال لإجراء التحقيق الهوياتي.`
-      : locale === 'ckb'
+      : locale === 'ku'
         ? `پیشاندان: ڕاپۆرتەکە لەسەر ${reportedName} نێردرا بۆ لێکۆڵینەوە.`
         : `Demo: Report for ${reportedName} successfully submitted to review board. Thank you for keeping the courtship environment secure.`;
-    
+
     triggerToast(feedback);
     setReportDetails('');
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6" id="chat-simulator-v2">
-      
+
       {/* Simulation Feedback Toast */}
       {toastMessage && (
         <div className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 bg-stone-900 border border-stone-800 text-white text-xs font-bold px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 z-50 animate-bounce duration-500 max-w-sm">
@@ -191,17 +158,17 @@ export default function ChatSimulator({
                 : 'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف للزواج". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.'}
             </p>
           </div>
-          
+
           <div className="p-4 bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl max-w-md mx-auto text-left text-xs text-[#6B635B] space-y-2">
-            <p className="font-bold text-accent-coral">⭐ Connection Simulation Tip:</p>
+            <p className="font-bold text-accent-coral">Connection note:</p>
             <p className="font-medium">
-              Click the **Match Explorer** tab above, choose any compatible profile (e.g. Lina or Sara or Zaid), and send a request. We've built in automated simulation approval so you can immediately return here to preview the private conversation!
+              Send an introduction request from Match Explorer. Chat unlocks only after the real receiver or an admin accepts the pending request.
             </p>
           </div>
         </div>
       ) : (
         <div className="bg-white/30 backdrop-blur-xl border border-white/45 rounded-[2rem] shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[620px] max-h-[750px] items-stretch relative z-10">
-          
+
           {/* LEFT PANEL: Accepted Serious Connections */}
           <div className={`${mobileView === 'list' ? 'flex' : 'hidden md:flex'} md:col-span-4 border-r border-[#A2978C]/15 flex flex-col justify-between bg-white/15 h-full`}>
             <div>
@@ -261,7 +228,7 @@ export default function ChatSimulator({
                 <span>{locale === 'en' ? 'Direct Connection Integrity' : 'صيانة الاتصال المباشر'}</span>
               </div>
               <p className="font-semibold leading-relaxed">
-                {locale === 'en' 
+                {locale === 'en'
                   ? 'Abusive scripts, unserious behaviors and spam trigger automatic review bans. Communicate with honor.'
                   : 'الألفاظ الجارحة، انعدام الجدية أو محاولات الإزعاج تفعّل الحظر والمراجعة من قبل الإدارة.'}
               </p>
@@ -304,7 +271,7 @@ export default function ChatSimulator({
 
                   {/* Safety management buttons (Block & Report placeholders) */}
                   <div className="flex items-center gap-1.5">
-                    
+
                     {/* Block User Button */}
                     <button
                       type="button"
@@ -332,9 +299,9 @@ export default function ChatSimulator({
                 <div className="bg-[#40798C]/10 py-3 px-4 text-xs text-warm-charcoal border-b border-stone-200/50 flex items-start gap-2 text-left rtl:text-right">
                   <Info className="w-4 h-4 text-[#40798C] shrink-0 mt-0.5" />
                   <p className="font-semibold leading-normal">
-                    {locale === 'en' 
+                    {locale === 'en'
                       ? "Private respectful chat. Only mutual matches can message each other. Keep communication honest, serious, and marriage-focused."
-                      : locale === 'ckb'
+                      : locale === 'ku'
                         ? "چاتی تایبەتی بەڕێز. تەنها ئەو کەسانەی قبوڵکردنی یەکلاکهرەوەیان هەیە دەتوانن نامە گۆڕینەوە بکەن. ئامانجمان ڕاستگۆیی و نیازپاکی خێزانییە."
                         : "محادثة خاصة ومحترمة. يمكن فقط للأعضاء المتوافقين بشكل متبادل تبادل الرسائل. يرجى الحفاظ على الصدق، والجدية، والتركيز على الزواج في تواصلكما."}
                   </p>
@@ -383,7 +350,7 @@ export default function ChatSimulator({
                     <Sparkles className="w-3.5 h-3.5 text-accent-coral fill-accent-coral shrink-0" />
                     <span>{locale === 'en' ? 'GUIDED VALUE QUESTIONS' : 'أسئلة معايير التوافق والزواج الموصى بها'}</span>
                   </p>
-                  
+
                   <div className="flex flex-nowrap md:flex-wrap overflow-x-auto gap-2 pb-1.5 scrollbar-none scroll-smooth">
                     {currentPrompts.map((prompt, idx) => (
                       <button
@@ -416,8 +383,8 @@ export default function ChatSimulator({
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center p-10 text-[#6B635B] text-xs font-bold text-center">
-                {locale === 'en' 
-                  ? 'Select an active marriage connection from the sidebar to dialogue.' 
+                {locale === 'en'
+                  ? 'Select an active marriage connection from the sidebar to dialogue.'
                   : 'يرجى اختيار أحد الشركاء المتطابقين في القائمة الجانبية لبدء حوار بناء.'}
               </div>
             )}
@@ -438,7 +405,7 @@ export default function ChatSimulator({
                 {locale === 'en' ? `Block ${activeMatch.name}?` : `حظر ${activeMatch.name}؟`}
               </h4>
               <p className="text-xs text-[#6B635B] leading-relaxed font-semibold">
-                {locale === 'en' 
+                {locale === 'en'
                   ? 'Are you sure you want to block this user? They will be permanently removed from your active connections and matches.'
                   : 'هل أنت متأكد من رغبتك في حظر هذا الشريك؟ سيتم حجب ملفه بالكامل وتطهير قنوات التعارف معه.'}
               </p>
@@ -472,7 +439,7 @@ export default function ChatSimulator({
                 <Flag className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
                 <span>{locale === 'en' ? `Report ${activeMatch.name}` : `تقديم بلاغ ضد ${activeMatch.name}`}</span>
               </h4>
-              <button 
+              <button
                 onClick={() => setShowReportModal(false)}
                 className="text-stone-400 hover:text-stone-600 font-extrabold text-sm"
               >
@@ -481,7 +448,7 @@ export default function ChatSimulator({
             </div>
 
             <form onSubmit={handleSendReport} className="space-y-4">
-              
+
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
                   {locale === 'en' ? 'Reason for Reporting' : 'سبب البلاغ المباشر'}
@@ -516,7 +483,7 @@ export default function ChatSimulator({
 
               {/* Simulation warning notice inside report */}
               <div className="p-3 bg-stone-50 rounded-xl text-[10px] text-stone-500 font-mono">
-                Notice: All reports are cross-checked against standard government ID verification rules. 
+                Notice: All reports are cross-checked against standard government ID verification rules.
               </div>
 
               <div className="flex gap-3 justify-end pt-2">

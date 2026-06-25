@@ -2,6 +2,7 @@ import React from 'react';
 import { AppLanguage, UserProfile } from '../types';
 import ProfileCard from '../components/ProfileCard';
 import { Sparkles, Edit3, UserCheck, ShieldCheck } from 'lucide-react';
+import { TRANSLATIONS } from '../lib/translations';
 
 interface ProfilePreviewScreenProps {
   locale: AppLanguage;
@@ -16,19 +17,48 @@ export default function ProfilePreviewScreen({
   profileStrength,
   onEditClick
 }: ProfilePreviewScreenProps) {
+  const t = TRANSLATIONS[locale] || TRANSLATIONS.ar;
+  const copy = {
+    en: {
+      title: 'My Marriage Profile',
+      sub: 'Preview how prospective matches see your compatibility and seriousness answers.',
+      edit: 'Edit profile',
+      score: 'Profile completeness',
+      scoreSub: 'Complete profiles receive more approvals from serious members.',
+      seal: 'Privacy protection active',
+      sealSub: 'Your profile follows your privacy settings. Photos stay protected according to the options you choose.'
+    },
+    ar: {
+      title: 'ملفي للزواج',
+      sub: 'عاين كيف يرى الأعضاء المناسبون بياناتك وإجابات الجدية.',
+      edit: 'تعديل الملف',
+      score: 'اكتمال الملف',
+      scoreSub: 'الملفات المكتملة تحصل على قبول أكثر من الأعضاء الجادين.',
+      seal: 'حماية الخصوصية مفعلة',
+      sealSub: 'ملفك يعمل وفق إعدادات الخصوصية التي اخترتها، وتبقى الصور محمية حسب خياراتك.'
+    },
+    ku: {
+      title: 'پڕۆفایلی هاوسەرگیریی من',
+      sub: 'ببینە ئەندامە گونجاوەکان چۆن زانیاری و وەڵامە جدییەکانت دەبینن.',
+      edit: 'دەستکاری پڕۆفایل',
+      score: 'تەواوی پڕۆفایل',
+      scoreSub: 'پڕۆفایلی تەواوتر زۆرجار پەسەندی زیاتر لە ئەندامە جدییەکان وەردەگرێت.',
+      seal: 'پاراستنی تایبەتمەندی چالاکە',
+      sealSub: 'پڕۆفایلەکەت بە پێی ڕێکخستنەکانی تایبەتمەندی کاردەکات، و وێنەکان بە پێی هەڵبژاردنەکانت پارێزراون.'
+    }
+  }[locale];
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-left" id="profile-preview-screen">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-start" id="profile-preview-screen">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-200 pb-5">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-warm-charcoal font-serif tracking-tight">
-            {locale === 'en' ? 'My Marriage Dossier' : 'ملفي الشخصي للتعارف'}
+            {copy.title}
           </h2>
           <p className="text-[#6B635B] text-xs sm:text-sm font-medium mt-1">
-            {locale === 'en' 
-              ? 'Preview how prospective matches inspect your compatibility and seriousness answers.'
-              : 'معاينة كيف يرى الشركاء المحتملون أجوبتك ومعايرك ومدى جدية نيتك.'}
+            {copy.sub}
           </p>
         </div>
 
@@ -37,7 +67,7 @@ export default function ProfilePreviewScreen({
           className="flex items-center space-x-1.5 px-4.5 py-2.5 rounded-xl bg-accent-coral text-white font-bold text-xs hover:opacity-95 transition active:scale-95 shadow-md shadow-accent-coral/10"
         >
           <Edit3 className="w-4 h-4" />
-          <span>{locale === 'en' ? 'Edit Dossier Parameters' : 'تعديل المعايير والبيانات'}</span>
+          <span>{copy.edit}</span>
         </button>
       </div>
 
@@ -47,13 +77,11 @@ export default function ProfilePreviewScreen({
           <div className="flex items-center space-x-2">
             <UserCheck className="w-5 h-5 text-[#40798C]" />
             <h4 className="font-bold text-warm-charcoal text-sm">
-              {locale === 'en' ? 'Dossier Completeness Score' : 'مؤشر اكتمال الملف الشخصي'}
+              {copy.score}
             </h4>
           </div>
           <p className="text-xs text-[#6B635B] font-medium max-w-sm">
-            {locale === 'en'
-              ? 'Complete profiles receive up to 5x higher mutual match approvals from serious partners.'
-              : 'الملفات المكتملة تحصل على فرصة قبول أعلى بـ 5 مرات من الشركاء الجادين.'}
+            {copy.scoreSub}
           </p>
         </div>
 
@@ -65,7 +93,7 @@ export default function ProfilePreviewScreen({
             />
           </div>
           <span className="text-xs font-mono font-black text-[#40798C] shrink-0">
-            {profileStrength}% {locale === 'en' ? 'Complete' : 'مكتمل'}
+            {profileStrength}% {t.completeScore}
           </span>
         </div>
       </div>
@@ -78,12 +106,10 @@ export default function ProfilePreviewScreen({
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <p className="text-xs font-bold uppercase tracking-wider font-mono">
-            {locale === 'en' ? 'Halal Privacy Seal Active' : 'ميثاق الخصوصية الشرعي مفعّل'}
+            {copy.seal}
           </p>
           <p className="text-xs font-medium leading-relaxed">
-            {locale === 'en'
-              ? "Your profile is sheltered under active privacy settings. Photos remain masked by whatever options you set, and our anti-abuse filters automatically screen conversation requests for absolute dignity."
-              : "ملفك محمي بالكامل بموجب أعلى معايير الأمان الشرعية. لا أحد يرى صورتك إلا بعد قبول ثنائي متبادل والتحقق من الهوية."}
+            {copy.sealSub}
           </p>
         </div>
       </div>

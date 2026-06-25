@@ -1,6 +1,8 @@
 import React from 'react';
 import { UserProfile, MatchProfile, AppLanguage } from '../types';
 import { ShieldCheck, Calendar, MapPin, Award, Smile, Globe, Heart } from 'lucide-react';
+import { TRANSLATIONS } from '../lib/translations';
+import { displayValue, labelFor } from '../i18n/labels';
 
 interface ProfileCardProps {
   profile: UserProfile | MatchProfile;
@@ -9,6 +11,7 @@ interface ProfileCardProps {
 }
 
 export default function ProfileCard({ profile, locale, isCurrentUser = false }: ProfileCardProps) {
+  const t = TRANSLATIONS[locale] || TRANSLATIONS.ar;
   const isMatch = 'compatibilityScore' in profile;
   
   const valuesArray = 'valuesSummary' in profile ? profile.valuesSummary : (profile.values || []);
@@ -32,10 +35,10 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
           </div>
           <div>
             <h4 className="text-xl font-serif font-black text-warm-charcoal font-display flex flex-wrap items-center gap-2">
-              <span>{profile.name || (locale === 'en' ? 'Anonymous User' : 'مجهول الهوية')}</span>
+              <span>{profile.name || t.guestProfile}</span>
               {isCurrentUser && (
                 <span className="text-[9px] bg-accent-coral/10 text-accent-coral font-bold px-2.5 py-0.5 rounded-full border border-accent-coral/20 uppercase font-mono">
-                  {locale === 'en' ? 'Me' : 'أنا'}
+                  {t.profile}
                 </span>
               )}
               {('verified' in profile && profile.verified) && (
@@ -47,7 +50,7 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
             </h4>
             <p className="text-xs text-[#6B635B] font-semibold mt-0.5 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-[#40798C]" />
-              <span>{profile.governorate || (locale === 'en' ? 'Unspecified Governorate' : 'محافظة غير محددة')}, {profile.country || 'Iraq'}</span>
+              <span>{displayValue(profile.governorate, locale)}, {displayValue(profile.country || 'Iraq', locale)}</span>
             </p>
           </div>
         </div>
@@ -55,7 +58,7 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
         {isMatch && (
           <div className="bg-gradient-to-br from-[#40798C] to-[#599da0] px-4 py-2.5 rounded-2xl text-white shadow-md text-center shrink-0">
             <span className="text-[10px] block font-bold uppercase tracking-wider font-mono text-cyan-100">
-              {locale === 'en' ? 'Compatibility' : 'درجة التوافق'}
+              {t.compatibility}
             </span>
             <span className="text-xl font-black">{profile.compatibilityScore}%</span>
           </div>
@@ -66,25 +69,25 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 pt-4 border-t border-dashed border-stone-200">
         <div>
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Age & Gender' : 'العمر والجنس'}
+            {t.age} / {t.gender}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5">
-            {profile.age || '—'} yrs • <span className="capitalize">{profile.gender}</span>
+            {profile.age || '—'} • <span>{displayValue(profile.gender, locale)}</span>
           </p>
         </div>
 
         <div>
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Belief details' : 'تفاصيل المذهب'}
+            {t.religiousQuestions}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5">
-            {profile.religion === 'islam' ? `${profile.sect || 'Sunni'} Muslim` : 'Non-Muslim'} • {profile.ethnicity}
+            {displayValue(profile.religion, locale)}{profile.sect ? ` / ${displayValue(profile.sect, locale)}` : ''} • {displayValue(profile.ethnicity, locale)}
           </p>
         </div>
 
         <div>
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Profession' : 'المهنة'}
+            {t.occupation}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5 truncate">
             {profile.profession || '—'}
@@ -93,16 +96,16 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
 
         <div>
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Education' : 'التحصيل الدراسي'}
+            {t.education}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5 truncate">
-            {profile.education || '—'}
+            {displayValue(profile.education, locale)}
           </p>
         </div>
 
         <div>
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Courtship Timeline' : 'الجدول الزمني للزواج'}
+            {t.courtshipTimeline}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5">
             {profile.timeline || '—'}
@@ -111,7 +114,7 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
 
         <div>
           <span className="text-[10px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Wants Children' : 'الرغبة في الأطفال'}
+            {t.wantsChildren}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5">
             {profile.wantsChildren || '—'}
@@ -120,7 +123,7 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
 
         <div>
           <span className="text-[10px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Languages' : 'اللغات'}
+            {t.languagesSpoken}
           </span>
           <p className="font-bold text-warm-charcoal text-xs sm:text-sm mt-0.5 truncate">
             {profile.languages?.join(', ') || '—'}
@@ -139,7 +142,7 @@ export default function ProfileCard({ profile, locale, isCurrentUser = false }: 
       {valuesArray && valuesArray.length > 0 && (
         <div className="space-y-2">
           <span className="text-[9px] font-bold text-[#6B635B] uppercase tracking-wider block font-mono">
-            {locale === 'en' ? 'Strict Values Commitments' : 'الالتزام بالقيم الأساسية'}
+            {t.valuesPrompt}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {valuesArray.map((v) => (

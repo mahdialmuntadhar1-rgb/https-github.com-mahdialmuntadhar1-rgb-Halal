@@ -68,7 +68,7 @@ export default function FilterPanel({
             {locale === 'en' ? 'Explore Courtship Portfolios' : 'استعراض الشركاء المحتملين'}
           </h2>
           <p className="text-[#6B635B] text-xs sm:text-sm font-medium mt-1">
-            {locale === 'en' 
+            {locale === 'en'
               ? 'Genuine profiles seeking marriage. No swipe tricks, verified portfolios only.'
               : 'ملفات جادة وحقيقية تسعى للزواج على سنة الله ورسوله، بدون ألاعيب التمرير العشوائي.'}
           </p>
@@ -79,8 +79,8 @@ export default function FilterPanel({
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-              showAdvancedFilters 
-                ? 'bg-[#40798C] border-[#40798C] text-white animate-pulse' 
+              showAdvancedFilters
+                ? 'bg-[#40798C] border-[#40798C] text-white animate-pulse'
                 : 'bg-white border-white/50 text-[#4A443F] hover:bg-white'
             }`}
           >
@@ -106,10 +106,10 @@ export default function FilterPanel({
 
       {/* Main filter board */}
       <div className="bg-white/30 border border-white/45 p-5 sm:p-7 rounded-3xl shadow-xl space-y-5 text-left">
-        
+
         {/* Row 1: Primary Parameters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
+
           {/* Sort By Option (High visibility requested!) */}
           <div>
             <label className="block text-[10px] font-bold text-accent-coral uppercase tracking-widest font-mono mb-2">
@@ -199,7 +199,7 @@ export default function FilterPanel({
         {/* Row 2: Secondary / Advanced filters configuration (Show always or conditionally) */}
         {showAdvancedFilters && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/20 animate-fade-in text-left">
-            
+
             {/* Iraq City Option (Dynamically dependent on selected governorate) */}
             <div>
               <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
@@ -373,7 +373,7 @@ export default function FilterPanel({
               <label className="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer bg-white/50 border border-white/45 px-3 py-2.5 rounded-xl text-xs font-bold text-warm-charcoal hover:bg-white transition-all select-none shadow-sm h-11">
                 <input
                   id="filter-verified-only-adv"
-                  type="checkbox"
+                  type="chekuox"
                   checked={filters.verifiedOnly}
                   onChange={(e) => setFilters(prev => ({ ...prev, verifiedOnly: e.target.checked }))}
                   className="w-4 h-4 text-accent-coral border-white/40 focus:ring-accent-coral rounded cursor-pointer accent-accent-coral"

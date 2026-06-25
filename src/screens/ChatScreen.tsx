@@ -6,7 +6,7 @@ interface ChatScreenProps {
   locale: AppLanguage;
   acceptedMatches: MatchProfile[];
   conversations: Conversation[];
-  onSendMessage: (matchId: string, text: string, sender: 'user' | 'match') => void;
+  onSendMessage: (matchId: string, text: string) => void;
   activeMatchId: string | null;
   setActiveMatchId: (id: string | null) => void;
 }

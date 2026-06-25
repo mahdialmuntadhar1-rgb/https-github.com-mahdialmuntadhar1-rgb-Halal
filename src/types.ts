@@ -3,15 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AppLanguage = 'en' | 'ar' | 'ckb';
+export type AppLanguage = 'en' | 'ar' | 'ku';
 
 export interface User {
   id: string;
   email: string;
   name: string;
   membershipStatus: 'free' | 'premium' | 'verified';
+  role?: 'member' | 'admin';
   createdAt: string;
 }
+
+export interface SessionUser {
+  id: string;
+  email: string;
+  role: 'member' | 'admin';
+}
+
+export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'community' | 'admin' | 'profile' | 'privacy' | 'account' | 'trust_safety';
+
+export type IntentionBadge =
+  | 'Serious for marriage'
+  | 'Family involved'
+  | 'Ready for engagement'
+  | 'Studying first'
+  | 'Private profile';
 
 export interface PrivacySettings {
   photoPrivacy: 'visible' | 'hidden_by_default' | 'private_mode' | 'hidden' | 'blurred' | 'initials' | 'floral' | 'mutual_approval';
@@ -58,7 +74,9 @@ export interface UserProfile {
   languages: string[];
   maritalStatus?: string;
   intention?: string;
-  
+  bio?: string;
+  intentionBadges?: IntentionBadge[];
+
   // Marriage Intention & Details
   lookingFor?: string;
   timeline: string;
@@ -125,18 +143,76 @@ export interface MatchProfile {
   aboutMe: string;
   dealbreakers?: string[];
   requestStatus: 'none' | 'sent' | 'accepted' | 'declined';
+  intentionBadges?: IntentionBadge[];
+  saved?: boolean;
+  hiddenByAdmin?: boolean;
+  reportCount?: number;
+}
+
+export interface HeroImage {
+  id: string;
+  url: string;
+  alt: string;
+  active: boolean;
+  order: number;
+}
+
+export type CommunityCategory =
+  | 'Marriage advice'
+  | 'Family approval'
+  | 'Engagement questions'
+  | 'Culture and traditions'
+  | 'Religious/respectful questions'
+  | 'Success stories';
+
+export interface CommunityComment {
+  id: string;
+  author: string;
+  text: string;
+  createdAt: string;
+  hiddenByAdmin?: boolean;
+}
+
+export interface CommunityPost {
+  id: string;
+  author: string;
+  category: CommunityCategory;
+  text: string;
+  createdAt: string;
+  likes: number;
+  likedByMe?: boolean;
+  comments: CommunityComment[];
+  reportCount?: number;
+  hiddenByAdmin?: boolean;
+  isDailyQuestion?: boolean;
+}
+
+export interface ContentReport {
+  id: string;
+  targetType: 'profile' | 'post';
+  targetId: string;
+  reason: string;
+  createdAt: string;
+  status: 'open' | 'resolved';
 }
 
 export interface IntroductionRequest {
   id: string;
   senderId: string;
   receiverId: string;
+  senderEmail?: string;
+  receiverEmail?: string;
+  senderName?: string;
+  receiverName?: string;
   status: 'pending' | 'accepted' | 'declined';
   createdAt: string;
+  decidedAt?: string;
 }
 
 export interface Conversation {
+  id: string;
   matchId: string;
+  match?: MatchProfile;
   messages: Message[];
 }
 

@@ -1,10 +1,13 @@
 import React from 'react';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 interface LoadingStateProps {
   message?: string;
 }
 
 export default function LoadingState({ message = 'Loading compatibility profiles...' }: LoadingStateProps) {
+  const { t } = useLanguage();
+  const displayMessage = message === 'Loading compatibility profiles...' ? t.loading : message;
   return (
     <div className="flex flex-col items-center justify-center py-20 space-y-4 w-full" id="loading-state">
       <div className="flex space-x-2">
@@ -13,7 +16,7 @@ export default function LoadingState({ message = 'Loading compatibility profiles
         <div className="w-3 h-3 bg-[#40798C] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
       <p className="text-xs font-mono tracking-widest text-[#6B635B] font-bold uppercase shrink-0">
-        {message}
+        {displayMessage}
       </p>
     </div>
   );

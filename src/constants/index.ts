@@ -20,20 +20,20 @@ export const GOVERNORATES = [
 ];
 
 export const SECTS = [
-  { value: 'sunni', label_en: 'Sunni', label_ar: 'سُنّي', label_ckb: 'سوننی' },
-  { value: 'shiaa', label_en: 'Shiaa', label_ar: 'شيعي', label_ckb: 'شیعە' },
-  { value: 'none', label_en: 'Prefer not to say / Other', label_ar: 'يفضل عدم القول / آخر', label_ckb: 'پێم باشە نەیڵێم / تر' }
+  { value: 'sunni', label_en: 'Sunni', label_ar: 'سُنّي', label_ku: 'سوننی' },
+  { value: 'shiaa', label_en: 'Shiaa', label_ar: 'شيعي', label_ku: 'شیعە' },
+  { value: 'none', label_en: 'Prefer not to say / Other', label_ar: 'يفضل عدم القول / آخر', label_ku: 'پێم باشە نەیڵێم / تر' }
 ];
 
 export const ETHNICITIES = [
-  { value: 'arab', label_en: 'Arab', label_ar: 'عربي', label_ckb: 'عەرەب' },
-  { value: 'kurdish', label_en: 'Kurdish', label_ar: 'كوردي', label_ckb: 'کورد' },
-  { value: 'others', label_en: 'Other (Turkmen, Assyrian, etc.)', label_ar: 'آخر (تركماني، آشوري، إلخ)', label_ckb: 'تر (تورکمان، ئاشووری، هتد)' }
+  { value: 'arab', label_en: 'Arab', label_ar: 'عربي', label_ku: 'عەرەب' },
+  { value: 'kurdish', label_en: 'Kurdish', label_ar: 'كوردي', label_ku: 'کورد' },
+  { value: 'others', label_en: 'Other (Turkmen, Assyrian, etc.)', label_ar: 'آخر (تركماني، آشوري، إلخ)', label_ku: 'تر (تورکمان، ئاشووری، هتد)' }
 ];
 
 export const RELIGIONS = [
-  { value: 'islam', label_en: 'Islam', label_ar: 'الإسلام', label_ckb: 'ئیسلام' },
-  { value: 'non_islam', label_en: 'Other Religion', label_ar: 'ديانة أخرى', label_ckb: 'ئایینی تر' }
+  { value: 'islam', label_en: 'Islam', label_ar: 'الإسلام', label_ku: 'ئیسلام' },
+  { value: 'non_islam', label_en: 'Other Religion', label_ar: 'ديانة أخرى', label_ku: 'ئایینی تر' }
 ];
 
 export const EDUCATION_LEVELS = [

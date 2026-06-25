@@ -18,7 +18,7 @@ export default function LanguageSwitcher({ locale, setLocale }: LanguageSwitcher
           {locale === 'en' ? 'Select Language:' : locale === 'ar' ? 'اختر اللغة:' : 'زمان دیاری بکە:'}
         </span>
       </div>
-      
+
       <div className="flex items-center space-x-3 rtl:space-x-reverse">
         {/* Arabic Link */}
         <button
@@ -35,9 +35,9 @@ export default function LanguageSwitcher({ locale, setLocale }: LanguageSwitcher
 
         {/* Kurdish Link */}
         <button
-          onClick={() => setLocale('ckb')}
+          onClick={() => setLocale('ku')}
           className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-300 ${
-            locale === 'ckb'
+            locale === 'ku'
               ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-md shadow-accent-coral/20 scale-105'
               : 'bg-white/50 border border-white/30 text-warm-charcoal hover:bg-white/80 hover:scale-102 hover:shadow-sm'
           }`}

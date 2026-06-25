@@ -180,7 +180,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" id="match-explorer">
-      
+
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left">
         <div>
@@ -196,8 +196,8 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-              showAdvancedFilters 
-                ? 'bg-[#40798C] border-[#40798C] text-white' 
+              showAdvancedFilters
+                ? 'bg-[#40798C] border-[#40798C] text-white'
                 : 'bg-white border-white/50 text-[#4A443F] hover:bg-white'
             }`}
           >
@@ -214,10 +214,10 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
 
       {/* Main filter board (Bento Grid) */}
       <div className="bg-white/30 border border-white/45 p-5 sm:p-7 rounded-3xl shadow-xl space-y-5 text-left">
-        
+
         {/* Row 1: Primary Parameters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
+
           {/* Gender */}
           <div>
             <label className="block text-[10px] font-bold text-warm-charcoal uppercase tracking-widest font-mono mb-2">
@@ -305,7 +305,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
         {/* Row 2: Secondary / Advanced filters configuration (Show conditionally) */}
         {showAdvancedFilters && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 border-t border-white/20 animate-fade-in">
-            
+
             {/* Islamic Sect Preference (if religion is islam or checking all) */}
             {filters.religion !== 'non_islam' && (
               <div>
@@ -443,12 +443,12 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
 
         {/* Row 3: Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between items-center pt-3 border-t border-white/20">
-          
+
           <div className="flex items-center space-x-3 w-full sm:w-auto">
             {/* Verified only switch */}
             <label className="flex items-center space-x-2 cursor-pointer bg-white/60 border border-white/45 px-4 py-2.5 rounded-xl text-xs font-bold text-[#4A443F] hover:bg-white shadow-sm transition">
               <input
-                type="checkbox"
+                type="chekuox"
                 checked={filters.verifiedOnly}
                 onChange={(e) => setFilters(prev => ({ ...prev, verifiedOnly: e.target.checked }))}
                 className="rounded border-white/30 text-accent-coral focus:ring-accent-coral focus:ring-offset-0 focus:ring-1"
@@ -503,7 +503,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
               >
                 {/* Photo container with privacy indicators */}
                 <div className="relative aspect-[4/3] bg-stone-100 overflow-hidden select-none">
-                  
+
                   {/* Photo itself */}
                   <img
                     src={m.avatarUrl}
@@ -547,10 +547,10 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                 {/* Info and CTA area */}
                 <div className="p-5 text-left space-y-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-2">
-                    
+
                     {/* Name block */}
                     <div className="flex justify-between items-start gap-2">
-                      <h4 
+                      <h4
                         onClick={() => setSelectedMatch(m)}
                         className="text-base font-bold text-warm-charcoal font-serif hover:text-accent-coral transition-all cursor-pointer leading-tight"
                       >
@@ -583,8 +583,8 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1">
                       {m.valuesSummary.slice(0, 2).map((val) => (
-                        <span 
-                          key={val} 
+                        <span
+                          key={val}
                           className="text-[9px] font-bold text-[#4A443F] bg-white border border-stone-200 px-2 py-0.5 rounded-md"
                         >
                           {val}
@@ -618,7 +618,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                           <span>Request Pending Review</span>
                         </button>
                         <p className="text-[8px] text-center text-[#6B635B] font-mono font-medium">
-                          Auto-approves in 2.5 seconds (Simulated)
+                          Waiting for receiver or admin review.
                         </p>
                       </div>
                     )}
@@ -638,7 +638,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                 </div>
 
                 {/* Click target helper for detailed popover */}
-                <div 
+                <div
                   onClick={() => setSelectedMatch(m)}
                   className="bg-white/45 hover:bg-white border-t border-white/20 p-2 text-center text-[9px] font-bold text-[#6B635B] cursor-pointer transition uppercase font-mono tracking-wider"
                 >
@@ -655,7 +655,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
       {selectedMatch && (
         <div className="fixed inset-0 bg-warm-charcoal/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/40 w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col md:flex-row max-h-[90vh] md:max-h-[80vh] text-left">
-            
+
             {/* Close button */}
             <button
               onClick={() => setSelectedMatch(null)}
@@ -715,7 +715,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
             {/* Right details column */}
             <div className="w-full md:w-7/12 p-6 overflow-y-auto space-y-5 flex flex-col justify-between">
               <div className="space-y-4">
-                
+
                 {/* Name */}
                 <div className="flex justify-between items-start">
                   <div>
