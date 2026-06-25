@@ -14,6 +14,9 @@ export interface User {
   membershipStatus: 'free' | 'premium' | 'verified';
   createdAt: string;
   role?: 'admin' | 'user';
+  phone?: string;
+  country?: string;
+  governorate?: string;
 }
 
 export interface PrivacySettings {
@@ -62,6 +65,7 @@ export interface UserProfile {
   maritalStatus?: string;
   intention?: string;
   email?: string;
+  phone?: string;
   role?: 'admin' | 'user';
   badges?: string[];
   savedMatches?: string[]; // Array of match profile IDs that are bookmarked

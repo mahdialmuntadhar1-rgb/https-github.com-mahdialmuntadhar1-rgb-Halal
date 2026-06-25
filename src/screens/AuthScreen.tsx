@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages } from 'lucide-react';
+import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Phone, Globe2, MapPin } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import { apiClient } from '../services/apiClient';
@@ -18,6 +18,9 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('Iraq');
+  const [governorate, setGovernorate] = useState('Baghdad');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
@@ -25,6 +28,36 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
   };
+
+  const countryOptions = [
+    { value: 'Iraq', en: 'Iraq', ar: '??????', ckb: '?????' },
+    { value: 'Other', en: 'Other', ar: '???? ????', ckb: '??????? ??' }
+  ];
+
+  const governorateOptions = [
+    { value: 'Baghdad', en: 'Baghdad', ar: '?????', ckb: '?????' },
+    { value: 'Basra', en: 'Basra', ar: '??????', ckb: '?????' },
+    { value: 'Nineveh', en: 'Nineveh', ar: '?????', ckb: '???????' },
+    { value: 'Erbil', en: 'Erbil', ar: '?????', ckb: '??????' },
+    { value: 'Sulaymaniyah', en: 'Sulaymaniyah', ar: '??????????', ckb: '???????' },
+    { value: 'Duhok', en: 'Duhok', ar: '????', ckb: '????' },
+    { value: 'Halabja', en: 'Halabja', ar: '?????', ckb: '???????' },
+    { value: 'Kirkuk', en: 'Kirkuk', ar: '?????', ckb: '???????' },
+    { value: 'Najaf', en: 'Najaf', ar: '?????', ckb: '?????' },
+    { value: 'Karbala', en: 'Karbala', ar: '??????', ckb: '???????' },
+    { value: 'Babil', en: 'Babil', ar: '????', ckb: '????' },
+    { value: 'Wasit', en: 'Wasit', ar: '????', ckb: '?????' },
+    { value: 'Diyala', en: 'Diyala', ar: '?????', ckb: '?????' },
+    { value: 'Anbar', en: 'Anbar', ar: '???????', ckb: '????????' },
+    { value: 'Salah al-Din', en: 'Salah al-Din', ar: '???? ?????', ckb: '?????????' },
+    { value: 'Maysan', en: 'Maysan', ar: '?????', ckb: '??????' },
+    { value: 'Dhi Qar', en: 'Dhi Qar', ar: '?? ???', ckb: '?????' },
+    { value: 'Muthanna', en: 'Muthanna', ar: '??????', ckb: '????????' },
+    { value: 'Al-Qadisiyah', en: 'Al-Qadisiyah', ar: '????????', ckb: '??????' }
+  ];
+
+  const optionText = (option: { en: string; ar: string; ckb: string }) =>
+    locale === 'en' ? option.en : locale === 'ckb' ? option.ckb : option.ar;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +67,16 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.login(email, password);
+      localStorage.setItem('halal_force_real', 'true');
+      const result = await apiClient.login(email.trim(), password);
       triggerToast(txt('✨ Logged in successfully.', '✨ تم تسجيل الدخول بنجاح.', '✨ بە سەرکەوتوویی چوویتە ژوورەوە.'));
       
       // Load current user profile immediately after login success
       const profile = await apiClient.getCurrentUser();
       onAuthSuccess(result.token, profile);
     } catch (err: any) {
+      localStorage.removeItem('halal_token');
+      localStorage.removeItem('halal_force_real');
       triggerToast(err.message || 'Login failed');
     } finally {
       setIsLoading(false);
@@ -49,18 +85,108 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !name) {
-      triggerToast(txt('Please fill in all fields.', 'يرجى تعبئة كافة الحقول.', 'تکایە هەموو بڕگەکان پڕبکەرەوە.'));
+
+    if (!email || !password || !name || !phone || !country || !governorate) {
+      triggerToast(txt('Please fill in all fields.', '???? ????? ???? ??????.', '????? ????? ??????? ?????????.'));
       return;
     }
+
+    if (password.length < 6) {
+      triggerToast(txt('Password must be at least 6 characters.', '??? ?? ???? ???? ?????? 6 ???? ??? ?????.', '???? ????? ????? ??????? ? ??? ???.'));
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      const result = await apiClient.register(email, password, name, gender);
-      triggerToast(txt('✨ Account created successfully.', '✨ تم إنشاء الحساب بنجاح.', '✨ هەژمارەکەت بە سەرکەوتوویی دروستکرا.'));
-      
-      const profile = await apiClient.getCurrentUser();
+      localStorage.setItem('halal_force_real', 'true');
+
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanName = name.trim();
+      const cleanPhone = phone.trim();
+
+      const result = await apiClient.register(
+        cleanEmail,
+        password,
+        cleanName,
+        cleanPhone,
+        country,
+        governorate,
+        gender
+      );
+
+      let profile: any = {
+        name: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        country,
+        governorate,
+        gender,
+        age: 0,
+        religion: 'islam',
+        ethnicity: 'arab',
+        education: '',
+        profession: '',
+        languages: [],
+        timeline: '',
+        wantsChildren: '',
+        relocation: '',
+        communicationPreference: '',
+        values: [],
+        photoPrivacy: gender === 'female' ? 'hidden_by_default' : 'visible',
+        savedMatches: []
+      };
+
+      try {
+        const existingProfile = await apiClient.getCurrentUser();
+        profile = {
+          ...profile,
+          ...existingProfile,
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          country,
+          governorate,
+          gender
+        };
+      } catch (profileErr) {
+        console.warn('Profile read after registration failed; using registration profile fallback.', profileErr);
+      }
+
+      try {
+        const savedProfile = await apiClient.updateCurrentUserProfile({
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          country,
+          governorate,
+          gender
+        } as any);
+
+        profile = {
+          ...profile,
+          ...savedProfile,
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          country,
+          governorate,
+          gender
+        };
+      } catch (saveErr) {
+        console.warn('Saving basic profile fields after registration failed; backend may already store them.', saveErr);
+      }
+
+      triggerToast(txt(
+        '? Account created. Please complete your onboarding profile.',
+        '? ?? ????? ??????. ???? ????? ????? ????? ??????.',
+        '? ?????????? ????????. ????? ????????????? ??????????? ????? ???.'
+      ));
+
       onAuthSuccess(result.token, profile);
     } catch (err: any) {
+      localStorage.removeItem('halal_token');
+      localStorage.removeItem('halal_force_real');
       triggerToast(err.message || 'Registration failed');
     } finally {
       setIsLoading(false);
@@ -205,7 +331,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('Your Sincere Name', 'الاسم الكريم', 'ناوی تەواو')}
+                  {txt('Full Name', '????? ??????', '???? ?????')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -248,43 +374,85 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                   <input
                     type="password"
                     required
+                    minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="????????"
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-2">{t.gender}</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setGender('male')}
-                    className={`py-3 px-4 rounded-xl border text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-2 ${
-                      gender === 'male'
-                        ? 'bg-stone-900 border-stone-900 text-white shadow-md'
-                        : 'bg-white border-stone-200 text-warm-charcoal hover:bg-stone-50'
-                    }`}
-                  >
-                    <span>🤵</span>
-                    <span>{txt('Male', 'ذكر', 'پیاو')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGender('female')}
-                    className={`py-3 px-4 rounded-xl border text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-2 ${
-                      gender === 'female'
-                        ? 'bg-[#FF7F50] border-[#FF7F50] text-white shadow-md'
-                        : 'bg-white border-stone-200 text-warm-charcoal hover:bg-stone-50'
-                    }`}
-                  >
-                    <span>🧕</span>
-                    <span>{txt('Female', 'أنثى', 'ئافرەت')}</span>
-                  </button>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Phone Number', '??? ??????', '?????? ??????')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <Phone className="h-4.5 w-4.5" />
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+964 7xx xxx xxxx"
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                    {txt('Country', '??????', '????')}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                      <Globe2 className="h-4.5 w-4.5" />
+                    </div>
+                    <select
+                      required
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                    >
+                      {countryOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{optionText(option)}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                    {txt('Governorate', '????????', '???????')}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                      <MapPin className="h-4.5 w-4.5" />
+                    </div>
+                    <select
+                      required
+                      value={governorate}
+                      onChange={(e) => setGovernorate(e.target.value)}
+                      className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                    >
+                      {governorateOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{optionText(option)}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] leading-relaxed text-stone-500 font-medium">
+                {txt(
+                  'After registration, you will complete onboarding and choose the remaining marriage profile details.',
+                  '??? ??????? ????? ????? ????? ?????? ?????? ???? ?????? ??????.',
+                  '???? ?????????? ?????????? ??????? ????? ?????? ? ????????????? ?????????? ????? ??????.'
+                )}
+              </p>
             </div>
 
             <button

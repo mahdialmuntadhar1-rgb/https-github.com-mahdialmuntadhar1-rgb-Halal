@@ -101,7 +101,7 @@ export default function App() {
       ]);
       setMatches(matchesResult.matches);
       setConversations(convs);
-      setTab('explore');
+      setTab('onboarding');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
