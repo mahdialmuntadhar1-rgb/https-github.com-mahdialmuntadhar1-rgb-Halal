@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { HeaderLanguageSelector } from '../i18n';
 import { Heart, Languages, LogOut, MessageCircle, ShieldCheck, Sparkles, User, UsersRound, MessageCircleQuestion, SlidersHorizontal } from 'lucide-react';
 import { AppTab } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
@@ -131,6 +132,8 @@ export default function Header({
           </div>
         </div>
       </div>
+          <div className="px-3 py-2"><HeaderLanguageSelector /></div>
     </header>
   );
 }
+

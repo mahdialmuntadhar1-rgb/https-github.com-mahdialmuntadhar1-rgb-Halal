@@ -1,0 +1,140 @@
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\Button.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\ChatSimulator.tsx ---
+Line 163: <p className="font-bold text-accent-coral">Connection note:</p>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\FilterPanel.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\GenderSelectionCards.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\Header.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\Hero.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\HowItWorks.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\LanguageSwitcher.tsx ---
+Line 33: <span>???????</span>
+Line 46: <span>?????</span>
+Line 59: <span>English</span>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\MatchCard.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\MatchExplorer.tsx ---
+Line 297: <option value="all">Any Religion</option>
+Line 298: <option value="islam">Islam</option>
+Line 299: <option value="non_islam">Non-Islam</option>
+Line 320: <option value="all">Any Sect (Sunni/Shiaa)</option>
+Line 321: <option value="sunni">Sunni Only</option>
+Line 322: <option value="shiaa">Shiaa Only</option>
+Line 337: <option value="all">Any Ethnicity</option>
+Line 338: <option value="arab">Arab</option>
+Line 339: <option value="kurdish">Kurdish</option>
+Line 340: <option value="others">Others</option>
+Line 386: <option value="All Seriousness Levels">All Seriousness Levels</option>
+Line 387: <option value="Highly Serious">Highly Serious (Soon or 1 year)</option>
+Line 388: <option value="Immediate Marriage (Soon)">Immediate Courtship (Soon)</option>
+Line 404: <option value="All">All Stances</option>
+Line 405: <option value="Yes">Yes, definitely</option>
+Line 406: <option value="No">No kids</option>
+Line 420: <option value="All">All types</option>
+Line 421: <option value="Strictly Non-smoker">Strictly Non-smoker</option>
+Line 435: <option value="All">All visible options</option>
+Line 436: <option value="Blurred Only">Blurred / Protected profiles</option>
+Line 437: <option value="Visible Only">Directly visible portraits</option>
+Line 458: <span>Verified Profiles Only</span>
+Line 469: <span>Reset parameters</span>
+Line 481: <h4 className="text-lg font-serif font-black text-warm-charcoal">No compatible dossiers found</h4>
+Line 523: <p className="text-[10px] text-white font-bold uppercase tracking-wider">Portrait Protected</p>
+Line 524: <p className="text-[8px] text-white/90">Click "Send Request" to request photo unlock</p>
+Line 606: <span>Send Request</span>
+Line 618: <span>Request Pending Review</span>
+Line 633: <span>Mutually Connected! Chat ?</span>
+Line 707: <p className="text-xs text-white font-bold uppercase tracking-wider">Portrait Protected</p>
+Line 708: <p className="text-[10px] text-white/90">Unlocked automatically to accepted match partners.</p>
+Line 736: <p className="text-[10px] font-bold text-accent-coral uppercase tracking-wider font-mono">Targeted Marital Goal</p>
+Line 746: <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Academics</span>
+Line 750: <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Courtship Timeline</span>
+Line 754: <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Wants Children</span>
+Line 758: <span className="text-[#6B635B] font-medium font-mono uppercase text-[9px] tracking-wider block">Privacy Preference</span>
+Line 765: <span className="text-[10px] font-bold text-[#6B635B] uppercase tracking-widest font-mono">Biography Overview</span>
+Line 775: <span className="font-semibold text-[10px] uppercase font-mono tracking-wider">Languages:</span>
+Line 789: <span className="text-[10px] font-bold text-[#6B635B] uppercase tracking-widest font-mono block">Absolute Dealbreakers</span>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\OnboardingWizard.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\PhotoPrivacyModule.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\PrivacyBadge.tsx ---
+Line 14: <span>Visible Photo</span>
+Line 20: <span>Blurred (Unlocked on Match)</span>
+Line 26: <span>Hidden by default</span>
+Line 32: <span>Mutual Contact Unlocked</span>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\SafetyNotice.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\TrustSafety.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\lib\apiClient.ts ---
+Line 92: async function withDemoFallback<T>(operation: () => Promise<T>, demoOperation: () => Promise<T>): Promise<T> {
+Line 307: async updateCurrentUserProfile(updated: Partial<UserProfile>): Promise<UserProfile> {
+Line 339: async getMatches(filters?: Partial<SearchFilters>, page = 1, limit = 20): Promise<MatchesResponse> {
+Line 367: () => request<{ saved: boolean }>(`/saved-profiles/${encodeURIComponent(id)}`, { method: saved ? 'POST' : 'DELETE' }),
+Line 422: async addHeroImage(image: Pick<HeroImage, 'url' | 'alt'>): Promise<HeroImage> {
+Line 435: async updateHeroImage(id: string, updates: Partial<HeroImage>): Promise<HeroImage[]> {
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\routes\profile.ts ---
+Line 24: export function filterProfilePhoto(row: Record<string, unknown>, viewerId: string): Record<string, unknown> {
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\routes\requests.ts ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\AccountPlaceholderScreen.tsx ---
+Line 214: placeholder="name@example.com"
+Line 260: <strong>?? Demo Notice: </strong>
+Line 283: <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: Coming soon to live production</span>
+Line 307: <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: In-Review / Simulated</span>
+Line 331: <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: Coming soon / Pending live agents</span>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\AdminScreen.tsx ---
+Line 12: onAddHeroImage: (url: string, alt: string) => Promise<void>;
+Line 13: onUpdateHeroImage: (id: string, updates: Partial<HeroImage>) => Promise<void>;
+Line 14: onRemoveHeroImage: (id: string) => Promise<void>;
+Line 15: onMoveHeroImage: (id: string, direction: 'up' | 'down') => Promise<void>;
+Line 16: onModerateContent: (targetType: 'profile' | 'post', targetId: string, action: 'hide' | 'delete') => Promise<void>;
+Line 17: onDecideIntroductionRequest: (id: string, decision: 'accept' | 'decline') => Promise<void>;
+Line 88: <button type="button" onClick={() => onRemoveHeroImage(image.id)} className="admin-icon-btn text-red-600"><Trash2 className="w-4 h-4" /></button>
+Line 97: <h3 className="text-lg font-serif font-black text-warm-charcoal">Introduction requests</h3>
+Line 99: <p className="text-sm text-[#6B635B]">No introduction requests yet.</p>
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\AuthScreen.tsx ---
+Line 8: onLogin: (email: string, password: string) => Promise<SessionUser>;
+Line 9: onRegister: (email: string, password: string) => Promise<SessionUser>;
+Line 113: placeholder="name@example.com"
+Line 129: placeholder="At least 10 characters"
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\CommunityScreen.tsx ---
+Line 12: onCreatePost: (category: CommunityCategory, text: string) => Promise<void>;
+Line 14: onComment: (id: string, text: string) => Promise<void>;
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\MatchExplorerScreen.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\PrivacySettingsScreen.tsx ---
+Line 308: <span className="text-[8px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono font-bold uppercase">Sandbox</span>
+Line 351: placeholder="e.g. AmberDossier"
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\TrustPrivacyScreen.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\services\mockApi.ts ---
+Line 162: async addHeroImage(image: Pick<HeroImage, 'url' | 'alt'>): Promise<HeroImage> {
+Line 175: async updateHeroImage(id: string, updates: Partial<HeroImage>): Promise<HeroImage[]> {
+Line 194: if (index >= 0 && swapIndex >= 0 && swapIndex < ordered.length) {
+Line 206: async updateCurrentUserProfile(updated: Partial<UserProfile>): Promise<UserProfile> {
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\App.tsx ---
+Line 311: acceptedMatches={conversations.map((conversation) => conversation.match).filter((match): match is NonNullable<Conversation['match']> => Boolean(match))}
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\db.ts ---
+Line 9: first<T = Record<string, unknown>>(column?: string): Promise<T | null>;
+Line 10: all<T = Record<string, unknown>>(): Promise<D1Result<T>>;
+Line 77: export async function readJson<T extends Record<string, unknown>>(request: Request): Promise<T> {
