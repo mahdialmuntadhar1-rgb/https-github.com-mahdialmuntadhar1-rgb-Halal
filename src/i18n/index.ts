@@ -1,3 +1,3 @@
-export * from './translations';
+﻿export * from './translations';
 export * from './LanguageProvider';
-export * from './LanguageSelector';
+export { LanguageSelector, LanguageSelector as HeaderLanguageSelector } from './LanguageSelector';
