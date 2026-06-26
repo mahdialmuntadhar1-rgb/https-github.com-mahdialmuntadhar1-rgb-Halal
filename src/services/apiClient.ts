@@ -1,7 +1,10 @@
 import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL || '/api';
+let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
+if (API_BASE.endsWith('/')) {
+  API_BASE = API_BASE.slice(0, -1);
+}
 
 /**
  * Checks if we should run in local demo mode.
@@ -9,14 +12,21 @@ const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as 
  * we try to contact the backend, otherwise we fallback to the local mock state.
  */
 export function getIsDemoMode(): boolean {
-  const token = localStorage.getItem('halal_token');
   const forceReal = localStorage.getItem('halal_force_real') === 'true';
-  
   if (forceReal) return false;
-  
-  // If no token exists, we default to demo mode so the user can interact with the app immediately
-  if (!token) return true;
-  
+
+  const apiUrl = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL;
+  // If no external/real API URL is configured, we must use demo/mock mode
+  if (!apiUrl || apiUrl === '/api') {
+    return true;
+  }
+
+  const token = localStorage.getItem('halal_token');
+  // If no token exists, or if it is a mock token/placeholder, we use demo/mock mode
+  if (!token || token.startsWith('mock_') || token === 'demo_real_token_placeholder') {
+    return true;
+  }
+
   return false;
 }
 
@@ -40,6 +50,60 @@ const getHeaders = () => {
   }
   return headers;
 };
+
+/**
+ * Robust wrapper over fetch to safely validate content-type and handle HTML/text fallbacks
+ * without crashing or throwing cryptic "Unexpected token <" JSON parsing exceptions.
+ */
+async function safeFetch<T = any>(url: string, options?: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(url, options);
+  } catch (error: any) {
+    throw new Error(`Connection error: Could not connect to the matchmaking API server at ${url}. Please verify your network connection or API base URL.`);
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+
+  if (!res.ok) {
+    if (isJson) {
+      let errData: any;
+      try {
+        errData = await res.json();
+      } catch {
+        throw new Error(`The API server returned an error (Status ${res.status}: ${res.statusText}) but the response could not be parsed as JSON.`);
+      }
+      throw new Error(errData.message || errData.error || `Request failed with status ${res.status}: ${res.statusText}`);
+    } else {
+      let text: string;
+      try {
+        text = await res.text();
+      } catch {
+        text = '';
+      }
+      const snippet = text.slice(0, 150).trim();
+      throw new Error(`The API server returned an unexpected HTML or text response instead of JSON (Status ${res.status}). This usually indicates a configuration error, an incorrect VITE_API_URL endpoint, or a server fallback to index.html.\nResponse snippet: "${snippet}..."`);
+    }
+  }
+
+  if (!isJson) {
+    let text: string;
+    try {
+      text = await res.text();
+    } catch {
+      text = '';
+    }
+    const snippet = text.slice(0, 150).trim();
+    throw new Error(`The API server returned a non-JSON response (Status ${res.status}). This usually indicates an incorrect API endpoint or route mismatch.\nResponse snippet: "${snippet}..."`);
+  }
+
+  try {
+    return await res.json() as T;
+  } catch (error: any) {
+    throw new Error(`Failed to parse the response as JSON: ${error.message}`);
+  }
+}
 
 export const apiClient = {
   isDemoMode: getIsDemoMode,
@@ -74,16 +138,12 @@ export const apiClient = {
     }
 
     // Real API call
-    const res = await fetch(`${API_BASE}/auth/login`, {
+    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `Login failed: ${res.statusText}`);
-    }
-    const data = await res.json();
+
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
@@ -121,16 +181,12 @@ export const apiClient = {
     }
 
     // Real API call
-    const res = await fetch(`${API_BASE}/auth/register`, {
+    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name, gender }),
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `Registration failed: ${res.statusText}`);
-    }
-    const data = await res.json();
+
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
@@ -149,15 +205,12 @@ export const apiClient = {
         message: 'Demo forgot password instructions simulated. Check your inbox.' 
       };
     }
-    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+
+    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
-    if (!res.ok) {
-      throw new Error(`Forgot password request failed: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   /**
@@ -168,14 +221,10 @@ export const apiClient = {
       return mockApi.getCurrentUser();
     }
 
-    const res = await fetch(`${API_BASE}/profile/me`, {
+    return safeFetch<UserProfile>(`${API_BASE}/profile/me`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch profile: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async updateCurrentUserProfile(updated: Partial<UserProfile>): Promise<UserProfile> {
@@ -183,15 +232,11 @@ export const apiClient = {
       return mockApi.updateCurrentUserProfile(updated);
     }
 
-    const res = await fetch(`${API_BASE}/profile/me`, {
+    return safeFetch<UserProfile>(`${API_BASE}/profile/me`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(updated),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to update profile: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   /**
@@ -232,7 +277,6 @@ export const apiClient = {
           filtered = filtered.filter(m => m.verified);
         }
         if (filters.smoking && filters.smoking !== 'all') {
-          // Fix matching filters: Remove the `|| true` bug from the smoking filter
           const isNonSmoker = filters.smoking === 'Strictly Non-smoker' || filters.smoking === 'No';
           filtered = filtered.filter(m => {
             const hasSmokingDealbreaker = m.dealbreakers?.some(d => d.toLowerCase().includes('smoking'));
@@ -288,16 +332,11 @@ export const apiClient = {
       });
     }
 
-    const res = await fetch(`${API_BASE}/matches?${params.toString()}`, {
+    const data = await safeFetch<any>(`${API_BASE}/matches?${params.toString()}`, {
       method: 'GET',
       headers: getHeaders(),
     });
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch matches: ${res.statusText}`);
-    }
-
-    const data = await res.json();
     if (Array.isArray(data)) {
       return {
         matches: data,
@@ -317,14 +356,10 @@ export const apiClient = {
       return mockApi.toggleSaveProfile(matchId);
     }
 
-    const res = await fetch(`${API_BASE}/matches/${matchId}/save`, {
+    return safeFetch<UserProfile>(`${API_BASE}/matches/${matchId}/save`, {
       method: 'POST',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to toggle save profile: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async sendIntroductionRequest(matchId: string): Promise<{ success: boolean; request: any }> {
@@ -332,15 +367,11 @@ export const apiClient = {
       return mockApi.sendIntroductionRequest(matchId);
     }
 
-    const res = await fetch(`${API_BASE}/requests`, {
+    return safeFetch<{ success: boolean; request: any }>(`${API_BASE}/requests`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ targetMatchId: matchId }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to send introduction request: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async acceptIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {
@@ -348,14 +379,10 @@ export const apiClient = {
       return mockApi.acceptIntroductionRequest(matchId);
     }
 
-    const res = await fetch(`${API_BASE}/requests/${matchId}/accept`, {
+    return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/accept`, {
       method: 'PUT',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to accept request: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   /**
@@ -366,14 +393,10 @@ export const apiClient = {
       return mockApi.getConversations();
     }
 
-    const res = await fetch(`${API_BASE}/conversations`, {
+    return safeFetch<Conversation[]>(`${API_BASE}/conversations`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch conversations: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -381,15 +404,11 @@ export const apiClient = {
       return mockApi.sendMessage(matchId, text, sender);
     }
 
-    const res = await fetch(`${API_BASE}/conversations/${matchId}/messages`, {
+    return safeFetch<Message>(`${API_BASE}/conversations/${matchId}/messages`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ text, sender }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to send message: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   /**
@@ -400,14 +419,10 @@ export const apiClient = {
       return mockApi.getHeroImages();
     }
 
-    const res = await fetch(`${API_BASE}/hero-images`, {
+    return safeFetch<HeroImage[]>(`${API_BASE}/hero-images`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch hero images: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async addHeroImage(url: string, title: string, isActive: boolean = true): Promise<HeroImage> {
@@ -415,15 +430,11 @@ export const apiClient = {
       return mockApi.addHeroImage(url, title, isActive);
     }
 
-    const res = await fetch(`${API_BASE}/hero-images`, {
+    return safeFetch<HeroImage>(`${API_BASE}/hero-images`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ url, title, isActive }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to add hero image: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async updateHeroImage(id: string, updatedFields: Partial<HeroImage>): Promise<HeroImage> {
@@ -431,15 +442,11 @@ export const apiClient = {
       return mockApi.updateHeroImage(id, updatedFields);
     }
 
-    const res = await fetch(`${API_BASE}/hero-images/${id}`, {
+    return safeFetch<HeroImage>(`${API_BASE}/hero-images/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(updatedFields),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to update hero image: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async deleteHeroImage(id: string): Promise<boolean> {
@@ -447,14 +454,10 @@ export const apiClient = {
       return mockApi.deleteHeroImage(id);
     }
 
-    const res = await fetch(`${API_BASE}/hero-images/${id}`, {
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/hero-images/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to delete hero image: ${res.statusText}`);
-    }
-    const data = await res.json();
     return !!data.success;
   },
 
@@ -463,15 +466,11 @@ export const apiClient = {
       return mockApi.reorderHeroImages(reordered);
     }
 
-    const res = await fetch(`${API_BASE}/hero-images/reorder`, {
+    return safeFetch<HeroImage[]>(`${API_BASE}/hero-images/reorder`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify({ reordered }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to reorder hero images: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   /**
@@ -482,14 +481,10 @@ export const apiClient = {
       return mockApi.getCommunityPosts();
     }
 
-    const res = await fetch(`${API_BASE}/community/posts`, {
+    return safeFetch<CommunityPost[]>(`${API_BASE}/community/posts`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch community posts: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false): Promise<CommunityPost> {
@@ -497,15 +492,11 @@ export const apiClient = {
       return mockApi.createCommunityPost(title, content, category, isDaily);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts`, {
+    return safeFetch<CommunityPost>(`${API_BASE}/community/posts`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ title, content, category, isDaily }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to create post: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async likePost(postId: string, userName: string): Promise<CommunityPost> {
@@ -513,15 +504,11 @@ export const apiClient = {
       return mockApi.likePost(postId, userName);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}/like`, {
+    return safeFetch<CommunityPost>(`${API_BASE}/community/posts/${postId}/like`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ userName }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to like post: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async addComment(postId: string, text: string, userName: string, userGender: 'male' | 'female'): Promise<PostComment> {
@@ -529,15 +516,11 @@ export const apiClient = {
       return mockApi.addComment(postId, text, userName, userGender);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}/comments`, {
+    return safeFetch<PostComment>(`${API_BASE}/community/posts/${postId}/comments`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ text, userName, userGender }),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to add comment: ${res.statusText}`);
-    }
-    return res.json();
   },
 
   async reportPost(postId: string): Promise<boolean> {
@@ -545,14 +528,10 @@ export const apiClient = {
       return mockApi.reportPost(postId);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}/report`, {
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/report`, {
       method: 'POST',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to report post: ${res.statusText}`);
-    }
-    const data = await res.json();
     return !!data.success;
   },
 
@@ -561,14 +540,10 @@ export const apiClient = {
       return mockApi.reportComment(postId, commentId);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}/comments/${commentId}/report`, {
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}/report`, {
       method: 'POST',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to report comment: ${res.statusText}`);
-    }
-    const data = await res.json();
     return !!data.success;
   },
 
@@ -577,14 +552,10 @@ export const apiClient = {
       return mockApi.deletePost(postId);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}`, {
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to delete post: ${res.statusText}`);
-    }
-    const data = await res.json();
     return !!data.success;
   },
 
@@ -593,14 +564,10 @@ export const apiClient = {
       return mockApi.deleteComment(postId, commentId);
     }
 
-    const res = await fetch(`${API_BASE}/community/posts/${postId}/comments/${commentId}`, {
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    if (!res.ok) {
-      throw new Error(`Failed to delete comment: ${res.statusText}`);
-    }
-    const data = await res.json();
     return !!data.success;
   }
 };

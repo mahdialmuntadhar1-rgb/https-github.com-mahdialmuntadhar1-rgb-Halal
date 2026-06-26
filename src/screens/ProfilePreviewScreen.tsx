@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLanguage, UserProfile } from '../types';
 import ProfileCard from '../components/ProfileCard';
+import ProfileEditor from '../components/ProfileEditor';
 import { Sparkles, Edit3, UserCheck, ShieldCheck } from 'lucide-react';
 
 interface ProfilePreviewScreenProps {
   locale: AppLanguage;
   profile: UserProfile;
   profileStrength: number;
-  onEditClick: () => void;
+  onSaveProfile: (updatedValues: Partial<UserProfile>) => void;
+  triggerToast: (msg: string) => void;
 }
 
 export default function ProfilePreviewScreen({
   locale,
   profile,
   profileStrength,
-  onEditClick
+  onSaveProfile,
+  triggerToast
 }: ProfilePreviewScreenProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (isEditing) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="profile-preview-screen-edit">
+        <ProfileEditor
+          locale={locale}
+          profile={profile}
+          onSave={onSaveProfile}
+          onClose={() => setIsEditing(false)}
+          triggerToast={triggerToast}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-left" id="profile-preview-screen">
       
@@ -33,7 +52,7 @@ export default function ProfilePreviewScreen({
         </div>
 
         <button
-          onClick={onEditClick}
+          onClick={() => setIsEditing(true)}
           className="flex items-center space-x-1.5 px-4.5 py-2.5 rounded-xl bg-accent-coral text-white font-bold text-xs hover:opacity-95 transition active:scale-95 shadow-md shadow-accent-coral/10"
         >
           <Edit3 className="w-4 h-4" />

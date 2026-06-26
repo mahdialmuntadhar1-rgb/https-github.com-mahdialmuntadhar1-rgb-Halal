@@ -166,9 +166,22 @@ export default function App() {
   // Onboarding wizard completion
   const handleOnboardingComplete = async (updatedProfile: UserProfile) => {
     try {
-      const saved = await apiClient.updateCurrentUserProfile(updatedProfile);
-      setUserProfile(saved);
-      triggerToast(`✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`);
+      setIsAuthenticated(true);
+      setUserProfile(updatedProfile);
+
+      // Load matching pool
+      const [matchesResult, convs] = await Promise.all([
+        apiClient.getMatches(),
+        apiClient.getConversations()
+      ]);
+      setMatches(matchesResult.matches);
+      setConversations(convs);
+
+      triggerToast(
+        locale === 'en'
+          ? `✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`
+          : `✨ مبارك! تم توثيق حسابك وربطه ببيانات الشركاء المتوافقين في العراق!`
+      );
       setTab('explore');
     } catch (err) {
       console.error("Failed to complete onboarding", err);
@@ -253,7 +266,7 @@ export default function App() {
 
   const profileStrength = calculateProfileStrength();
   const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
-  const isProtectedTab = ['onboarding', 'explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin'].includes(currentTab);
+  const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin'].includes(currentTab);
 
   return (
     <div 
@@ -335,10 +348,23 @@ export default function App() {
               />
             )}
 
-            {currentTab === 'onboarding' && userProfile && (
+            {currentTab === 'onboarding' && (
               <OnboardingScreen
                 locale={locale}
-                userProfile={userProfile}
+                userProfile={userProfile || {
+                  name: '',
+                  age: 24,
+                  gender: 'male',
+                  country: 'Iraq',
+                  governorate: 'Baghdad',
+                  religion: 'islam',
+                  ethnicity: 'arab',
+                  education: "Bachelor Degree",
+                  profession: 'Professional',
+                  languages: ['Arabic'],
+                  photoPrivacy: 'visible',
+                  values: ['Family First', 'Mutual Respect']
+                }}
                 onComplete={handleOnboardingComplete}
               />
             )}
@@ -372,7 +398,8 @@ export default function App() {
                 locale={locale}
                 profile={userProfile}
                 profileStrength={profileStrength}
-                onEditClick={() => setTab('onboarding')}
+                onSaveProfile={handleUpdateUserProfile}
+                triggerToast={triggerToast}
               />
             )}
 
