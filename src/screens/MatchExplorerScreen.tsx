@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MatchProfile, SearchFilters, AppLanguage } from '../types';
+import { MatchProfile, SearchFilters, AppLanguage, UserProfile } from '../types';
 import { apiClient } from '../services/apiClient';
 import FilterPanel from '../components/FilterPanel';
 import MatchCard from '../components/MatchCard';
 import Modal from '../components/Modal';
 import EmptyState from '../components/EmptyState';
+import ProfileCompletionCard from '../components/ProfileCompletionCard';
+import TodayInZawaj from '../components/TodayInZawaj';
 import { 
   ShieldCheck, MapPin, Award, BookOpen, User, Star, Book, Heart, Lock, 
   CheckCircle, X, HelpCircle, Languages, AlertCircle, Fingerprint, 
@@ -21,6 +23,9 @@ interface MatchExplorerScreenProps {
   userGovernorate?: string;
   savedMatchIds?: string[];
   onToggleSaveMatch: (id: string) => void;
+  userProfile: UserProfile;
+  onUpdateUserProfile: (updated: Partial<UserProfile>) => void;
+  onNavigateToTab?: (tab: any) => void;
 }
 
 export default function MatchExplorerScreen({
@@ -31,7 +36,10 @@ export default function MatchExplorerScreen({
   userGender,
   userGovernorate,
   savedMatchIds = [],
-  onToggleSaveMatch
+  onToggleSaveMatch,
+  userProfile,
+  onUpdateUserProfile,
+  onNavigateToTab
 }: MatchExplorerScreenProps) {
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
@@ -265,6 +273,21 @@ export default function MatchExplorerScreen({
           </span>
         </div>
       )}
+
+      {/* Interactive Profile Completion Progress Card */}
+      <ProfileCompletionCard
+        locale={locale}
+        userProfile={userProfile}
+        onUpdateProfile={onUpdateUserProfile}
+      />
+
+      {/* Today in Zawaj Daily Digest */}
+      <TodayInZawaj
+        locale={locale}
+        matches={matches}
+        onSelectMatch={setSelectedMatch}
+        onNavigateToTab={(tab) => onNavigateToTab && onNavigateToTab(tab)}
+      />
 
       {/* Browsing modes tabs (Grid vs Swipe Deck vs Saved portfolios) */}
       <div className="flex flex-wrap gap-2.5 pb-2 border-b border-stone-200 text-left">

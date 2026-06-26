@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CommunityPost, PostComment, AppLanguage } from '../types';
 import { apiClient } from '../services/apiClient';
+import MarriageCafe from './MarriageCafe';
 import { 
   MessageSquare, 
   Heart, 
@@ -208,6 +209,12 @@ export default function CommunityFeed({
           <span>{isEn ? 'Ask Marriage Question' : isAr ? 'اطرح استفساراً جديداً' : 'پرسیارێک بکە'}</span>
         </button>
       </div>
+
+      {/* Marriage Café Lounge Section */}
+      <MarriageCafe
+        locale={locale}
+        triggerToast={triggerToast}
+      />
 
       {/* DAILY MARRIAGE QUESTION SPOTLIGHT CARD */}
       {dailyPost && !dailyPost.isReported && (

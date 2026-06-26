@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MatchProfile, AppLanguage } from '../types';
-import { Heart, Lock, ShieldCheck, CheckCircle, Star, Fingerprint, MessageSquare, ThumbsUp, ThumbsDown, Eye } from 'lucide-react';
+import { Heart, Lock, ShieldCheck, CheckCircle, Star, Fingerprint, MessageSquare, ThumbsUp, ThumbsDown, Eye, Check, Loader2 } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 
 interface MatchCardProps {
@@ -29,9 +29,31 @@ export default function MatchCard({
   onToggleInterested,
   onPass
 }: MatchCardProps) {
-  const isBlur = match.photoStatus === 'blurred' && match.requestStatus !== 'accepted';
-  const isHiddenState = match.photoStatus === 'hidden' && match.requestStatus !== 'accepted';
-  const isInitialsState = match.photoStatus === 'initials' && match.requestStatus !== 'accepted';
+  // Photo privacy simulation state
+  const [photoAccessRequested, setPhotoAccessRequested] = useState(false);
+  const [photoAccessApproved, setPhotoAccessApproved] = useState(match.requestStatus === 'accepted');
+  const [isSimulatingPhoto, setIsSimulatingPhoto] = useState(false);
+
+  // Safe Chat Request Flow State
+  const [chatFlow, setChatFlow] = useState<'none' | 'interest_sent' | 'interest_accepted' | 'chat_requested' | 'chat_approved'>(
+    match.requestStatus === 'accepted' ? 'chat_approved' : match.requestStatus === 'sent' ? 'interest_sent' : 'none'
+  );
+  const [isSimulatingChat, setIsSimulatingChat] = useState(false);
+  const [toastText, setToastText] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (match.requestStatus === 'accepted') {
+      setChatFlow('chat_approved');
+      setPhotoAccessApproved(true);
+    } else if (match.requestStatus === 'sent') {
+      setChatFlow('interest_sent');
+    }
+  }, [match.requestStatus]);
+
+  // Photo blur status - photos are blurred by default for privacy (except when approved)
+  const isBlur = !photoAccessApproved && match.requestStatus !== 'accepted';
+  const isHiddenState = match.photoStatus === 'hidden' && match.requestStatus !== 'accepted' && !photoAccessApproved;
+  const isInitialsState = match.photoStatus === 'initials' && match.requestStatus !== 'accepted' && !photoAccessApproved;
   const initialsLetter = match.name ? match.name.charAt(0).toUpperCase() : '?';
   const isSaved = savedMatchIds.includes(match.id);
 
@@ -74,6 +96,57 @@ export default function MatchCard({
       return locale === 'ckb' ? valueMap[key].ckb : valueMap[key].ar;
     }
     return v;
+  };
+
+  const handleRequestPhotoAccess = () => {
+    if (isSimulatingPhoto || photoAccessApproved) return;
+    setIsSimulatingPhoto(true);
+    setPhotoAccessRequested(true);
+    setToastText(txt("Requesting photo access...", "جاري طلب الإذن لعرض الصورة...", "داواکاری بینینی وێنە دەنێردرێت..."));
+    
+    // Simulate other user accepting after 2 seconds!
+    setTimeout(() => {
+      setPhotoAccessApproved(true);
+      setIsSimulatingPhoto(false);
+      setToastText(txt(`✨ Photo access approved by ${match.name}!`, `✨ وافقت ${match.name} على طلبك لعرض الصورة!`, `✨ ${match.name} داواکارییەکی قبوڵ کرد بۆ بینینی وێنەکە!`));
+      // Clear toast after 4s
+      setTimeout(() => setToastText(null), 4000);
+    }, 2000);
+  };
+
+  const handleChatFlowClick = () => {
+    if (isSimulatingChat) return;
+
+    if (chatFlow === 'none') {
+      setIsSimulatingChat(true);
+      setChatFlow('interest_sent');
+      setToastText(txt("Sending your interest...", "جاري إبداء اهتمامك الوقور...", "ئارەزوومەندی دەنێردرێت..."));
+      
+      // Notify parent of request status if any API is integrated
+      onSendRequest(match.id);
+
+      // Simulate other user accepting interest after 2s
+      setTimeout(() => {
+        setChatFlow('interest_accepted');
+        setIsSimulatingChat(false);
+        setToastText(txt(`🌟 ${match.name} accepted your interest! Chat request available.`, `🌟 قبلت ${match.name} اهتمامك! طلب المحادثة متاح الآن.`, `🌟 ${match.name} ئارەزووی تۆی قبوڵکرد! داواکاری چات بەردەستە.`));
+        setTimeout(() => setToastText(null), 4000);
+      }, 2000);
+
+    } else if (chatFlow === 'interest_accepted') {
+      setIsSimulatingChat(true);
+      setChatFlow('chat_requested');
+      setToastText(txt("Requesting secure chat...", "جاري طلب بدء المحادثة الآمنة...", "داواکاری چاتی پارێزراو دەنێردرێت..."));
+
+      // Simulate other user accepting chat request after 2s
+      setTimeout(() => {
+        setChatFlow('chat_approved');
+        setIsSimulatingChat(false);
+        setPhotoAccessApproved(true); // Approved chat also unlocks photo!
+        setToastText(txt(`💍 Respectful Chat Approved with ${match.name}!`, `💍 تمت الموافقة على المحادثة الوقورة مع ${match.name}!`, `💍 چاتی ڕێزدارانە پەسەندکرا لەگەڵ ${match.name}!`));
+        setTimeout(() => setToastText(null), 4000);
+      }, 2000);
+    }
   };
 
   return (
@@ -156,17 +229,44 @@ export default function MatchCard({
                   <img
                     src={match.avatarUrl}
                     alt={match.name}
-                    className={`w-full h-full object-cover transition-all duration-700 ${
-                      isBlur ? 'filter blur-[12px]' : ''
+                    className={`w-full h-full object-cover transition-all duration-750 ease-in-out ${
+                      isBlur ? 'filter blur-[15px]' : 'filter-none scale-100'
                     }`}
                     referrerPolicy="no-referrer"
                   />
                   {isBlur && (
-                    <div className="absolute inset-0 bg-[#2D2A26]/30 flex flex-col items-center justify-center p-2 text-center">
-                      <Lock className="w-3.5 h-3.5 text-white mb-1" />
-                      <p className="text-[8px] text-white font-bold uppercase tracking-wider leading-none">
-                        {txt('Photo protected', 'الصورة محمية', 'وێنە پارێزراوە')}
+                    <div className="absolute inset-0 bg-[#2D2A26]/40 backdrop-blur-[4px] flex flex-col items-center justify-center p-2.5 text-center animate-fade-in">
+                      <Lock className="w-5 h-5 text-white mb-1.5 drop-shadow animate-pulse" />
+                      <p className="text-[10px] text-white font-extrabold uppercase tracking-widest mb-2 drop-shadow leading-tight">
+                        {txt('Photo hidden for privacy', 'الصورة مموهة للخصوصية', 'وێنە لێڵکراوە بۆ پاراستن')}
                       </p>
+                      
+                      {!photoAccessRequested ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRequestPhotoAccess();
+                          }}
+                          className="px-3 py-1.5 bg-white text-warm-charcoal hover:bg-stone-50 font-black text-[9px] uppercase tracking-wide rounded-lg shadow-md transition duration-200 active:scale-95 cursor-pointer flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-accent-coral shrink-0" />
+                          <span>{txt('Request photo access', 'طلب عرض الصورة', 'داواکردنی بینینی وێنە')}</span>
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-white text-[9px] font-bold">
+                          {isSimulatingPhoto ? (
+                            <Loader2 className="w-3 h-3 animate-spin text-white shrink-0" />
+                          ) : (
+                            <Check className="w-3 h-3 text-emerald-300 shrink-0" />
+                          )}
+                          <span>
+                            {isSimulatingPhoto 
+                              ? txt('Requesting...', 'جاري الطلب...', 'داوا دەکرێت...') 
+                              : txt('Photo access approved', 'تمت الموافقة', 'پەسەندکرا')}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -337,50 +437,80 @@ export default function MatchCard({
         <div className="flex items-center gap-1.5 w-full">
           {/* Action / Status Button */}
           <div className="flex-1">
-            {match.requestStatus === 'none' && (
+            {chatFlow === 'none' && (
               <button
                 type="button"
-                onClick={() => onSendRequest(match.id)}
-                className="w-full py-2.5 rounded-xl bg-warm-charcoal text-white font-bold text-xs hover:opacity-95 transition duration-200 shadow-sm flex items-center justify-center space-x-1.5 group/btn"
+                onClick={handleChatFlowClick}
+                className="w-full py-2.5 rounded-xl bg-warm-charcoal text-white font-bold text-xs hover:bg-[#34302D] active:scale-98 transition duration-200 shadow-sm flex items-center justify-center space-x-1.5 group/btn cursor-pointer"
               >
-                <Heart className="w-3.5 h-3.5 text-accent-pink fill-accent-pink/20 group-hover/btn:scale-110 transition-transform" />
-                <span>{txt('Send Respectful Request', 'إرسال طلب وقور للزواج', 'ناردنی داواکاری فەرمی')}</span>
+                {isSimulatingChat ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-accent-pink" />
+                ) : (
+                  <Heart className="w-3.5 h-3.5 text-accent-pink fill-accent-pink/20 group-hover/btn:scale-110 transition-transform shrink-0" />
+                )}
+                <span>{txt('Send Interest', 'إرسال اهتمام وقور', 'ناردنی ئارەزوومەندی')}</span>
               </button>
             )}
 
-            {match.requestStatus === 'sent' && (
+            {chatFlow === 'interest_sent' && (
               <button
                 type="button"
                 disabled
-                className="w-full py-2.5 rounded-xl bg-accent-coral/10 text-accent-coral border border-accent-coral/20 font-bold text-xs cursor-not-allowed flex items-center justify-center space-x-1"
+                className="w-full py-2.5 rounded-xl bg-accent-coral/10 text-accent-coral border border-accent-coral/20 font-bold text-xs flex items-center justify-center space-x-1"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-coral animate-ping shrink-0" />
-                <span>{txt('Request Sent', 'تم إرسال الطلب', 'داواکاری نێردرا')}</span>
+                <span>{txt('Interest Sent (Pending...)', 'تم إرسال الاهتمام (قيد الانتظار)', 'ئارەزوومەندی نێردرا (چاوەڕوانە)')}</span>
               </button>
             )}
 
-            {match.requestStatus === 'accepted' && (
+            {chatFlow === 'interest_accepted' && (
+              <button
+                type="button"
+                onClick={handleChatFlowClick}
+                className="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 active:scale-98 transition duration-200 shadow-sm flex items-center justify-center space-x-1.5 group/btn cursor-pointer"
+              >
+                {isSimulatingChat ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                ) : (
+                  <ShieldCheck className="w-3.5 h-3.5 text-white shrink-0" />
+                )}
+                <span>{txt('Request Chat', 'طلب محادثة وقورة', 'داواکردنی چات')}</span>
+              </button>
+            )}
+
+            {chatFlow === 'chat_requested' && (
+              <button
+                type="button"
+                disabled
+                className="w-full py-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center space-x-1"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                <span>{txt('Chat Requested...', 'تم طلب المحادثة...', 'داوای چات کرا...')}</span>
+              </button>
+            )}
+
+            {chatFlow === 'chat_approved' && (
               <button
                 type="button"
                 disabled
                 className="w-full py-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center space-x-1"
               >
                 <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span>{txt('Mutual Approval', 'موافقة متبادلة', 'ڕەزامەندی دوولایەنە')}</span>
+                <span>{txt('Chat Approved ✓', 'تمت الموافقة على المحادثة ✓', 'چات پەسەندکرا ✓')}</span>
               </button>
             )}
           </div>
 
           {/* Secure Message Trigger (Locked or Unlocked) */}
           <div className="shrink-0">
-            {match.requestStatus === 'accepted' ? (
+            {chatFlow === 'chat_approved' ? (
               <button
                 type="button"
                 onClick={() => onInitiateChat(match.id)}
-                className="px-3 py-2.5 rounded-xl bg-[#40798C] hover:bg-[#346271] text-white font-bold text-xs transition duration-200 shadow-md flex items-center justify-center gap-1.5"
+                className="px-3 py-2.5 rounded-xl bg-[#40798C] hover:bg-[#346271] text-white font-bold text-xs transition duration-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                 title={txt('Open Guided Chat', 'فتح المحادثة الموجهة', 'کردنەوەی چات')}
               >
-                <MessageSquare className="w-4 h-4 text-emerald-200 shrink-0" />
+                <MessageSquare className="w-4 h-4 text-emerald-200 shrink-0 animate-bounce" />
                 <span>{txt('Message', 'مراسلة', 'چات')}</span>
               </button>
             ) : (
@@ -395,7 +525,7 @@ export default function MatchCard({
                 </button>
                 {/* Tooltip Popup */}
                 <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-52 bg-stone-900 text-white text-[9px] rounded-lg p-2 text-center shadow-lg z-30 font-sans font-normal leading-normal">
-                  <p>{txt('Messaging unlocks after mutual approval', 'يفتح التواصل بعد الموافقة المتبادلة', 'چات دەکرێتەوە دوای قبوڵکردنی دوولایەنە')}</p>
+                  <p>{txt('Chat opens only after both sides agree.', 'تفتح المحادثة فقط بعد موافقة الطرفين كلياً.', 'چات دەکرێتەوە تەنها دوای ڕەزامەندی هەردوولا.')}</p>
                 </div>
               </div>
             )}
@@ -432,6 +562,21 @@ export default function MatchCard({
             </button>
           </div>
         </div>
+
+        {/* Friendly Text Notice for serious courtship privacy guidelines */}
+        <div className="text-center pt-1">
+          <p className="text-[9.5px] font-semibold text-stone-400 italic">
+            🔒 {txt('Chat opens only after both sides agree.', 'تفتح المحادثة فقط بعد موافقة الطرفين بشكل متبادل.', 'چات دەکرێتەوە تەنها کاتێک هەردوو لا ڕازی بن.')}
+          </p>
+        </div>
+
+        {/* Micro toast alert on card-level */}
+        {toastText && (
+          <div className="bg-[#40798C] text-white text-[9.5px] font-bold py-1.5 px-3 rounded-xl text-center shadow-md animate-fade-in border border-[#2D5A6B] flex items-center justify-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping shrink-0" />
+            <span>{toastText}</span>
+          </div>
+        )}
 
       </div>
 

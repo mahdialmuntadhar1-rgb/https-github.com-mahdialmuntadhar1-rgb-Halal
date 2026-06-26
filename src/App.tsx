@@ -379,6 +379,9 @@ export default function App() {
                 userGovernorate={userProfile.governorate}
                 savedMatchIds={savedMatchIds}
                 onToggleSaveMatch={handleToggleSaveMatch}
+                userProfile={userProfile}
+                onUpdateUserProfile={handleUpdateUserProfile}
+                onNavigateToTab={setTab}
               />
             )}
 

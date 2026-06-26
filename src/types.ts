@@ -100,6 +100,7 @@ export interface UserProfile {
 
   photoPrivacy: PrivacySettings['photoPrivacy'];
   avatarUrl?: string;
+  photoStatus?: 'visible' | 'blurred' | 'hidden' | 'initials' | 'unlocked';
   privateContactMode?: string;
   sendRequestsPermission?: string;
   seeProfilePermission?: string;
