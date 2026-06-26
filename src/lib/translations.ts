@@ -187,6 +187,12 @@ export interface Translations {
   demoBadge: string;
   toggleDemoMode: string;
   realModeBtn: string;
+
+  // Hero Carousel
+  heroCarouselTitle: string;
+  createAccountBtn: string;
+  loginBtn: string;
+  browseMatchesBtn: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {
@@ -361,7 +367,13 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     demoBannerDesc: 'Connecting to virtual simulation sandbox. Toggle to force real backend mode below if available.',
     demoBadge: 'Demo Mode Only',
     toggleDemoMode: 'Switch Mode',
-    realModeBtn: 'Attempt Real Backend API Integration'
+    realModeBtn: 'Attempt Real Backend API Integration',
+
+    // Hero Carousel
+    heroCarouselTitle: 'Find a serious path to marriage',
+    createAccountBtn: 'Create Account',
+    loginBtn: 'Login',
+    browseMatchesBtn: 'Browse Matches'
   },
   ar: {
     dir: 'rtl',
@@ -534,7 +546,13 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     demoBannerDesc: 'أنت تتصفح حسابات تجريبية ومحاكاة محلية لتبسيط التجربة. يمكنك محاولة الاتصال بالخادم الحقيقي أدناه.',
     demoBadge: 'وضع تجريبي فقط',
     toggleDemoMode: 'تغيير وضع التشغيل',
-    realModeBtn: 'الاتصال بخادم API الحقيقي للإنتاج'
+    realModeBtn: 'الاتصال بخادم API الحقيقي للإنتاج',
+
+    // Hero Carousel
+    heroCarouselTitle: 'ابدأ طريقاً جاداً نحو الزواج',
+    createAccountBtn: 'إنشاء حساب جاد',
+    loginBtn: 'تسجيل الدخول',
+    browseMatchesBtn: 'تصفح الشركاء'
   },
   ckb: {
     dir: 'rtl',
@@ -707,6 +725,12 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     demoBannerDesc: 'تۆ پڕۆفایلە تاقیکاریەکان دەبینیت بۆ ئاسانکاری پلاتفۆرمەکە. دەتوانیت هەوڵی بەستنەوەی سێرڤەری سەرەکی بدەیت لە خوارەوە.',
     demoBadge: 'تەنها پڕۆفایلی تاقیکاری',
     toggleDemoMode: 'گۆڕینی دۆخ',
-    realModeBtn: 'هەوڵدان بۆ بەستنەوەی سێرڤەری سەرەکی'
+    realModeBtn: 'هەوڵدان بۆ بەستنەوەی سێرڤەری سەرەکی',
+
+    // Hero Carousel
+    heroCarouselTitle: 'ڕێگایەکی جددی بۆ هاوسەرگیری دەست پێ بکە',
+    createAccountBtn: 'دروستکردنی هەژماری نوێ',
+    loginBtn: 'چوونە ژوورەوە',
+    browseMatchesBtn: 'گەڕان بەدوای هاوسەردا'
   }
 };

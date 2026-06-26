@@ -101,7 +101,7 @@ export default function App() {
       ]);
       setMatches(matchesResult.matches);
       setConversations(convs);
-      setTab('onboarding');
+      setTab('explore');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -330,6 +330,8 @@ export default function App() {
                 }}
                 onExploreMatches={() => setTab('explore')}
                 setTab={setTab}
+                isAuthenticated={isAuthenticated}
+                userProfileName={userProfile?.name}
               />
             )}
 

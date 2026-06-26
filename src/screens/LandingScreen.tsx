@@ -12,9 +12,11 @@ interface LandingScreenProps {
   onSelectGender: (gender: 'male' | 'female') => void;
   onExploreMatches: () => void;
   setTab: (tab: AppTab) => void;
+  isAuthenticated: boolean;
+  userProfileName?: string;
 }
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
 
   return (
@@ -23,6 +25,9 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         locale={locale}
         onSelectGender={onSelectGender}
         onExploreMatches={onExploreMatches}
+        setTab={setTab}
+        isAuthenticated={isAuthenticated}
+        userProfileName={userProfileName}
       />
       <HowItWorks locale={locale} />
       <PhotoPrivacyModule locale={locale} />

@@ -2,7 +2,6 @@ import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityP
 import { mockApi } from './mockApi';
 
 const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL || '/api';
-const HAS_EXPLICIT_API_BASE = Boolean((import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL);
 
 /**
  * Checks if we should run in local demo mode.
@@ -14,11 +13,8 @@ export function getIsDemoMode(): boolean {
   const forceReal = localStorage.getItem('halal_force_real') === 'true';
   
   if (forceReal) return false;
-
-  // If a backend URL is configured, use the real backend instead of local demo mode.
-  if (HAS_EXPLICIT_API_BASE) return false;
   
-  // If no token and no backend URL exists, keep local demo mode available.
+  // If no token exists, we default to demo mode so the user can interact with the app immediately
   if (!token) return true;
   
   return false;
@@ -94,77 +90,50 @@ export const apiClient = {
     return data;
   },
 
-  async register(
-    email: string,
-    password: string,
-    name: string,
-    phone: string,
-    country: string,
-    governorate: string,
-    gender: 'male' | 'female' = 'male'
-  ): Promise<{ token: string; user: User }> {
-    const registrationPayload = {
-      email,
-      password,
-      name,
-      phone,
-      country,
-      governorate,
-      gender
-    };
-
+  async register(email: string, password: string, name: string, gender: 'male' | 'female'): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
-      if (!email || !password || !name || !phone || !country || !governorate) {
+      // Mock register response
+      if (!email || !password || !name) {
         throw new Error('Please fill in all registration fields');
       }
-
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
-
       const user: User = {
         id: 'me',
         email,
         name,
-        phone,
-        country,
-        governorate,
         membershipStatus: 'free',
         createdAt: new Date().toISOString(),
         role: email.includes('admin') ? 'admin' : 'user'
       };
 
+      // Reset mock profile with basic data
       await mockApi.updateCurrentUserProfile({
         email,
         name,
-        phone,
-        country,
-        governorate,
         gender,
         role: user.role,
-        age: 0,
-        education: '',
-        profession: ''
+        age: 25, // default
+        education: 'Bachelor Degree',
+        profession: 'Professional'
       });
 
       return { token: 'mock_jwt_token_for_demo', user };
     }
 
+    // Real API call
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(registrationPayload),
+      body: JSON.stringify({ email, password, name, gender }),
     });
-
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.message || `Registration failed: ${res.statusText}`);
     }
-
     const data = await res.json();
-
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
-
     return data;
   },
 

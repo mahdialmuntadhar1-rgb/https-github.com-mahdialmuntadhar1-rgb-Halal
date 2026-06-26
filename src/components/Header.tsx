@@ -278,12 +278,7 @@ export default function Header({
           </div>
         </div>
 
-        {/* Beautiful Hero Section Rectangle Banner (Without any overlay text or button) */}
-        {currentTab === 'landing' && (
-          <div className="w-full mt-1.5 mb-5 animate-fade-in" id="header-hero-banner">
-            <HeroSlideshow images={heroImages} />
-          </div>
-        )}
+
 
         {/* Mobile Navigation Row */}
         <div className="flex md:hidden border-t border-white/20 py-2.5 overflow-x-auto scrollbar-none justify-start sm:justify-around items-center text-xs space-x-1 rtl:space-x-reverse px-2 gap-1">
