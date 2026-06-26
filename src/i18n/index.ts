@@ -1,5 +1,3 @@
-﻿export * from './translations';
-export * from './displayValue';
+export * from './translations';
 export * from './LanguageProvider';
-export * from './HeaderLanguageSelector';
-export * from './I18nFloatingControl';
+export * from './LanguageSelector';

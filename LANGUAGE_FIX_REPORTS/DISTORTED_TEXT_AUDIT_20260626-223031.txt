@@ -1,0 +1,32 @@
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\ChatSimulator.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\FilterPanel.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\GenderSelectionCards.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\HowItWorks.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\LanguageSwitcher.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\MatchExplorer.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\PhotoPrivacyModule.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\ProfileCard.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\components\TrustSafety.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\constants\index.ts ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\i18n\labels.ts ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\lib\translations.ts ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\AccountPlaceholderScreen.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\PrivacySettingsScreen.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\ProfilePreviewScreen.tsx ---
+
+--- C:\Users\HB LAPTOP STORE\Documents\Codex\2026-06-23\please-update-the-marriage-matchmaking-app\work\halal-app\src\screens\TrustPrivacyScreen.tsx ---

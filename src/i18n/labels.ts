@@ -1,4 +1,4 @@
-import type { Language, Translations } from './translations';
+import type { Language, Translations } from '../lib/translations';
 
 const keyMap: Record<string, keyof Translations> = {
   'Serious for marriage': 'seriousForMarriage',
