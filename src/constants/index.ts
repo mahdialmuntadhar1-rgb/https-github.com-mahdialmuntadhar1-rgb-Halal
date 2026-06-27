@@ -16,7 +16,8 @@ export const GOVERNORATES = [
   'Muthanna',
   'Salah al-Din',
   'Wasit',
-  'Dhi Qar'
+  'Dhi Qar',
+  'Halabja'
 ];
 
 export const SECTS = [

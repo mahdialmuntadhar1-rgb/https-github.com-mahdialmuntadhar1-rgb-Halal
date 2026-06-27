@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MatchProfile, SearchFilters, AppLanguage, UserProfile } from '../types';
 import { apiClient } from '../services/apiClient';
 import FilterPanel from '../components/FilterPanel';
@@ -206,21 +206,40 @@ export default function MatchExplorerScreen({
     }
   }, [matches]);
 
+  const isProfileIncomplete = useMemo(() => {
+    return !userProfile.age || userProfile.age === 0 || !userProfile.education || !userProfile.profession;
+  }, [userProfile]);
+
+  const incompleteMatches = useMemo(() => {
+    const women = matches.filter(m => m.gender === 'female').slice(0, 2);
+    const men = matches.filter(m => m.gender === 'male').slice(0, 2);
+    return [...women, ...men];
+  }, [matches]);
+
   // Derived matches after applying client-side bookmark filtering and passes if requested
-  const displayedMatches = (browsingMode === 'saved'
-    ? loadedMatches.filter((m) => savedMatchIds.includes(m.id))
-    : loadedMatches
-  ).filter((m) => !blockedMatchIds.includes(m.id) && !passedMatchIds.includes(m.id));
+  const displayedMatches = useMemo(() => {
+    if (isProfileIncomplete) return incompleteMatches;
+    return (browsingMode === 'saved'
+      ? loadedMatches.filter((m) => savedMatchIds.includes(m.id))
+      : loadedMatches
+    ).filter((m) => !blockedMatchIds.includes(m.id) && !passedMatchIds.includes(m.id));
+  }, [isProfileIncomplete, incompleteMatches, loadedMatches, browsingMode, savedMatchIds, blockedMatchIds, passedMatchIds]);
 
   // Saved portfolios match list (unfiltered by passes)
-  const savedMatches = loadedMatches.filter((m) => 
-    savedMatchIds.includes(m.id) && !blockedMatchIds.includes(m.id)
-  );
+  const savedMatches = useMemo(() => {
+    if (isProfileIncomplete) return incompleteMatches;
+    return loadedMatches.filter((m) => 
+      savedMatchIds.includes(m.id) && !blockedMatchIds.includes(m.id)
+    );
+  }, [isProfileIncomplete, incompleteMatches, loadedMatches, savedMatchIds, blockedMatchIds]);
 
   // Active swipe matches remaining (unpassed, unblocked)
-  const swipeMatches = loadedMatches.filter((m) => 
-    !blockedMatchIds.includes(m.id) && !passedMatchIds.includes(m.id)
-  );
+  const swipeMatches = useMemo(() => {
+    if (isProfileIncomplete) return incompleteMatches;
+    return loadedMatches.filter((m) => 
+      !blockedMatchIds.includes(m.id) && !passedMatchIds.includes(m.id)
+    );
+  }, [isProfileIncomplete, incompleteMatches, loadedMatches, blockedMatchIds, passedMatchIds]);
 
   // Synchronized view for selected match to capture live state changes
   const activeSelectedMatch = selectedMatch 
@@ -274,20 +293,44 @@ export default function MatchExplorerScreen({
         </div>
       )}
 
-      {/* Interactive Profile Completion Progress Card */}
-      <ProfileCompletionCard
-        locale={locale}
-        userProfile={userProfile}
-        onUpdateProfile={onUpdateUserProfile}
-      />
+      {/* Interactive Profile Completion Progress Card or Incomplete Warning Banner */}
+      {isProfileIncomplete ? (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs animate-fade-in text-start" id="complete-profile-banner">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⚠️</span>
+              <h4 className="text-base sm:text-lg font-serif font-black text-amber-900">
+                {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
+              </h4>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
+                {txt("Limited Access", "وصول محدود", "دەستپێگەیشتنی سنووردار")}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
+              {txt(
+                "To ensure a respectful, serious, and Shari'a-compliant matchmaking process, you are currently shown exactly two women and two men. Please complete your marriage profile parameters to unlock full access, custom match lists, and private filters.",
+                "لضمان تعارف وقور وجاد متوافق مع الشريعة الغراء، يظهر لك حالياً امرأتان ورجلان فقط. يرجى إكمال بيانات ملفك الشخصي لتتمكن من استكشاف كافة الشركاء المناسبين وتفعيل مرشحات البحث المتقدمة والخاصة.",
+                "بۆ دڵنیابوون لەوەی کە پڕۆسەی هاوسەرگیری بە شێوەیەکی ڕێزدار و جدی ئەنجام دەدرێت، لە ئێستادا تەنها دوو ژن و دوو پیاو پیشان دەدرێن. تکایە پڕۆفایلی خۆت تەواو بکە بۆ بەدەستهێنانی دەستپێگەیشتنی تەواو."
+              )}
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigateToTab && onNavigateToTab('onboarding')}
+            className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Star className="w-4 h-4 text-amber-300 animate-pulse fill-amber-300" />
+            <span>{txt("Complete Profile Now", "أكمل ملفك الآن", "ئێستا پڕۆفایلەکەت تەواو بکە")}</span>
+          </button>
+        </div>
+      ) : (
+        <ProfileCompletionCard
+          locale={locale}
+          userProfile={userProfile}
+          onUpdateProfile={onUpdateUserProfile}
+        />
+      )}
 
-      {/* Today in Zawaj Daily Digest */}
-      <TodayInZawaj
-        locale={locale}
-        matches={matches}
-        onSelectMatch={setSelectedMatch}
-        onNavigateToTab={(tab) => onNavigateToTab && onNavigateToTab(tab)}
-      />
+
 
       {/* Browsing modes tabs (Grid vs Swipe Deck vs Saved portfolios) */}
       <div className="flex flex-wrap gap-2.5 pb-2 border-b border-stone-200 text-left">
@@ -523,6 +566,12 @@ export default function MatchExplorerScreen({
           )}
         </div>
       )}
+
+      {/* Today in Zawaj Daily Digest */}
+      <TodayInZawaj
+        locale={locale}
+        onNavigateToTab={(tab) => onNavigateToTab && onNavigateToTab(tab)}
+      />
 
       {/* Structured Courtship Portfolio detail modal (Extremely comprehensive as serious apps) */}
       <Modal

@@ -30,6 +30,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const [name, setName] = useState(''); // Full Name
   const [email, setEmail] = useState('');
   const [governorate, setGovernorate] = useState('Baghdad');
+  const [district, setDistrict] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState(''); // Optional
 
@@ -63,7 +64,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !name || !governorate) {
+    if (!email || !password || !confirmPassword || !name || !governorate || !district.trim()) {
       triggerToast(txt('Please fill in all required fields.', 'يرجى تعبئة كافة الحقول المطلوبة.', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە.'));
       return;
     }
@@ -73,9 +74,16 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.register(name, governorate, email, phone.trim() || undefined, password);
+      const result = await apiClient.register(name, governorate, district.trim(), email, phone.trim() || undefined, password);
       triggerToast(txt('✨ Account created successfully.', '✨ تم إنشاء الحساب بنجاح.', '✨ هەژمارەکەت بە سەرکەوتوویی دروستکرا.'));
       
+      // Update district on the profile immediately
+      try {
+        await apiClient.updateCurrentUserProfile({ city: district.trim() });
+      } catch (e) {
+        console.warn("Could not set city/district on newly created profile:", e);
+      }
+
       const profile = await apiClient.getCurrentUser();
       onAuthSuccess(result.token, profile);
     } catch (err: any) {
@@ -299,6 +307,25 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                       <option key={govName} value={govName}>{govName}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('District / Neighborhood', 'القضاء / الحي', 'قەزا یان گەڕەک')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <MapPin className="h-4.5 w-4.5 text-accent-coral" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                    placeholder={txt('e.g. Karrada, Erbil Center...', 'مثال: الكرادة، مركز أربيل...', 'بۆ نموونە: کەڕادە، سەنتەری هەولێر...')}
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
                 </div>
               </div>
 

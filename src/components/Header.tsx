@@ -42,7 +42,7 @@ export default function Header({
           {/* Logo & Slogan */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center shadow-lg shadow-accent-coral/20 shrink-0">
-              <span className="text-white font-serif font-bold text-xl">H</span>
+              <span className="text-white font-serif font-bold text-xl">Z</span>
             </div>
             <div className="text-start">
               <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
@@ -133,90 +133,103 @@ export default function Header({
           {/* Right Action Menu: Profile Strength bar & Shortcuts */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             
-            {/* Profile Info block */}
-            <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
-              <div className="flex items-center gap-2">
-                <span 
-                  className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
-                  onClick={() => setTab('profile')}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
-                  {userProfileName ? `${t.welcome}, ${userProfileName}` : t.guestProfile}
-                </span>
-                {onLogout && userProfileName && (
-                  <button 
-                    onClick={onLogout}
-                    className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
-                    title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
-                  >
-                    {locale === 'en' ? 'Logout' : locale === 'ar' ? 'خروج' : 'دەرچوون'}
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
-                <div className="w-20 bg-white/40 border border-white/20 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-[#40798C] to-[#599da0] h-full transition-all duration-500"
-                    style={{ width: `${profileStrength}%` }}
-                  />
+            {/* Profile Info block / Login Button */}
+            {userProfileName ? (
+              <>
+                <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
+                  <div className="flex items-center gap-2">
+                    <span 
+                      className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
+                      onClick={() => setTab('profile')}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
+                      {`${t.welcome}, ${userProfileName}`}
+                    </span>
+                    {onLogout && (
+                      <button 
+                        onClick={onLogout}
+                        className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
+                        title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
+                      >
+                        {locale === 'en' ? 'Logout' : locale === 'ar' ? 'خروج' : 'دەرچوون'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
+                    <div className="w-20 bg-white/40 border border-white/20 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-[#40798C] to-[#599da0] h-full transition-all duration-500"
+                        style={{ width: `${profileStrength}%` }}
+                      />
+                    </div>
+                    <span 
+                      className="text-[10px] text-[#6B635B] font-mono font-bold cursor-pointer hover:text-[#40798C] transition-colors"
+                      onClick={() => setTab('profile')}
+                    >
+                      {profileStrength}% {t.completeScore}
+                    </span>
+                  </div>
                 </div>
-                <span 
-                  className="text-[10px] text-[#6B635B] font-mono font-bold cursor-pointer hover:text-[#40798C] transition-colors"
-                  onClick={() => setTab('profile')}
-                >
-                  {profileStrength}% {t.completeScore}
-                </span>
-              </div>
-            </div>
 
-            {/* Quick settings switches (Dossier, Privacy, Account) */}
-            {profileStrength > 0 && (
-              <div className="flex items-center gap-1 bg-white/30 p-1 rounded-xl border border-white/40">
+                {/* Quick settings switches (Dossier, Privacy, Account) */}
+                {profileStrength > 0 && (
+                  <div className="flex items-center gap-1 bg-white/30 p-1 rounded-xl border border-white/40">
+                    <button
+                      onClick={() => setTab('profile')}
+                      title="My Dossier"
+                      className={`p-1.5 rounded-lg transition-all ${
+                        currentTab === 'profile' 
+                          ? 'bg-[#40798C] text-white shadow-sm scale-102' 
+                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                      }`}
+                    >
+                      <User className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setTab('privacy')}
+                      title="Privacy Settings"
+                      className={`p-1.5 rounded-lg transition-all ${
+                        currentTab === 'privacy' 
+                          ? 'bg-[#FF7F50] text-white shadow-sm scale-102' 
+                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                      }`}
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setTab('account')}
+                      title="Account Verification Center"
+                      className={`p-1.5 rounded-lg transition-all ${
+                        currentTab === 'account' 
+                          ? 'bg-emerald-600 text-white shadow-sm scale-102' 
+                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
+                      }`}
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
                 <button
-                  onClick={() => setTab('profile')}
-                  title="My Dossier"
-                  className={`p-2 rounded-lg transition-all ${
-                    currentTab === 'profile' 
-                      ? 'bg-[#40798C] text-white shadow-sm scale-102' 
-                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                  }`}
+                  onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
+                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#FF7F50]/10 text-accent-coral hover:bg-[#FF7F50]/20 flex items-center gap-1"
                 >
-                  <User className="w-3.5 h-3.5" />
+                  <User className="w-3.5 h-3.5 text-[#FF7F50]" />
+                  <span className="hidden xs:inline">
+                    {t.editDetails}
+                  </span>
                 </button>
-                <button
-                  onClick={() => setTab('privacy')}
-                  title="Privacy Settings"
-                  className={`p-2 rounded-lg transition-all ${
-                    currentTab === 'privacy' 
-                      ? 'bg-[#FF7F50] text-white shadow-sm scale-102' 
-                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                  }`}
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setTab('account')}
-                  title="Account Verification Center"
-                  className={`p-2 rounded-lg transition-all ${
-                    currentTab === 'account' 
-                      ? 'bg-emerald-600 text-white shadow-sm scale-102' 
-                      : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                  }`}
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              </>
+            ) : (
+              <button
+                onClick={() => setTab('onboarding')}
+                className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 shadow-md shadow-accent-coral/10 hover:shadow-lg transition-all duration-200 flex items-center gap-1.5 cursor-pointer hover:scale-102"
+                id="header-login-btn"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>{locale === 'en' ? 'Login' : locale === 'ar' ? 'دخول / تسجيل' : 'چوونە ژوورەوە'}</span>
+              </button>
             )}
-
-            <button
-              onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
-              className="p-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 border border-accent-coral/20 bg-[#FF7F50]/10 text-accent-coral hover:bg-[#FF7F50]/20 flex items-center gap-1.5"
-            >
-              <User className="w-4 h-4 text-[#FF7F50]" />
-              <span className="hidden xs:inline">
-                {profileStrength > 0 ? t.editDetails : t.onboardNow}
-              </span>
-            </button>
           </div>
         </div>
 

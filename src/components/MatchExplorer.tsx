@@ -17,6 +17,29 @@ const GOVERNORATES = [
   'Maysan', 'Dhi Qar', 'Muthanna', 'Qadisiyah', 'Halabja'
 ];
 
+const GOVERNORATE_NAMES: Record<string, { en: string; ar: string; ckb: string }> = {
+  'All Iraq': { en: 'All Iraq', ar: 'كل العراق', ckb: 'هەموو عێراق' },
+  'Baghdad': { en: 'Baghdad', ar: 'بغداد', ckb: 'بەغداد' },
+  'Erbil': { en: 'Erbil', ar: 'أربيل', ckb: 'هەولێر' },
+  'Sulaymaniyah': { en: 'Sulaymaniyah', ar: 'السليمانية', ckb: 'سلێمانی' },
+  'Duhok': { en: 'Duhok', ar: 'دهوك', ckb: 'دهۆک' },
+  'Halabja': { en: 'Halabja', ar: 'حلبجة', ckb: 'هەڵەبجە' },
+  'Kirkuk': { en: 'Kirkuk', ar: 'كركوك', ckb: 'کەرکوک' },
+  'Nineveh': { en: 'Nineveh', ar: 'نينوى', ckb: 'نەینەوا' },
+  'Basra': { en: 'Basra', ar: 'البصرة', ckb: 'بەسرە' },
+  'Najaf': { en: 'Najaf', ar: 'النجف', ckb: 'نەجەف' },
+  'Karbala': { en: 'Karbala', ar: 'كربلاء', ckb: 'کەربەلا' },
+  'Babil': { en: 'Babil', ar: 'بابل', ckb: 'بابل' },
+  'Anbar': { en: 'Anbar', ar: 'الأنبار', ckb: 'ئەنبار' },
+  'Diyala': { en: 'Diyala', ar: 'ديالى', ckb: 'دیالە' },
+  'Salah al-Din': { en: 'Salah al-Din', ar: 'صلاح الدين', ckb: 'سەڵاحەدین' },
+  'Wasit': { en: 'Wasit', ar: 'واسط', ckb: 'واسیت' },
+  'Maysan': { en: 'Maysan', ar: 'ميسان', ckb: 'میسان' },
+  'Dhi Qar': { en: 'Dhi Qar', ar: 'ذي قار', ckb: 'زیقار' },
+  'Muthanna': { en: 'Muthanna', ar: 'المثنى', ckb: 'موتەنا' },
+  'Qadisiyah': { en: 'Qadisiyah', ar: 'القادسية', ckb: 'قادسیە' }
+};
+
 const GOVERNORATE_CITIES: Record<string, string[]> = {
   'All Iraq': ['All Cities'],
   'Baghdad': ['All Cities', 'Karrada', 'Mansour', 'Adhamiyah', 'Jadriya', 'Zayouna'],
@@ -212,6 +235,60 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
             <span className="w-1.5 h-1.5 bg-[#40798C] rounded-full animate-pulse" />
             <span>{filteredMatches.length} Compatible Portfolios</span>
           </div>
+        </div>
+      </div>
+      
+      {/* Horizontal Governorate Quick Filter Pills */}
+      <div className="bg-white/40 border border-white/50 p-4 rounded-3xl shadow-md text-left space-y-3" id="gov-quick-filters">
+        <div className="flex justify-between items-center px-1">
+          <span className="text-xs font-bold text-warm-charcoal uppercase tracking-widest font-mono">
+            {txt('Quick Filter by Governorate', 'تصفية سريعة حسب المحافظة', 'پاڵاوکردنی خێرا بەپێی پارێزگا')}
+          </span>
+          {filters.governorate !== 'All Iraq' && (
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, governorate: 'All Iraq' }))}
+              className="text-[11px] font-bold text-accent-coral hover:underline"
+            >
+              {txt('Clear Filter', 'إلغاء التصفية', 'پاککردنەوەی پاڵاو')}
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0">
+          {GOVERNORATES.map((g) => {
+            const isSelected = filters.governorate === g;
+            const trans = GOVERNORATE_NAMES[g] || { en: g, ar: g, ckb: g };
+            const displayName = locale === 'en' ? trans.en : locale === 'ckb' ? trans.ckb : trans.ar;
+            
+            // Calculate active profiles matching basic filters (gender and age)
+            const count = matches.filter(m => {
+              if (filters.gender !== 'all' && m.gender !== filters.gender) return false;
+              if (m.age < filters.minAge || m.age > filters.maxAge) return false;
+              if (g !== 'All Iraq' && m.governorate !== g) return false;
+              return true;
+            }).length;
+
+            return (
+              <button
+                key={g}
+                onClick={() => setFilters(prev => ({ ...prev, governorate: g }))}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 border cursor-pointer shrink-0 ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white border-transparent shadow-md shadow-accent-coral/20'
+                    : 'bg-white border-stone-200 text-warm-charcoal hover:border-stone-300 hover:bg-stone-50'
+                }`}
+              >
+                <span>{displayName}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                  isSelected 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-stone-100 text-stone-500'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

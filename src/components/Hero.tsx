@@ -15,8 +15,8 @@ interface HeroProps {
 
 const CAROUSEL_SLIDES = [
   {
-    localUrl: '/hero/marriage-1.jpg',
-    fallbackUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200',
+    localUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=1200',
+    fallbackUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=1200',
     title: {
       en: 'Find a Serious Path to Marriage',
       ar: 'ابدأ طريقاً جاداً نحو الزواج',
@@ -29,7 +29,7 @@ const CAROUSEL_SLIDES = [
     }
   },
   {
-    localUrl: '/hero/marriage-2.jpg',
+    localUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1200',
     fallbackUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1200',
     title: {
       en: 'A Sacred Covenant of Trust',
@@ -43,8 +43,8 @@ const CAROUSEL_SLIDES = [
     }
   },
   {
-    localUrl: '/hero/couple-1.jpg',
-    fallbackUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=1200',
+    localUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
+    fallbackUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
     title: {
       en: 'Dignified Photo Protection',
       ar: 'الخصوصية التامة لصورك التعريفية',
@@ -57,8 +57,8 @@ const CAROUSEL_SLIDES = [
     }
   },
   {
-    localUrl: '/hero/family-1.jpg',
-    fallbackUrl: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&q=80&w=1200',
+    localUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&q=80&w=1200',
+    fallbackUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&q=80&w=1200',
     title: {
       en: 'Sincere Matches, Shared Goals',
       ar: 'نوايا صادقة وأهداف عائلية مشتركة',
@@ -71,8 +71,8 @@ const CAROUSEL_SLIDES = [
     }
   },
   {
-    localUrl: '/hero/rings-1.jpg',
-    fallbackUrl: 'https://images.unsplash.com/photo-1607190074257-dd4b7af0309f?auto=format&fit=crop&q=80&w=1200',
+    localUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
+    fallbackUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
     title: {
       en: 'Blessed Halal Union',
       ar: 'عقود مباركة وبيوت مطمئنة',
@@ -81,7 +81,7 @@ const CAROUSEL_SLIDES = [
     subtitle: {
       en: 'Take a secure, respectable path toward sealing a happy, long-lasting household.',
       ar: 'خذ مساراً آمناً ووقوراً نحو تأسيس زواج مستقر وحياة زوجية عامرة بالسعادة.',
-      ckb: 'ڕێگایەکی ئارام و بەڕێز بگرەبەر بۆ پێکهێنانی ژیانێکی هاوسەری جێگیر.'
+      ckb: 'ڕێگايەکی ئارام و بەڕێز بگرەبەر بۆ پێکهێنانی ژیانێکی هاوسەری جێگیر.'
     }
   }
 ];

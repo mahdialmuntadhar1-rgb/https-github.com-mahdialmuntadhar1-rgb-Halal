@@ -1,11 +1,28 @@
-import React from 'react';
-import { AppLanguage, AppTab } from '../types';
+import React, { useState, useMemo } from 'react';
+import { AppLanguage, AppTab, MatchProfile, UserProfile } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
 import PhotoPrivacyModule from '../components/PhotoPrivacyModule';
 import TrustSafety from '../components/TrustSafety';
-import { Check } from 'lucide-react';
+import MarriageCafe from '../components/MarriageCafe';
+import { INITIAL_MATCHES } from '../data/matches';
+import { 
+  Check, 
+  MapPin, 
+  User, 
+  Users, 
+  GraduationCap, 
+  Filter, 
+  Sparkles, 
+  Heart, 
+  ShieldCheck, 
+  Lock,
+  ArrowRight,
+  UserCheck,
+  X,
+  Compass
+} from 'lucide-react';
 
 interface LandingScreenProps {
   locale: AppLanguage;
@@ -14,13 +31,162 @@ interface LandingScreenProps {
   setTab: (tab: AppTab) => void;
   isAuthenticated: boolean;
   userProfileName?: string;
+  userProfile?: UserProfile;
 }
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName }: LandingScreenProps) {
+// 19 Governorates list with English, Arabic, and Kurdish translations
+const GOVERNORATE_OPTIONS = [
+  { id: 'Baghdad', en: 'Baghdad (بغداد / بەغداد)', ar: 'بغداد (Baghdad)', ckb: 'بەغداد (Baghdad)' },
+  { id: 'Erbil', en: 'Erbil (أربيل / هەولێر)', ar: 'أربيل (Erbil)', ckb: 'هەولێر (Erbil)' },
+  { id: 'Sulaymaniyah', en: 'Sulaymaniyah (السليمانية / سلێمانی)', ar: 'السليمانية (Sulaymaniyah)', ckb: 'سلێمانی (Sulaymaniyah)' },
+  { id: 'Duhok', en: 'Duhok (دهوك / دهۆک)', ar: 'دهوك (Duhok)', ckb: 'دهۆک (Duhok)' },
+  { id: 'Halabja', en: 'Halabja (حلبجة / هەڵەبجە)', ar: 'حلبجة (Halabja)', ckb: 'هەڵەبجە (Halabja)' },
+  { id: 'Kirkuk', en: 'Kirkuk (كركوك / کەرکوک)', ar: 'كركوك (Kirkuk)', ckb: 'کەرکوک (Kirkuk)' },
+  { id: 'Nineveh', en: 'Nineveh (نينوى / نەینەوا)', ar: 'نينوى (Nineveh)', ckb: 'نەینەوا (Nineveh)' },
+  { id: 'Basra', en: 'Basra (البصرة / بەسرە)', ar: 'البصرة (Basra)', ckb: 'بەسرە (Basra)' },
+  { id: 'Najaf', en: 'Najaf (النجف / نەجەف)', ar: 'النجف (Najaf)', ckb: 'نەجەف (Najaf)' },
+  { id: 'Karbala', en: 'Karbala (كربلاء / کەربەلا)', ar: 'كربلاء (Karbala)', ckb: 'کەربەلا (Karbala)' },
+  { id: 'Babil', en: 'Babil (بابل / بابل)', ar: 'بابل (Babel)', ckb: 'بابل (Babel)' },
+  { id: 'Anbar', en: 'Anbar (الأنبار / ئەنبار)', ar: 'الأنبار (Anbar)', ckb: 'ئەنبار (Anbar)' },
+  { id: 'Diyala', en: 'Diyala (ديالى / دیالە)', ar: 'ديالى (Diyala)', ckb: 'دیالە (Diyala)' },
+  { id: 'Salah al-Din', en: 'Salah al-Din (صلاح الدين / سەڵاحەدین)', ar: 'صلاح الدين (Salah al-Din)', ckb: 'سەڵاحەدین (Salah al-Din)' },
+  { id: 'Wasit', en: 'Wasit (واسط / واسیت)', ar: 'واسط (Wasit)', ckb: 'واسیت (Wasit)' },
+  { id: 'Maysan', en: 'Maysan (ميسان / میسان)', ar: 'ميسان (Maysan)', ckb: 'میسان (Maysan)' },
+  { id: 'Dhi Qar', en: 'Dhi Qar (ذي قار / زیقار)', ar: 'ذي قار (Dhi Qar)', ckb: 'زیقار (Dhi Qar)' },
+  { id: 'Muthanna', en: 'Muthanna (المثنى / موتەنا)', ar: 'المثنى (Muthanna)', ckb: 'موتەنا (Muthanna)' },
+  { id: 'Qadisiyah', en: 'Qadisiyah (القادسية / قادسيە)', ar: 'القادسية (Qadisiyah)', ckb: 'قادسیە (Qadisiyah)' }
+];
+
+// System-selected landmarks for the 19 Iraqi governorates
+const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: string; icon: string }> = {
+  Baghdad: { en: 'Al-Mutanabbi Street', ar: 'شارع المتنبي التراثي', ckb: 'شەقامی موتەنەبی مێژوویی', icon: '📚' },
+  Erbil: { en: 'Erbil Citadel', ar: 'قلعة أربيل الأثرية', ckb: 'قەڵای هەولێری دێرین', icon: '🏰' },
+  Sulaymaniyah: { en: 'Salim Street & Azadi Park', ar: 'شارع سالم وحديقة آزادي', ckb: 'شەقامی سالم و باخی دایک', icon: '🌳' },
+  Duhok: { en: 'Duhok Dam & Dream City', ar: 'سد دهوك ومدينة الأحلام', ckb: 'بەنداوی دهۆک و دریم سیتی', icon: '🎡' },
+  Halabja: { en: 'Sarchinar & Ahmad Awa', ar: 'شلالات أحمد آوا الجميلة', ckb: 'هاوینەهەواری ئەحمەد ئاوا', icon: '🌊' },
+  Kirkuk: { en: 'Kirkuk Citadel', ar: 'قلعة كركوك التاريخية', ckb: 'قەڵای کەرکوکی مێژوویی', icon: '🏛️' },
+  Nineveh: { en: 'Al-Nuri Mosque & Mosul Woods', ar: 'غابات الموصل والمنارة الحدباء', ckb: 'دارستانەکانی موسڵ', icon: '🕌' },
+  Basra: { en: 'Shatt al-Arab Corniche', ar: 'كورنيش شط العرب', ckb: 'کۆڕنیشی شەتل عەرەب', icon: '⛵' },
+  Najaf: { en: 'Wadi-us-Salaam & Heritage Bazaar', ar: 'السوق الكبير والتراث النجفي', ckb: 'بازاڕی گەورەی نەجەف', icon: '🕌' },
+  Karbala: { en: 'Al-Hussein Area & Lake Milh', ar: 'منطقة الحرمين وبحيرة الملح', ckb: 'ناوچەی حەرەمەین', icon: '🌅' },
+  Babil: { en: 'Ancient Ruins of Babylon', ar: 'آثار بابل التاريخية وأسد بابل', ckb: 'شوێنەواری دێرینی بابل', icon: '🦁' },
+  Anbar: { en: 'Habbaniyah Lake & Euphrates', ar: 'بحيرة الحبانية ونهر الفرات', ckb: 'دەریاچەی حەبانیە', icon: '🏖️' },
+  Diyala: { en: 'Hamrin Hills & Orange Groves', ar: 'بساتين البرتقال وتلال حمرين', ckb: 'باخەکانی پرتەقاڵی دیالە', icon: '🍊' },
+  "Salah al-Din": { en: 'Spiral Minaret of Samarra', ar: 'مئذنة الملوية الأثرية في سامراء', ckb: 'منارەی مەلوییەی سامەڕا', icon: '🕌' },
+  Wasit: { en: 'Kut Barrage & Tigris Banks', ar: 'سد الكوت وضفاف نهر دجلة', ckb: 'بەنداوی کوت', icon: '🌊' },
+  Maysan: { en: 'Amara Marshes & Kahla River', ar: 'أهوار العمارة ونهر الكحلاء', ckb: 'أهوار العمارة ونهر الكحلاء', icon: '🚣' },
+  "Dhi Qar": { en: 'Ziggurat of Ur & Chibayish Marshes', ar: 'زقورة أور الأثرية وأهوار الجبايش', ckb: 'زەقوورەی ئۆر و ئەهوارەکان', icon: '🏺' },
+  Muthanna: { en: 'Sawa Lake & Warka Ruins', ar: 'بحيرة ساوة وآثار الوركاء', ckb: 'دەریاچەی ساوا', icon: '🏜️' },
+  Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
+};
+
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+  const isEn = locale === 'en';
+  const isCkb = locale === 'ckb';
+
+  const isProfileIncomplete = useMemo(() => {
+    return isAuthenticated && (
+      !userProfile || !userProfile.age || userProfile.age === 0 || !userProfile.education || !userProfile.profession
+    );
+  }, [isAuthenticated, userProfile]);
+
+  // State management for governorate filtering
+  const [selectedGov, setSelectedGov] = useState<string>('Baghdad');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
+  const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
+  
+  // Local toast notification system
+  const [localToast, setLocalToast] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setLocalToast(msg);
+    setTimeout(() => setLocalToast(null), 4000);
+  };
+
+  // Filter matches dynamically (we guarantee at least 10 men and 10 women per governorate in INITIAL_MATCHES)
+  const filteredMatches = useMemo(() => {
+    let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
+    
+    if (activeCategory === 'brides') {
+      result = result.filter(m => m.gender === 'female');
+    } else if (activeCategory === 'grooms') {
+      result = result.filter(m => m.gender === 'male');
+    } else if (activeCategory === 'professionals') {
+      result = result.filter(m => 
+        m.education.toLowerCase().includes('bachelor') || 
+        m.education.toLowerCase().includes('doctor') || 
+        m.education.toLowerCase().includes('degree') || 
+        m.profession.toLowerCase().includes('engineer') || 
+        m.profession.toLowerCase().includes('architect') || 
+        m.profession.toLowerCase().includes('pharmacist') || 
+        m.profession.toLowerCase().includes('cardiologist')
+      );
+    }
+    
+    // Return sorted by compatibility score or verification
+    const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+    
+    if (isProfileIncomplete) {
+      const women = sorted.filter(m => m.gender === 'female').slice(0, 2);
+      const men = sorted.filter(m => m.gender === 'male').slice(0, 2);
+      return [...women, ...men];
+    }
+    
+    return sorted;
+  }, [selectedGov, activeCategory, isProfileIncomplete]);
+
+  // Featured Active Candidates (filtered active profiles who have been online)
+  const featuredCandidates = useMemo(() => {
+    // Pick 4 outstanding profiles from diverse regions
+    const baghdadGroom = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'male' && m.id === 'm1');
+    const erbilGroom = INITIAL_MATCHES.find(m => m.governorate === 'Erbil' && m.gender === 'male' && m.id === 'm2');
+    const slemaniBride = INITIAL_MATCHES.find(m => m.governorate === 'Sulaymaniyah' && m.gender === 'female' && m.id === 'f1');
+    const baghdadBride = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'female' && m.id === 'f2');
+    
+    const candidates: MatchProfile[] = [];
+    if (slemaniBride) candidates.push(slemaniBride);
+    if (erbilGroom) candidates.push(erbilGroom);
+    if (baghdadBride) candidates.push(baghdadBride);
+    if (baghdadGroom) candidates.push(baghdadGroom);
+    
+    return candidates;
+  }, []);
+
+  const getGovDisplayName = (govId: string) => {
+    const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
+    if (!gov) return govId;
+    return isEn ? gov.en : isCkb ? gov.ckb : gov.ar;
+  };
+
+  const txt = (en: string, ar: string, ckb: string) => {
+    return isEn ? en : isCkb ? ckb : ar;
+  };
+
+  const handleProfileClick = (candidate: MatchProfile) => {
+    if (!isAuthenticated) {
+      showToast(txt(
+        "💍 Please login or create an account to view deep lifestyle values & send requests!",
+        "💍 يرجى تسجيل الدخول أو إنشاء حساب لاستكشاف تفاصيل القيم العائلية والتواصل الجاد!",
+        "💍 تکایە سەرەتا بچۆ ژوورەوە یان پڕۆفایل دروست بکە بۆ دیتنی بەهاکان!"
+      ));
+      setTab('onboarding');
+    } else {
+      onExploreMatches();
+    }
+  };
 
   return (
-    <div className="animate-fade-in space-y-4" id="landing-screen">
+    <div className="animate-fade-in space-y-10 relative" id="landing-screen">
+      
+      {/* LOCAL TOAST NOTIFICATION */}
+      {localToast && (
+        <div className="fixed bottom-6 right-6 z-[9999] max-w-sm bg-warm-charcoal text-white text-xs sm:text-sm p-4 rounded-2xl shadow-2xl flex items-center space-x-3 border border-emerald-500/25 animate-slide-in">
+          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+          <p className="font-bold">{localToast}</p>
+        </div>
+      )}
+
+      {/* HERO SECTION */}
       <Hero
         locale={locale}
         onSelectGender={onSelectGender}
@@ -29,12 +195,453 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         isAuthenticated={isAuthenticated}
         userProfileName={userProfileName}
       />
+
+      {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
+      <section className="py-4" id="governorate-matrimonial-portal">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{txt("Governorate Matrimonial Portal", "بوابة المحافظات العراقية للزواج الحلال", "دەروازەی هاوسەرگیری پارێزگاکان")}</span>
+            </span>
+            <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-warm-charcoal tracking-tight">
+              {txt("Find Serious Candidates by Governorate", "ابحث عن شريك العمر حسب المحافظة", "هاوبەشی گونجاو بەپێی پارێزگا بدۆزەوە")}
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">
+              {txt(
+                "Select any of the 19 Iraqi governorates to discover serious, verified candidates living nearby. Use our precise filters to explore compatible lifestyles.",
+                "اختر أي من المحافظات الـ ١٩ في العراق لاستعراض ملفات جادة وموثقة مقيمة بالقرب منك، واكتشف مدى التوافق الاجتماعي والثقافي.",
+                "یەکێک لە ١٩ پارێزگاکەی عێراق دیاری بکە بۆ دۆزینەوەی کەسانی جدی و پشتڕاستکراوە کە لە نزیکتەوە دەژین."
+              )}
+            </p>
+          </div>
+
+          {/* PORTAL INTERACTION BOX */}
+          <div className="bg-white/60 backdrop-blur-md border border-[#E8DCC4] rounded-[2.5rem] p-6 sm:p-8 shadow-xl space-y-6 text-start">
+            
+            {/* Controls row */}
+            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-stone-100 pb-6">
+              
+              {/* Dropdown column */}
+              <div className="space-y-2 flex-grow max-w-md">
+                <label className="block text-[11px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                  📍 {txt("Select Governorate", "المحافظة المطلوبة", "پارێزگا دیاری بکە")}
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedGov}
+                    onChange={(e) => {
+                      setSelectedGov(e.target.value);
+                      showToast(txt(`Displaying candidates from ${e.target.value}`, `عرض المقبلين على الزواج من محافظة ${getGovDisplayName(e.target.value)}`, `پیشاندانی کاندیدەکانی پارێزگای ${getGovDisplayName(e.target.value)}`));
+                    }}
+                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E6DCC3] focus:border-[#40798C] focus:ring-1 focus:ring-[#40798C] text-sm font-black text-warm-charcoal outline-none cursor-pointer shadow-xs transition"
+                  >
+                    {GOVERNORATE_OPTIONS.map((gov) => (
+                      <option key={gov.id} value={gov.id}>
+                        {isEn ? gov.en : isCkb ? gov.ckb : gov.ar}
+                      </option>
+                    ))}
+                  </select>
+                  <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#40798C]" />
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div className="space-y-2 flex-grow-0">
+                <label className="block text-[11px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                  🎯 {txt("Category alignment", "الفئة والتصنيف", "پۆلێنکردن")}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'all', labelEn: 'All Matches', labelAr: 'الكل', labelCkb: 'هەموو' },
+                    { id: 'brides', labelEn: 'Brides (Women)', labelAr: 'العرائس 👩‍💼', labelCkb: 'کچان 👩‍💼' },
+                    { id: 'grooms', labelEn: 'Grooms (Men)', labelAr: 'العرسان 👨‍💼', labelCkb: 'کوڕان 👨‍💼' },
+                    { id: 'professionals', labelEn: 'Academic & Career', labelAr: 'أكاديمي ومهني 🎓', labelCkb: 'ئەکادیمی و پیشەیی 🎓' }
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id as any)}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                        activeCategory === cat.id
+                          ? 'bg-[#40798C] border-[#40798C] text-white shadow-md shadow-[#40798C]/20'
+                          : 'bg-[#FAF8F5] border-[#E6DCC3] hover:bg-stone-50 text-stone-500'
+                      }`}
+                    >
+                      {txt(cat.labelEn, cat.labelAr, cat.labelCkb)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* GOVERNORATE STORYLINE / STORIES (SOCIAL MEDIA SQUARE STORIES) */}
+            <div className="border-t border-b border-stone-100 py-6 space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent-coral/10 text-accent-coral animate-pulse shrink-0">
+                    📸
+                  </span>
+                  <div>
+                    <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal">
+                      {txt("Live Intention Stories", "قصص حية من المحافظة", "چیرۆکە زیندووەکانی پارێزگا")}
+                    </h5>
+                    <p className="text-[10px] text-stone-500 font-semibold">
+                      {txt("Click square cards to view real marital life goals", "انقر لمشاهدة أهداف الحياة ونوايا الزواج الصادقة", "بۆ بینینی مەبەستەکان کلیک لەسەر کارتەکان بکە")}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* System-selected Landmark badge */}
+                <div className="flex items-center gap-2 bg-[#FAF8F5] border border-[#E6DCC3]/80 px-3 py-1.5 rounded-xl shadow-xs self-stretch sm:self-auto justify-between sm:justify-start">
+                  <div className="flex items-center gap-1.5 text-start">
+                    <span className="text-sm shrink-0">{GOVERNORATE_LANDMARKS[selectedGov]?.icon || '📍'}</span>
+                    <div>
+                      <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider leading-none mb-0.5">
+                        📍 {txt("System Location Spotlight", "معلم المحافظة المختار", "شوێنەواری پارێزگا")}
+                      </span>
+                      <span className="text-[10.5px] font-black text-[#40798C] leading-none">
+                        {GOVERNORATE_LANDMARKS[selectedGov]?.[locale] || GOVERNORATE_LANDMARKS[selectedGov]?.ar || GOVERNORATE_LANDMARKS[selectedGov]?.en}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Horizontal scrolling square stories */}
+              {INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase()).length > 0 ? (
+                <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent snap-x">
+                  {INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase()).map((m) => {
+                    const isFemale = m.gender === 'female';
+                    
+                    // Get a custom quick intention summary based on their database text
+                    const briefQuote = m.intention ? (m.intention.length > 55 ? m.intention.substring(0, 52) + '...' : m.intention) : txt("Seeking serious marriage built on trust.", "البحث عن زواج مستقر مبني على التفاهم والمحبة.", "هیواداری دروستکردنی خێزانێکی بەختەوەر.");
+
+                    return (
+                      <div 
+                        key={`story-${m.id}`}
+                        onClick={() => setSelectedStory(m)}
+                        className="flex-shrink-0 w-32 h-44 bg-[#FCFBF9] border border-[#E6DCC3] hover:border-accent-coral rounded-2xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md hover:shadow-accent-coral/5 transition-all duration-300 transform hover:-translate-y-0.5 snap-start text-start relative overflow-hidden group select-none"
+                      >
+                        {/* Story progress indicator bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-coral to-accent-pink opacity-90 group-hover:h-1.5 transition-all" />
+                        
+                        {/* Profile ring & Age */}
+                        <div className="flex items-center justify-between mt-1">
+                          <div className="relative">
+                            <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-accent-coral via-accent-pink to-[#40798C]">
+                              <div className="w-full h-full rounded-full overflow-hidden border border-white bg-stone-100 flex items-center justify-center">
+                                {isFemale ? (
+                                  <div className="w-full h-full flex items-center justify-center bg-accent-pink/10">
+                                    <span className="text-accent-pink font-serif font-black text-xs">{m.name.charAt(0)}</span>
+                                  </div>
+                                ) : (
+                                  <img 
+                                    src={m.avatarUrl} 
+                                    alt={m.name} 
+                                    className="w-full h-full object-cover grayscale-[10%]" 
+                                    referrerPolicy="no-referrer"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
+                          </div>
+                          
+                          <span className="text-[9px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-md">
+                            {m.age}
+                          </span>
+                        </div>
+
+                        {/* Content excerpt & Name */}
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-black text-warm-charcoal truncate">
+                            {m.name}
+                          </p>
+                          <p className="text-[9px] text-stone-500 font-semibold leading-tight line-clamp-3 group-hover:text-accent-coral transition-colors">
+                            "{briefQuote}"
+                          </p>
+                        </div>
+
+                        {/* Small badge representing local identity */}
+                        <span className="text-[8.5px] font-black text-accent-coral bg-accent-coral/5 px-2 py-0.5 rounded-md inline-block truncate max-w-full">
+                          📍 {isEn ? selectedGov : isCkb ? getGovDisplayName(selectedGov) : getGovDisplayName(selectedGov)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-6 text-center text-xs font-semibold text-stone-400 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#E6DCC3]/80">
+                  {txt("No stories in this governorate yet.", "لا توجد قصص في هذه المحافظة حالياً.", "هیچ چیرۆکێک لەم پارێزگایەدا نییە تا ئێستا.")}
+                </div>
+              )}
+            </div>
+
+            {/* PROFILE INCOMPLETE ALERT BANNER */}
+            {isProfileIncomplete && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs animate-fade-in text-start mb-6" id="complete-profile-banner">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">⚠️</span>
+                    <h4 className="text-base sm:text-lg font-serif font-black text-amber-900">
+                      {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
+                    </h4>
+                    <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
+                      {txt("Limited Access", "وصول محدود", "دەستپێگەیشتنی سنووردار")}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
+                    {txt(
+                      "To ensure a respectful, serious, and Shari'a-compliant matchmaking process, you are currently shown exactly two women and two men. Please complete your marriage profile parameters to unlock full access, custom match lists, and private filters.",
+                      "لضمان تعارف وقور وجاد متوافق مع الشريعة الغراء، يظهر لك حالياً امرأتان ورجلان فقط. يرجى إكمال بيانات ملفك الشخصي لتتمكن من استكشاف كافة الشركاء المناسبين وتفعيل مرشحات البحث المتقدمة والخاصة.",
+                      "بۆ دڵنیابوون لەوەی کە پڕۆسەی هاوسەرگیری بە شێوەیەکی ڕێزدار و جدی ئەنجام دەدرێت، لە ئێستادا تەنها دوو ژن و دوو پیاو پیشان دەدرێن. تکایە پڕۆفایلی خۆت تەواو بکە بۆ بەدەستهێنانی دەستپێگەیشتنی تەواو."
+                    )}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setTab('onboarding')}
+                  className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>{txt("Complete Profile Now", "أكمل ملفك الشخصي الآن", "ئێستا پڕۆفایلەکەت تەواو بکە")}</span>
+                </button>
+              </div>
+            )}
+
+            {/* RESULTS MATCHES GRID */}
+            {filteredMatches.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {filteredMatches.slice(0, 8).map((candidate) => {
+                  const isFemale = candidate.gender === 'female';
+
+                  return (
+                    <div
+                      key={candidate.id}
+                      onClick={() => handleProfileClick(candidate)}
+                      className="group cursor-pointer bg-[#FCFBF9] hover:bg-white border border-[#E6DCC3]/80 hover:border-accent-coral/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
+                    >
+                      <div className="space-y-3">
+                        {/* Avatar photo with forced privacy constraint */}
+                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
+                          {isFemale ? (
+                            <>
+                              {/* FROSTED BLUR FEMALE PORTRAIT - strictly private constraint */}
+                              <img
+                                src={candidate.avatarUrl}
+                                alt={candidate.name}
+                                className="w-full h-full object-cover blur-lg scale-110 select-none pointer-events-none opacity-85"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[6px] flex flex-col items-center justify-center text-center p-3">
+                                <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-accent-pink/30 shadow-md flex items-center justify-center text-accent-pink font-serif font-black text-sm">
+                                  {candidate.name.charAt(0)}
+                                </div>
+                                <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
+                                  🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {/* REALISTIC IRAQI-LOOKING MALE PORTRAITS - unmodified */}
+                              <img
+                                src={candidate.avatarUrl}
+                                alt={candidate.name}
+                                className="w-full h-full object-cover grayscale-[12%] group-hover:scale-105 transition-transform duration-500"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                              <span className="absolute bottom-2.5 left-2.5 text-[8px] sm:text-[9px] font-mono font-extrabold text-white bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md">
+                                {txt("Verified Groom", "شاب جاد للزواج", "زاوا پشتڕاستکراوە")}
+                              </span>
+                            </>
+                          )}
+                          
+                          {/* Top floating badges */}
+                          <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+                            {candidate.verified && (
+                              <span className="bg-emerald-500 text-white p-1 rounded-full shadow-sm" title="Identity Verified">
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Name & Basic details */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal group-hover:text-[#40798C] transition-colors flex items-center gap-1">
+                              <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
+                              <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
+                            </h4>
+                            <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
+                              💖 {candidate.compatibilityScore}%
+                            </span>
+                          </div>
+                          
+                          {/* Profession & Education */}
+                          <p className="text-[10.5px] font-extrabold text-stone-500 flex items-center gap-1 truncate">
+                            <GraduationCap className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
+                            <span className="truncate">{candidate.profession}</span>
+                          </p>
+                          <p className="text-[9.5px] text-stone-400 font-semibold truncate">
+                            {candidate.education}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Card Footer tags */}
+                      <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+                        <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
+                          📍 {txt(candidate.city, candidate.city, candidate.city)}
+                        </span>
+                        
+                        <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
+                          <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
+                          <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
+                        </span>
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
+                <Users className="w-10 h-10 text-stone-300 mx-auto" />
+                <p className="text-xs font-bold text-stone-400">
+                  {txt("No serious candidates match these categories in this governorate yet.", "لا يوجد عرسان أو عرائس يطابقون هذا التصنيف في هذه المحافظة حالياً.", "کاندیدێک بۆ ئەم جۆرە پۆلێنکردنە لەم پارێزگایەدا نەدۆزرایەوە.")}
+                </p>
+              </div>
+            )}
+
+            {/* CTAs banner to enter search */}
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-100 text-xs text-stone-500 font-semibold">
+              <p className="text-start leading-snug">
+                💍 {txt(
+                  "To protect photos and prevent casual swipe culture, only mutual, serious matches with completed profiles can initiate chaperoned discussion.",
+                  "لحماية الخصوصية ومنع المراسلات العشوائية العابرة، يمكن فقط للملفات الحقيقية والمكتملة البدء بالتواصل الوقور تحت إشراف شرعي.",
+                  "بۆ پاراستنی وێنەکان، تەنها ئەو کەسانەی پڕۆفایلەکەیان تەواو کردووە دەتوانن پەیوەندی بکەن."
+                )}
+              </p>
+              <button
+                onClick={onExploreMatches}
+                className="w-full sm:w-auto px-6 py-3 bg-[#40798C] hover:bg-[#316070] text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-[#40798C]/10 cursor-pointer"
+              >
+                {txt("Explore Compatibility Pool", "استكشاف مصفوفة التوافق الكاملة", "گەڕان بەدوای هاوشێوەکاندا")}
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) */}
+      <section className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2.5rem] py-10" id="featured-active-candidates">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-start">
+            <div>
+              <h4 className="text-base sm:text-xl font-serif font-black text-warm-charcoal flex items-center gap-1.5">
+                <UserCheck className="w-5 h-5 text-accent-coral" />
+                <span>{txt("Featured Active Candidates", "أعضاء متميزون ونشطون اليوم", "کاندیدە چالاکە دیارەکان")}</span>
+              </h4>
+              <p className="text-[11px] sm:text-xs text-stone-500 font-medium leading-relaxed">
+                {txt(
+                  "These active members are looking for lifelong marriage right now. Women's photos are automatically blurred, and men are authentic Iraqi applicants.",
+                  "هؤلاء الأعضاء متصلون ويبحثون بنية جادة عن شريك الحياة حالياً. صور النساء محمية بالتمويه تلقائياً، والرجال متقدمون عراقيون أصيلون.",
+                  "ئەم ئەندامانە ئێستا چالاکن و بەدوای هاوسەرگیری دەگەڕێن. وێنەی کچان لێڵکراوە بۆ پاراستن و کوڕانیش کاندیدی ڕاستەقینەی عێراقین."
+                )}
+              </p>
+            </div>
+            <span className="text-[10px] bg-accent-coral/10 text-accent-coral px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
+              ⚡ {txt("Active Today", "نشطون اليوم", "ئەمڕۆ چالاک بوون")}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {featuredCandidates.map((candidate) => {
+              const isFemale = candidate.gender === 'female';
+
+              return (
+                <div 
+                  key={candidate.id}
+                  onClick={() => handleProfileClick(candidate)}
+                  className="bg-white border border-stone-150 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 cursor-pointer hover:shadow-lg transition duration-200 relative group"
+                >
+                  {/* Photo area */}
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-stone-100 shadow-md">
+                    {isFemale ? (
+                      <>
+                        <img 
+                          src={candidate.avatarUrl} 
+                          alt={candidate.name} 
+                          className="w-full h-full object-cover blur-md scale-110 select-none pointer-events-none" 
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[4px] flex items-center justify-center">
+                          <span className="text-accent-pink font-serif font-black text-xs">{candidate.name.charAt(0)}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <img 
+                        src={candidate.avatarUrl} 
+                        alt={candidate.name} 
+                        className="w-full h-full object-cover grayscale-[10%]" 
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                    
+                    {/* Live status dot */}
+                    <span className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" title="Online now" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal group-hover:text-accent-coral transition-colors flex items-center justify-center gap-1">
+                      <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
+                      <span className="text-[10px] text-stone-400">({candidate.age})</span>
+                    </h5>
+                    <p className="text-[9px] font-mono text-stone-500 bg-[#FAF7F2] border border-[#E8DCC4]/50 px-2 py-0.5 rounded-md inline-block">
+                      📍 {txt(candidate.governorate, candidate.governorateAr, candidate.governorateCkb)}
+                    </p>
+                    <p className="text-[10px] font-extrabold text-stone-400 truncate max-w-[140px] mx-auto">
+                      {candidate.profession}
+                    </p>
+                  </div>
+
+                  <span className="text-[8.5px] uppercase font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
+                    ✨ {txt("Compatible", "متوافق", "هاوتا")}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* MARRIAGE CAFE & DAILY ENGAGEMENT POLL */}
+      <MarriageCafe 
+        locale={locale} 
+        triggerToast={showToast} 
+        onNavigateToTab={setTab}
+      />
+
+      {/* HOW IT WORKS */}
       <HowItWorks locale={locale} />
+      
+      {/* PHOTO PRIVACY PROTECTION MODULE */}
       <PhotoPrivacyModule locale={locale} />
+      
+      {/* TRUST AND SAFETY PRINCIPLES */}
       <TrustSafety locale={locale} />
 
-      {/* In-Depth Core Philosophy Section (Chunk 12) */}
-      <section className="bg-transparent py-16" id="core-philosophy">
+      {/* CORE PHILOSOPHY SECTION */}
+      <section className="bg-transparent py-12" id="core-philosophy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-br from-accent-coral to-accent-pink rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden shadow-2xl">
             {/* Decorative element */}
@@ -73,7 +680,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               <div className="pt-6">
                 <button
                   onClick={() => setTab('onboarding')}
-                  className="px-8 py-4 rounded-2xl bg-white text-warm-charcoal font-bold hover:bg-warm-ivory transition active:scale-95 shadow-lg shadow-black/10 text-xs sm:text-sm"
+                  className="px-8 py-4 rounded-2xl bg-white text-warm-charcoal font-bold hover:bg-warm-ivory transition active:scale-95 shadow-lg shadow-black/10 text-xs sm:text-sm cursor-pointer"
                 >
                   {t.philBtn}
                 </button>
@@ -82,6 +689,152 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
           </div>
         </div>
       </section>
+
+      {/* SOCIAL MEDIA STYLE SQUARE STORY VIEWER MODAL */}
+      {selectedStory && (
+        <div className="fixed inset-0 bg-[#1C1A17]/85 backdrop-blur-md z-[10000] flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative w-full max-w-sm bg-[#FAF8F5] border border-[#E8DCC4] rounded-[2rem] overflow-hidden shadow-2xl flex flex-col justify-between h-[480px]">
+            
+            {/* Top progress bar lines simulating Instagram/Snapchat stories */}
+            <div className="absolute top-3 left-4 right-4 flex gap-1.5 z-20">
+              <div className="h-1 flex-grow bg-accent-coral rounded-full overflow-hidden">
+                <div className="h-full bg-white/40 w-full animate-pulse" />
+              </div>
+              <div className="h-1 flex-grow bg-stone-300 rounded-full" />
+              <div className="h-1 flex-grow bg-stone-300 rounded-full" />
+            </div>
+
+            {/* Story Header */}
+            <div className="pt-7 px-4 pb-3 bg-gradient-to-b from-[#FAF8F5] to-transparent border-b border-stone-100 flex items-center justify-between z-10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-accent-coral via-accent-pink to-[#40798C]">
+                  <div className="w-full h-full rounded-full overflow-hidden border border-white bg-stone-100 flex items-center justify-center">
+                    {selectedStory.gender === 'female' ? (
+                      <span className="text-accent-pink font-serif font-black text-xs">{selectedStory.name.charAt(0)}</span>
+                    ) : (
+                      <img src={selectedStory.avatarUrl} alt={selectedStory.name} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                </div>
+                <div className="text-start">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-serif font-black text-sm text-warm-charcoal">
+                      {selectedStory.name}
+                    </span>
+                    <span className="text-xs text-stone-500 font-mono font-bold">({selectedStory.age})</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                    {txt("Online Now", "نشط الآن بنية جادة", "ئێستا چالاکە")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <button 
+                onClick={() => setSelectedStory(null)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Story Content Area */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5 text-start scrollbar-thin">
+              
+              {/* Serious Intention Display */}
+              <div className="bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl p-4 space-y-2 relative">
+                <span className="absolute -top-2.5 left-4 bg-[#40798C] text-white text-[8px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                  💍 {txt("Serious Marital Intention", "نية الزواج الجادة", "مەبەستی هاوسەرگیری")}
+                </span>
+                <p className="text-xs sm:text-sm font-serif font-black text-warm-charcoal leading-relaxed pt-1 italic">
+                  "{selectedStory.intention || txt("To build a pious and quiet home based on mutual consultation and respect.", "تأسيس بيت صالح وقائم على المودة والرحمة والاحترام المتبادل.", "دروستکردنی خێزانێکی بەختەوەر لەسەر بنەمای ڕێز.")}"
+                </p>
+              </div>
+
+              {/* About Me & Hobbies */}
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[10px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                    👤 {txt("About Me", "نبذة تعريفية شخصية", "دەربارەی من")}
+                  </span>
+                  <p className="text-xs text-stone-600 leading-relaxed font-semibold mt-1">
+                    {selectedStory.aboutMe}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="bg-stone-50 border border-stone-100 rounded-xl p-2.5">
+                    <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase">
+                      💼 {txt("Profession", "المهنة", "پیشە")}
+                    </span>
+                    <span className="text-[10.5px] font-bold text-warm-charcoal truncate block">
+                      {selectedStory.profession}
+                    </span>
+                  </div>
+                  <div className="bg-stone-50 border border-stone-100 rounded-xl p-2.5">
+                    <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase">
+                      📍 {txt("Location", "السكن والموقع", "شوێنی نیشتەجێبوون")}
+                    </span>
+                    <span className="text-[10.5px] font-bold text-[#40798C] truncate block">
+                      {selectedStory.city}, {getGovDisplayName(selectedStory.governorate)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verified Badge / Privacy Guard Note */}
+              <div className="bg-[#40798C]/5 border border-emerald-500/10 rounded-xl p-3 flex gap-2.5 items-start">
+                <ShieldCheck className="w-4 h-4 text-[#40798C] shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] font-black text-stone-800">
+                    {txt("Chaperoned Protocol", "بروتوكول الخطوبة الشرعي", "پڕۆتۆکۆلی شەرعی")}
+                  </span>
+                  <p className="text-[9px] text-stone-500 font-medium leading-normal">
+                    {txt("Profiles are strictly identity-verified. Casual messaging is blocked. Connection occurs under guardian (Wali) supervision.", "الملفات موثقة بالكامل بالهوية الوطنية. لا توجد دردشة عشوائية، التواصل يتم بوقار وتحت إشراف عائلي.", "پڕۆفایلەکان بە تەواوی موثق کراون. چاتی عشوایی قەدەغەیە.")}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Story Footer actions */}
+            <div className="p-4 bg-stone-50 border-t border-stone-100 flex items-center gap-3">
+              <button
+                onClick={() => setSelectedStory(null)}
+                className="flex-1 py-3 border border-[#E6DCC3] rounded-xl text-xs font-black text-stone-500 hover:bg-stone-100 transition active:scale-98 cursor-pointer"
+              >
+                {txt("Go Back", "رجوع", "گەڕانەوە")}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedStory(null);
+                  if (!isAuthenticated) {
+                    showToast(txt(
+                      "💍 Please log in or register to request chaperoned contact.",
+                      "💍 يرجى تسجيل الدخول أو إنشاء حساب لطلب تواصل وقور وعائلي.",
+                      "💍 تکایە سەرەتا بچۆ ژوورەوە بۆ ناردنی داواکاری."
+                    ));
+                    setTab('onboarding');
+                  } else {
+                    showToast(txt(
+                      `💍 Intention Match request sent successfully to ${selectedStory.gender === 'female' ? selectedStory.name : selectedStory.name}'s guardian.`,
+                      `💍 تم إرسال طلب نية التعارف الشرعي بنجاح إلى ولي أمر الطرف الآخر لمراجعته متبادلاً.`,
+                      `💍 داواکارییەکە بە سەرکەوتوویی نێردرا.`
+                    ));
+                  }
+                }}
+                className="flex-2 py-3 bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-accent-coral/10 transition active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Heart className="w-3.5 h-3.5 text-white" />
+                <span>{txt("Send Serious Intention", "إرسال رغبة جادة", "ناردنی مەبەستی جدی")}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

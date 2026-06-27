@@ -12,6 +12,9 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
   const [isIOS, setIsIOS] = useState<boolean>(false);
   const [showGuide, setShowGuide] = useState<boolean>(false);
   const [guideTab, setGuideTab] = useState<'ios' | 'android' | 'desktop'>('android');
+  const [isMinimized, setIsMinimized] = useState<boolean>(() => {
+    return sessionStorage.getItem('pwa-install-minimized') === 'true';
+  });
 
   useEffect(() => {
     // Check if already running in standalone mode (installed)
@@ -84,6 +87,12 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
     }
   };
 
+  const handleMinimize = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMinimized(true);
+    sessionStorage.setItem('pwa-install-minimized', 'true');
+  };
+
   // Do not render anything if already installed
   if (isStandalone) return null;
 
@@ -98,22 +107,46 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
     <>
       {/* FLOATING INSTALL BUTTON - FIXED LEFT MIDDLE */}
       <div 
-        className="fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[9999] pointer-events-auto flex flex-col items-center"
+        className="fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[9999] pointer-events-auto flex items-center gap-1.5"
         id="pwa-floating-install-container"
       >
-        <button
-          onClick={handleInstallClick}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-[#40798C] text-white hover:opacity-95 px-3.5 py-2.5 rounded-full shadow-lg shadow-[#40798C]/30 border border-emerald-400/40 transition-all active:scale-95 animate-pulse duration-300 pointer-events-auto"
-          aria-label="Install App"
-        >
-          <div className="bg-white/20 p-1 rounded-full text-white shrink-0">
+        {isMinimized ? (
+          <button
+            onClick={handleInstallClick}
+            className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-emerald-600 to-[#40798C] text-white hover:opacity-95 rounded-full shadow-lg shadow-[#40798C]/30 border border-emerald-400/40 transition-all active:scale-95 cursor-pointer relative group"
+            title={buttonText}
+            aria-label="Install App"
+          >
             <Download className="w-4 h-4 stroke-[2.5]" />
+            {/* Tooltip on hover */}
+            <span className="absolute left-12 scale-0 group-hover:scale-100 transition-all duration-150 bg-stone-900/90 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-md">
+              {buttonText}
+            </span>
+          </button>
+        ) : (
+          <div className="flex items-center bg-gradient-to-r from-emerald-600 to-[#40798C] p-0.5 rounded-full shadow-lg shadow-[#40798C]/30 border border-emerald-400/40">
+            <button
+              onClick={handleInstallClick}
+              className="flex items-center gap-1.5 text-white hover:opacity-95 px-3 py-2 rounded-full transition-all active:scale-95 pointer-events-auto cursor-pointer"
+              aria-label="Install App"
+            >
+              <div className="bg-white/20 p-1 rounded-full text-white shrink-0">
+                <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span className="text-[11px] font-extrabold tracking-wide px-0.5">
+                {buttonText}
+              </span>
+            </button>
+            {/* Minimal close button to collapse it */}
+            <button
+              onClick={handleMinimize}
+              className="p-1 hover:bg-white/15 text-white/80 hover:text-white rounded-full transition duration-150 mr-1 ml-0.5 rtl:ml-1 rtl:mr-0.5 cursor-pointer"
+              title={txt('Minimize', 'تصغير', 'بچوکردنەوە')}
+            >
+              <X className="w-3 h-3 stroke-[2.5]" />
+            </button>
           </div>
-          
-          <span className="text-xs sm:text-sm font-extrabold tracking-wide px-0.5">
-            {buttonText}
-          </span>
-        </button>
+        )}
       </div>
 
       {/* DETAILED PWA INSTALLATION GUIDE MODAL */}

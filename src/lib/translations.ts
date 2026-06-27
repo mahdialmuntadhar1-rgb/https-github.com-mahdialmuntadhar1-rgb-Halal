@@ -198,7 +198,7 @@ export interface Translations {
 export const TRANSLATIONS: Record<Language, Translations> = {
   en: {
     dir: 'ltr',
-    brand: 'HALAL',
+    brand: 'زواج العراق',
     slogan: 'Serious intentions • Respectful connections',
     tagline: 'MARRIAGE ONLY',
     marriageOnly: 'MARRIAGE ONLY',
@@ -338,7 +338,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     idVerify: 'ID Verification Guide',
 
     // English additions
-    loginTitle: 'Sign In to Your Halal Account',
+    loginTitle: 'Sign In to Your Zawaj Iraq Account',
     loginSub: 'Ensure serious marital intentions. Proceed with dignity.',
     emailLabel: 'Email Address',
     passwordLabel: 'Password',
@@ -346,7 +346,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     signUpBtn: 'Create a Serious Account',
     noAccount: "Don't have an account yet?",
     haveAccount: 'Already have an account?',
-    registerTitle: 'Establish Your Halal Account',
+    registerTitle: 'Establish Your Zawaj Iraq Account',
     registerSub: 'Create an account to begin finding serious marital matches with full security.',
     forgotPasswordLabel: 'Forgot your password?',
     forgotPasswordSub: 'Enter your email to request recovery link simulation.',
@@ -377,7 +377,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ar: {
     dir: 'rtl',
-    brand: 'حلال',
+    brand: 'زواج العراق',
     slogan: 'نوايا جادة • تواصل محترم',
     tagline: 'للزواج فقط',
     marriageOnly: 'للزواج فقط',
@@ -517,7 +517,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     idVerify: 'دليل توثيق الهوية والبطاقات',
 
     // Arabic additions
-    loginTitle: 'تسجيل الدخول إلى حساب حلال',
+    loginTitle: 'تسجيل الدخول إلى حساب زواج العراق',
     loginSub: 'ضمان النوايا الصادقة والجدية وبناء بيت كريم ووقور.',
     emailLabel: 'البريد الإلكتروني',
     passwordLabel: 'كلمة المرور',
@@ -525,7 +525,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     signUpBtn: 'إنشاء حساب جاد وجديد',
     noAccount: 'ليس لديك حساب مسبق؟',
     haveAccount: 'لديك حساب بالفعل؟',
-    registerTitle: 'إنشاء حسابك في حلال',
+    registerTitle: 'إنشاء حسابك في زواج العراق',
     registerSub: 'أنشئ حساباً لبدء البحث عن شركاء التوافق بخصوصية تامة وحماية معززة.',
     forgotPasswordLabel: 'نسيت كلمة المرور؟',
     forgotPasswordSub: 'أدخل بريدك الإلكتروني للحصول على رابط استعادة كلمة المرور.',
@@ -556,7 +556,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ckb: {
     dir: 'rtl',
-    brand: 'حەڵاڵ',
+    brand: 'زواج العراق',
     slogan: 'نیاز و مەبەستی جدی • پەیوەندی بەڕێزەوە',
     tagline: 'تەنها بۆ هاوسەرگیری',
     marriageOnly: 'تەنها بۆ هاوسەرگیری',

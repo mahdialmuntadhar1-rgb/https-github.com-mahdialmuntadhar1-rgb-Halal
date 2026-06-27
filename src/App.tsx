@@ -21,7 +21,7 @@ import GenderSelectionScreen from './screens/GenderSelectionScreen';
 import FloatingInstallButton from './components/FloatingInstallButton';
 import { useLocale } from './hooks/useLocale';
 import { apiClient } from './services/apiClient';
-import { Sparkles, Check, Heart } from 'lucide-react';
+import { Sparkles, Check, Heart, Home, Compass, MessageCircle, User } from 'lucide-react';
 import { HeroImage, AppTab } from './types';
 
 export default function App() {
@@ -111,14 +111,8 @@ export default function App() {
       setMatches(matchesResult.matches);
       setConversations(convs);
       
-      // Route user correctly
-      if (!profile.gender) {
-        setTab('gender-selection');
-      } else if (!profile.age || profile.age === 0 || !profile.education || !profile.profession) {
-        setTab('onboarding');
-      } else {
-        setTab('explore');
-      }
+      // Route user correctly: registration and login are separate from onboarding now
+      setTab('explore');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -312,7 +306,7 @@ export default function App() {
     <div 
       dir={t.dir} 
       lang={locale} 
-      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-hidden"
+      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-hidden pb-20 sm:pb-24"
     >
       
       {/* Blur blobs background */}
@@ -392,6 +386,7 @@ export default function App() {
                 setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
+                userProfile={userProfile || undefined}
               />
             )}
 
@@ -507,7 +502,7 @@ export default function App() {
             <div className="md:col-span-5 space-y-4">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center">
-                  <span className="text-white font-serif font-bold text-sm">H</span>
+                  <span className="text-white font-serif font-bold text-sm">Z</span>
                 </div>
                 <span className="text-xl font-serif font-bold tracking-wider text-white font-display">{t.brand}</span>
               </div>
@@ -566,6 +561,97 @@ export default function App() {
 
       {/* Floating PWA Install Button for mobile users */}
       <FloatingInstallButton locale={locale} />
+
+      {/* PERSISTENT BOTTOM TASKBAR */}
+      <div 
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-white/95 backdrop-blur-md border border-[#EBE6DD]/60 rounded-2xl shadow-xl px-2 py-2 flex items-center justify-around animate-slide-in"
+        id="bottom-navigation-taskbar"
+      >
+        {/* Home Option */}
+        <button
+          onClick={() => setTab('landing')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'landing' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-home-btn"
+        >
+          <Home className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'landing' ? 'scale-110' : ''}`} />
+          <span className="text-[10px] sm:text-xs tracking-tight">{t.overview}</span>
+        </button>
+
+        {/* Partner Exploration Option */}
+        <button
+          onClick={() => setTab('explore')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'explore' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-explore-btn"
+        >
+          <Compass className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'explore' ? 'scale-110' : ''}`} />
+          <span className="text-[10px] sm:text-xs tracking-tight">{t.explore}</span>
+        </button>
+
+        {/* Chat Option */}
+        <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              triggerToast(
+                locale === 'en' 
+                  ? '💍 Please log in or create an account to view and chat with matches.' 
+                  : '💍 يرجى تسجيل الدخول أولاً لتصفح والدردشة مع شركاء التوافق.'
+              );
+              setTab('onboarding');
+            } else {
+              setTab('chat');
+            }
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'chat' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-chat-btn"
+        >
+          <div className="relative">
+            <MessageCircle className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'chat' ? 'scale-110' : ''}`} />
+            {isAuthenticated && conversations.some(c => c.unreadCount && c.unreadCount > 0) && (
+              <span className="absolute -top-1 -right-1 bg-accent-coral w-2.5 h-2.5 rounded-full ring-2 ring-white animate-pulse" />
+            )}
+          </div>
+          <span className="text-[10px] sm:text-xs tracking-tight">{t.chat}</span>
+        </button>
+
+        {/* My Dossier Option */}
+        <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              triggerToast(
+                locale === 'en' 
+                  ? '💍 Please sign in to view your profile dossier.' 
+                  : '💍 يرجى تسجيل الدخول لعرض وتعديل ملفك التعريفي.'
+              );
+              setTab('onboarding');
+            } else {
+              setTab('profile');
+            }
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'profile' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-profile-btn"
+        >
+          <User className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'profile' ? 'scale-110' : ''}`} />
+          <span className="text-[10px] sm:text-xs tracking-tight">
+            {locale === 'en' ? 'My Profile' : locale === 'ar' ? 'ملفي' : 'پڕۆفایلم'}
+          </span>
+        </button>
+      </div>
 
     </div>
   );

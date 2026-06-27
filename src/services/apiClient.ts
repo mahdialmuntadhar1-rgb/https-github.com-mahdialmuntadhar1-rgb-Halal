@@ -150,10 +150,10 @@ export const apiClient = {
     return data;
   },
 
-  async register(fullName: string, governorate: string, email: string, phone: string | undefined, password: string): Promise<{ token: string; user: User }> {
+  async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock register response
-      if (!fullName || !governorate || !email || !password) {
+      if (!fullName || !governorate || !district || !email || !password) {
         throw new Error('Please fill in all required registration fields');
       }
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
@@ -171,6 +171,7 @@ export const apiClient = {
         email,
         name: fullName,
         governorate,
+        city: district, // district stored as city
         gender: undefined, // do not send gender on register
         role: user.role,
         age: 0, // not onboarded
@@ -260,7 +261,14 @@ export const apiClient = {
           filtered = filtered.filter(m => m.age <= (filters.maxAge ?? 100));
         }
         if (filters.governorate && filters.governorate !== 'All Iraq' && filters.governorate !== 'all') {
-          filtered = filtered.filter(m => m.governorate === filters.governorate);
+          const target = filters.governorate.toLowerCase();
+          filtered = filtered.filter(m => {
+            const current = m.governorate?.toLowerCase() || '';
+            if (target === 'nineveh' || target === 'mosul') {
+              return current === 'nineveh' || current === 'mosul';
+            }
+            return current === target;
+          });
         }
         if (filters.city && filters.city !== 'All Cities' && filters.city !== 'all') {
           filtered = filtered.filter(m => m.city?.toLowerCase().includes(filters.city!.toLowerCase()));
