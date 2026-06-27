@@ -10,9 +10,8 @@ import {
   SessionUser,
   UserProfile,
 } from '../types';
-import { mockApi } from '../services/mockApi';
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE = String(import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 const TOKEN_KEY = 'halal.authToken';
 
@@ -22,6 +21,14 @@ export interface MatchesResponse {
   page: number;
   limit: number;
   total: number;
+}
+
+export interface CafeQuestion {
+  id: string;
+  question: string;
+  question_ar?: string;
+  category: string;
+  active_date: string;
 }
 
 export class ApiError extends Error {
@@ -35,9 +42,7 @@ export class ApiError extends Error {
 }
 
 export function getIsDemoMode(): boolean {
-  const requested = String(import.meta.env.VITE_DEMO_MODE || '').toLowerCase() === 'true';
-  const allowProductionDemo = String(import.meta.env.VITE_ALLOW_PROD_DEMO || '').toLowerCase() === 'true';
-  return requested && (!import.meta.env.PROD || allowProductionDemo);
+  return false;
 }
 
 function getToken(): string | null {
@@ -53,6 +58,10 @@ function clearToken(): void {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (!API_BASE) {
+    throw new ApiError('VITE_API_URL is not configured.', 0);
+  }
+
   const headers = new Headers(init.headers);
   const token = getToken();
 
@@ -87,14 +96,6 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 
   return payload as T;
-}
-
-async function withDemoFallback<T>(operation: () => Promise<T>, demoOperation: () => Promise<T>): Promise<T> {
-  if (getIsDemoMode()) {
-    return demoOperation();
-  }
-
-  return operation();
 }
 
 function roleFromBackend(role?: string): SessionUser['role'] {
@@ -284,115 +285,106 @@ export const apiClient = {
   },
 
   async getSession(): Promise<SessionUser> {
-    return withDemoFallback(
-      async () => {
-        const response = await request<{ user: { id: string; email: string; role: string } }>('/auth/me');
-        return { id: response.user.id, email: response.user.email, role: roleFromBackend(response.user.role) };
-      },
-      () => mockApi.getSession(),
-    );
+    const response = await request<{ user: { id: string; email: string; role: string } }>('/auth/me');
+    return { id: response.user.id, email: response.user.email, role: roleFromBackend(response.user.role) };
   },
 
   async getCurrentUser(): Promise<UserProfile & { backendRole?: SessionUser['role'] }> {
-    return withDemoFallback(
-      async () => {
-        const response = await request<{ profile: Record<string, unknown> }>('/profile/me');
-        const profile = normalizeUserProfile(response.profile);
-        return { ...profile, backendRole: roleFromBackend(String(response.profile.role || 'user')) };
-      },
-      () => mockApi.getCurrentUser(),
-    );
+    const response = await request<{ profile: Record<string, unknown> }>('/profile/me');
+    const profile = normalizeUserProfile(response.profile);
+    return { ...profile, backendRole: roleFromBackend(String(response.profile.role || 'user')) };
   },
 
   async updateCurrentUserProfile(updated: Partial<UserProfile>): Promise<UserProfile> {
-    return withDemoFallback(
-      async () => {
-        const currentResponse = await request<{ profile: Record<string, unknown> }>('/profile/me');
-        const current = normalizeUserProfile(currentResponse.profile);
-        const merged = { ...current, ...updated };
-        const birthYear = merged.age ? new Date().getUTCFullYear() - merged.age : undefined;
-        const response = await request<{ profile: Record<string, unknown> }>('/profile/me', {
-          method: 'PUT',
-          body: JSON.stringify({
-            fullName: merged.name || 'HALAL Member',
-            gender: merged.gender,
-            birthYear,
-            governorate: merged.governorate,
-            city: merged.city,
-            religion: merged.religion,
-            sect: merged.sect,
-            ethnicity: merged.ethnicity,
-            maritalStatus: merged.maritalStatus,
-            education: merged.education,
-            occupation: merged.profession,
-            bio: merged.bio || merged.lookingFor,
-            photoUrl: merged.avatarUrl,
-            photoVisibility: merged.photoPrivacy === 'visible' ? 'public' : 'private',
-          }),
-        });
-        return normalizeUserProfile(response.profile);
-      },
-      () => mockApi.updateCurrentUserProfile(updated),
-    );
+    const currentResponse = await request<{ profile: Record<string, unknown> }>('/profile/me');
+    const current = normalizeUserProfile(currentResponse.profile);
+    const merged = { ...current, ...updated };
+    const birthYear = merged.age ? new Date().getUTCFullYear() - merged.age : undefined;
+    const response = await request<{ profile: Record<string, unknown> }>('/profile/me', {
+      method: 'PUT',
+      body: JSON.stringify({
+        fullName: merged.name || 'HALAL Member',
+        gender: merged.gender,
+        birthYear,
+        governorate: merged.governorate,
+        city: merged.city,
+        religion: merged.religion,
+        sect: merged.sect,
+        ethnicity: merged.ethnicity,
+        maritalStatus: merged.maritalStatus,
+        education: merged.education,
+        occupation: merged.profession,
+        bio: merged.bio || merged.lookingFor,
+        photoUrl: merged.avatarUrl,
+        photoVisibility: merged.photoPrivacy === 'visible' ? 'public' : 'private',
+      }),
+    });
+    return normalizeUserProfile(response.profile);
   },
 
   async getMatches(filters?: Partial<SearchFilters>, page = 1, limit = 20): Promise<MatchesResponse> {
-    return withDemoFallback(
-      async () => {
-        const response = await request<{ matches: Record<string, unknown>[]; hasMore: boolean; page: number; limit: number; total: number }>(
-          `/matches?${filtersToQuery(filters, page, limit)}`,
-        );
-        if (!Array.isArray(response.matches) || typeof response.hasMore !== 'boolean') {
-          throw new ApiError('Backend returned an invalid matches response.', 502, response);
-        }
-        return {
-          matches: response.matches.map(normalizeMatch),
-          hasMore: Boolean(response.hasMore),
-          page: Number(response.page),
-          limit: Number(response.limit),
-          total: Number(response.total),
-        };
-      },
-      async () => {
-        const all = await mockApi.getMatches();
-        const start = (page - 1) * limit;
-        const pageMatches = all.slice(start, start + limit);
-        return { matches: pageMatches, hasMore: start + pageMatches.length < all.length, page, limit, total: all.length };
-      },
+    const response = await request<{ matches: Record<string, unknown>[]; hasMore: boolean; page: number; limit: number; total: number }>(
+      `/matches?${filtersToQuery(filters, page, limit)}`,
     );
+    if (!Array.isArray(response.matches) || typeof response.hasMore !== 'boolean') {
+      throw new ApiError('Backend returned an invalid matches response.', 502, response);
+    }
+    return {
+      matches: response.matches.map(normalizeMatch),
+      hasMore: Boolean(response.hasMore),
+      page: Number(response.page),
+      limit: Number(response.limit),
+      total: Number(response.total),
+    };
   },
 
   async saveProfile(id: string, saved = true): Promise<{ saved: boolean }> {
-    return withDemoFallback(
-      () => request<{ saved: boolean }>(`/saved-profiles/${encodeURIComponent(id)}`, { method: saved ? 'POST' : 'DELETE' }),
-      async () => {
-        await mockApi.toggleSavedProfile(id);
-        return { saved };
-      },
-    );
+    return request<{ saved: boolean }>(`/saved-profiles/${encodeURIComponent(id)}`, { method: saved ? 'POST' : 'DELETE' });
   },
 
   async sendIntroductionRequest(receiverId: string): Promise<void> {
-    return withDemoFallback(
-      async () => {
-        await request('/requests', {
-          method: 'POST',
-          body: JSON.stringify({ receiverId }),
-        });
-      },
-      async () => undefined,
-    );
+    await request('/request/send', {
+      method: 'POST',
+      body: JSON.stringify({ receiverId }),
+    });
   },
 
   async getAdminIntroductionRequests(): Promise<IntroductionRequest[]> {
-    if (getIsDemoMode()) return [];
     const response = await request<{ requests: Record<string, unknown>[] }>('/admin/requests');
     return response.requests.map(normalizeIntroductionRequest);
   },
 
   async decideIntroductionRequest(id: string, decision: 'accept' | 'decline'): Promise<void> {
-    if (getIsDemoMode()) return;
-    await request(`/requests/${encodeURIComponent(id)}/${decision}`, { method: 'PUT' });
+    await request('/request/respond', {
+      method: 'POST',
+      body: JSON.stringify({ requestId: id, action: decision }),
+    });
+  },
+
+  async getCafeToday(): Promise<{ question: CafeQuestion | null; answered: boolean; answer?: Record<string, unknown> | null }> {
+    const response = await request<{ question: Record<string, unknown> | null; answered: boolean; answer?: Record<string, unknown> | null }>(
+      '/cafe/today',
+    );
+    return {
+      question: response.question
+        ? {
+            id: String(response.question.id),
+            question: String(response.question.question || ''),
+            question_ar: response.question.question_ar ? String(response.question.question_ar) : undefined,
+            category: String(response.question.category || 'daily'),
+            active_date: String(response.question.active_date || ''),
+          }
+        : null,
+      answered: Boolean(response.answered),
+      answer: response.answer,
+    };
+  },
+
+  async submitCafeAnswer(questionId: string, answer: string): Promise<void> {
+    await request('/cafe/answer', {
+      method: 'POST',
+      body: JSON.stringify({ questionId, answer }),
+    });
   },
 
   async getConversations(): Promise<Conversation[]> {
@@ -410,26 +402,16 @@ export const apiClient = {
   },
 
   async getHeroImages(): Promise<HeroImage[]> {
-    return withDemoFallback(
-      async () => {
-        const response = await request<{ heroImages: Record<string, unknown>[] }>('/hero-images');
-        return response.heroImages.map(normalizeHeroImage);
-      },
-      () => mockApi.getHeroImages(),
-    );
+    const response = await request<{ heroImages: Record<string, unknown>[] }>('/hero-images');
+    return response.heroImages.map(normalizeHeroImage);
   },
 
   async addHeroImage(image: Pick<HeroImage, 'url' | 'alt'>): Promise<HeroImage> {
-    return withDemoFallback(
-      async () => {
-        const response = await request<{ heroImage: Record<string, unknown> }>('/admin/hero-images', {
-          method: 'POST',
-          body: JSON.stringify({ title: image.alt, imageUrl: image.url, altText: image.alt }),
-        });
-        return normalizeHeroImage({ ...response.heroImage, image_url: image.url, alt_text: image.alt, active: 1 });
-      },
-      () => mockApi.addHeroImage(image),
-    );
+    const response = await request<{ heroImage: Record<string, unknown> }>('/admin/hero-images', {
+      method: 'POST',
+      body: JSON.stringify({ title: image.alt, imageUrl: image.url, altText: image.alt }),
+    });
+    return normalizeHeroImage({ ...response.heroImage, image_url: image.url, alt_text: image.alt, active: 1 });
   },
 
   async updateHeroImage(id: string, updates: Partial<HeroImage>): Promise<HeroImage[]> {
@@ -452,37 +434,30 @@ export const apiClient = {
   },
 
   async moveHeroImage(id: string, direction: 'up' | 'down'): Promise<HeroImage[]> {
-    if (getIsDemoMode()) return mockApi.moveHeroImage(id, direction);
     throw new ApiError('Hero image reordering is not implemented by the backend yet.', 501);
   },
 
   getCommunityPosts(): Promise<CommunityPost[]> {
-    if (getIsDemoMode()) return mockApi.getCommunityPosts();
     return Promise.resolve([]);
   },
 
   addCommunityPost(category: CommunityCategory, text: string): Promise<CommunityPost[]> {
-    if (getIsDemoMode()) return mockApi.addCommunityPost(category, text);
     throw new ApiError('Community posts backend is not implemented yet.', 501);
   },
 
   likePost(id: string): Promise<CommunityPost[]> {
-    if (getIsDemoMode()) return mockApi.likePost(id);
     throw new ApiError('Community posts backend is not implemented yet.', 501);
   },
 
   addComment(id: string, text: string): Promise<CommunityPost[]> {
-    if (getIsDemoMode()) return mockApi.addComment(id, text);
     throw new ApiError('Community posts backend is not implemented yet.', 501);
   },
 
   reportPost(id: string): Promise<ContentReport> {
-    if (getIsDemoMode()) return mockApi.reportPost(id);
     throw new ApiError('Reports backend is not implemented yet.', 501);
   },
 
   reportProfile(id: string): Promise<ContentReport> {
-    if (getIsDemoMode()) return mockApi.reportProfile(id);
     return request<{ report: Record<string, unknown> }>(`/reports/profiles/${encodeURIComponent(id)}`, {
       method: 'POST',
       body: JSON.stringify({ reason: 'Reported by member' }),
@@ -497,7 +472,6 @@ export const apiClient = {
   },
 
   getReports(): Promise<ContentReport[]> {
-    if (getIsDemoMode()) return mockApi.getReports();
     return request<{ reports: Record<string, unknown>[] }>('/reports').then(({ reports }) =>
       reports.map((report) => ({
         id: String(report.id),
@@ -511,7 +485,6 @@ export const apiClient = {
   },
 
   moderateContent(targetType: 'profile' | 'post', targetId: string, action: 'hide' | 'delete'): Promise<void> {
-    if (getIsDemoMode()) return mockApi.moderateContent(targetType, targetId, action);
     throw new ApiError('Moderation backend is not implemented yet.', 501);
   },
 };

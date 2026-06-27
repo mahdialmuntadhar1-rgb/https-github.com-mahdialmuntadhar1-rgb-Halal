@@ -63,3 +63,20 @@ export const PROFESSION_CATEGORIES = [
   'Student',
   'Other'
 ];
+
+export const COMMUNITY_CATEGORIES = [
+  'Marriage advice',
+  'Family approval',
+  'Engagement questions',
+  'Culture and traditions',
+  'Religious/respectful questions',
+  'Success stories'
+] as const;
+
+export const INTENTION_BADGES = [
+  'Serious for marriage',
+  'Family involved',
+  'Ready for engagement',
+  'Studying first',
+  'Private profile'
+] as const;

@@ -3,9 +3,10 @@ import { filterProfilePhoto } from './profile';
 
 export async function handleConversations(ctx: RequestContext): Promise<Response | null> {
   const { request, url, env } = ctx;
+  const path = url.pathname.replace(/^\/api(?=\/)/, '');
   const user = requireUser(ctx);
 
-  if (url.pathname === '/api/conversations' && request.method === 'GET') {
+  if (path === '/conversations' && request.method === 'GET') {
     const conversations = await env.DB.prepare(
       `SELECT
          c.*,
@@ -15,10 +16,10 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
          (CAST(strftime('%Y', 'now') AS INTEGER) - p.birth_year) AS age,
          'accepted' AS request_status,
          0 AS saved
-       FROM conversations c
-       JOIN introduction_requests r ON r.id = c.request_id AND r.status = 'accepted'
-       JOIN users u ON u.id = CASE WHEN c.user_one_id = ? THEN c.user_two_id ELSE c.user_one_id END
-       LEFT JOIN profiles p ON p.user_id = u.id
+       FROM halal_conversations c
+       JOIN halal_requests r ON r.id = c.request_id AND r.status = 'accepted'
+       JOIN halal_users u ON u.id = CASE WHEN c.user_one_id = ? THEN c.user_two_id ELSE c.user_one_id END
+       LEFT JOIN halal_profiles p ON p.user_id = u.id
        WHERE c.user_one_id = ? OR c.user_two_id = ?
        ORDER BY c.created_at DESC`,
     )
@@ -27,7 +28,7 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
 
     const result = [];
     for (const conversation of conversations.results || []) {
-      const messages = await env.DB.prepare('SELECT id, sender_id, text, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC')
+      const messages = await env.DB.prepare('SELECT id, sender_id, text, created_at FROM halal_messages WHERE conversation_id = ? ORDER BY created_at ASC')
         .bind(conversation.id)
         .all<Record<string, unknown>>();
       result.push({
@@ -46,13 +47,13 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
     return json({ conversations: result });
   }
 
-  const messageMatch = url.pathname.match(/^\/api\/conversations\/([^/]+)\/messages$/);
+  const messageMatch = path.match(/^\/conversations\/([^/]+)\/messages$/);
   if (messageMatch && request.method === 'POST') {
     const conversationId = decodeURIComponent(messageMatch[1]);
     const conversation = await env.DB.prepare(
       `SELECT c.id
-       FROM conversations c
-       JOIN introduction_requests r ON r.id = c.request_id AND r.status = 'accepted'
+       FROM halal_conversations c
+       JOIN halal_requests r ON r.id = c.request_id AND r.status = 'accepted'
        WHERE c.id = ? AND (c.user_one_id = ? OR c.user_two_id = ?)`,
     )
       .bind(conversationId, user.id, user.id)
@@ -62,13 +63,14 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
     const body = await readJson(request);
     const text = requireString(body, 'text', 2000);
     const id = uuid();
-    await env.DB.prepare('INSERT INTO messages (id, conversation_id, sender_id, text) VALUES (?, ?, ?, ?)')
+    await env.DB.prepare('INSERT INTO halal_messages (id, conversation_id, sender_id, text) VALUES (?, ?, ?, ?)')
       .bind(id, conversationId, user.id, text)
       .run();
 
-    const message = await env.DB.prepare('SELECT id, sender_id, text, created_at FROM messages WHERE id = ?').bind(id).first();
+    const message = await env.DB.prepare('SELECT id, sender_id, text, created_at FROM halal_messages WHERE id = ?').bind(id).first();
     return json({ message }, 201);
   }
 
   return null;
 }
+

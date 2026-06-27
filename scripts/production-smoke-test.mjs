@@ -1,4 +1,4 @@
-const API_BASE = process.env.VITE_API_BASE_URL || process.env.API_BASE || 'http://127.0.0.1:8787/api';
+const API_BASE = process.env.VITE_API_URL || process.env.API_BASE;
 const runId = Date.now();
 
 let token = '';
@@ -45,6 +45,10 @@ async function updateProfile(profile) {
 }
 
 async function main() {
+  if (!API_BASE) {
+    throw new Error('Set VITE_API_URL or API_BASE to the deployed Worker URL before running the smoke test.');
+  }
+
   const password = 'SmokeTestPassword123!';
   const receiverEmail = `receiver.${runId}@example.com`;
   const senderEmail = `sender.${runId}@example.com`;
@@ -121,3 +125,4 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+

@@ -3,7 +3,12 @@ import { HeaderLanguageSelector } from '../i18n';
 import { Heart, Languages, LogOut, MessageCircle, ShieldCheck, Sparkles, User, UsersRound, MessageCircleQuestion, SlidersHorizontal } from 'lucide-react';
 import { AppTab } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
-import { LANGUAGE_OPTIONS } from '../i18n/translations';
+
+const LANGUAGE_OPTIONS: Array<{ code: Language; label: string }> = [
+  { code: 'ar', label: 'العربية' },
+  { code: 'ku', label: 'کوردی' },
+  { code: 'en', label: 'EN' },
+];
 
 interface HeaderProps {
   currentTab: AppTab;

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS halal_profiles (
   birth_year INTEGER,
   country TEXT NOT NULL DEFAULT 'Iraq',
   governorate TEXT,
+  district TEXT,
   city TEXT,
   religion TEXT NOT NULL DEFAULT 'islam' CHECK (religion IN ('islam', 'non_islam')),
   sect TEXT DEFAULT 'sunni' CHECK (sect IN ('sunni', 'shiaa', 'none')),
@@ -148,6 +149,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_gender ON halal_profiles(gender);
 CREATE INDEX IF NOT EXISTS idx_profiles_age ON halal_profiles(birth_year);
 CREATE INDEX IF NOT EXISTS idx_profiles_birth_year ON halal_profiles(birth_year);
 CREATE INDEX IF NOT EXISTS idx_profiles_governorate ON halal_profiles(governorate);
+CREATE INDEX IF NOT EXISTS idx_profiles_district ON halal_profiles(district);
 CREATE INDEX IF NOT EXISTS idx_profiles_religion ON halal_profiles(religion);
 CREATE INDEX IF NOT EXISTS idx_profiles_sect ON halal_profiles(sect);
 CREATE INDEX IF NOT EXISTS idx_profiles_ethnicity ON halal_profiles(ethnicity);

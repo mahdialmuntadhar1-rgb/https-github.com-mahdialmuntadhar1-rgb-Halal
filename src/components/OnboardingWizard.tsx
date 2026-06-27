@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ShieldAlert } from 'lucide-react';
 import { UserProfile } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
-import { INTENTION_BADGES } from '../services/mockApi';
+import { INTENTION_BADGES } from '../constants';
 import { displayValue, labelFor } from '../i18n/labels';
 
 interface OnboardingWizardProps {

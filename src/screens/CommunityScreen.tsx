@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Heart, MessageCircle, Send } from 'lucide-react';
 import { AppLanguage, CommunityCategory, CommunityPost } from '../types';
-import { COMMUNITY_CATEGORIES } from '../services/mockApi';
+import { COMMUNITY_CATEGORIES } from '../constants';
 import EmptyState from '../components/EmptyState';
 import { TRANSLATIONS } from '../lib/translations';
 import { labelFor } from '../i18n/labels';
+import { apiClient, CafeQuestion } from '../lib/apiClient';
 
 interface CommunityScreenProps {
   locale: AppLanguage;
@@ -27,7 +28,23 @@ export default function CommunityScreen({
   const [category, setCategory] = useState<CommunityCategory>('Marriage advice');
   const [text, setText] = useState('');
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [cafeQuestion, setCafeQuestion] = useState<CafeQuestion | null>(null);
+  const [cafeAnswer, setCafeAnswer] = useState('');
+  const [cafeAnswered, setCafeAnswered] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiClient
+      .getCafeToday()
+      .then((response) => {
+        setCafeQuestion(response.question);
+        setCafeAnswered(response.answered);
+        setCafeAnswer(String(response.answer?.answer || ''));
+      })
+      .catch(() => {
+        setCafeQuestion(null);
+      });
+  }, []);
 
   const submitPost = async () => {
     if (!text.trim()) return;
@@ -36,6 +53,17 @@ export default function CommunityScreen({
       await onCreatePost(category, text.trim());
       setText('');
     } catch (err) {
+      setError(t.respectfulContentError);
+    }
+  };
+
+  const submitCafeAnswer = async () => {
+    if (!cafeQuestion || !cafeAnswer.trim()) return;
+    try {
+      setError(null);
+      await apiClient.submitCafeAnswer(cafeQuestion.id, cafeAnswer.trim());
+      setCafeAnswered(true);
+    } catch {
       setError(t.respectfulContentError);
     }
   };
@@ -63,6 +91,27 @@ export default function CommunityScreen({
           {t.communitySub}
         </p>
       </section>
+
+      {cafeQuestion && (
+        <section className="bg-white/70 border border-accent-coral/20 rounded-[1.5rem] p-5 shadow text-start space-y-3">
+          <span className="text-[10px] font-black uppercase tracking-widest text-accent-coral">{t.dailyQuestion}</span>
+          <h3 className="text-base sm:text-lg font-black text-warm-charcoal leading-relaxed">
+            {locale === 'ar' && cafeQuestion.question_ar ? cafeQuestion.question_ar : cafeQuestion.question}
+          </h3>
+          <textarea
+            value={cafeAnswer}
+            onChange={(event) => setCafeAnswer(event.target.value)}
+            className="input-basic min-h-24"
+            placeholder={t.addRespectfulAdvice}
+          />
+          <div className="flex justify-end">
+            <button type="button" onClick={submitCafeAnswer} className="rounded-xl bg-[#40798C] text-white px-5 py-3 text-xs font-bold flex items-center gap-1.5">
+              <Send className="w-4 h-4" />
+              {cafeAnswered ? t.saveChanges : t.post}
+            </button>
+          </div>
+        </section>
+      )}
 
       <section className="bg-white/70 border border-white/80 rounded-[1.5rem] p-5 shadow text-start space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">

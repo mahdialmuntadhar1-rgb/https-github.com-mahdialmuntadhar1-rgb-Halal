@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { Env, getUserById, HttpError, AuthUser } from './db';
 
 const encoder = new TextEncoder();
@@ -31,17 +32,14 @@ function getJwtSecret(env: Env): string {
 export async function hashPassword(password: string): Promise<string> {
   if (password.length < 10) throw new HttpError(400, 'Password must be at least 10 characters.');
 
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' },
-    key,
-    256,
-  );
-  return `pbkdf2_sha256$210000$${base64UrlEncode(salt)}$${base64UrlEncode(new Uint8Array(bits))}`;
+  return bcrypt.hash(password, 12);
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  if (stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$')) {
+    return bcrypt.compare(password, stored);
+  }
+
   const [algorithm, iterationsRaw, saltRaw, hashRaw] = stored.split('$');
   if (algorithm !== 'pbkdf2_sha256') return false;
 
@@ -89,3 +87,4 @@ export async function authenticateRequest(env: Env, request: Request): Promise<A
   if (!user) throw new HttpError(401, 'User not found.');
   return user;
 }
+

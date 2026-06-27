@@ -74,12 +74,11 @@ export default function App() {
 
         await refreshAll();
       } catch (err) {
-        console.error('Failed to load initial data', err);
         resetPrivateState();
         try {
           setHeroImages(await apiClient.getHeroImages());
-        } catch (heroError) {
-          console.error('Failed to load public hero images', heroError);
+        } catch {
+          setHeroImages([]);
         }
         setAuthStatus('unauthenticated');
       }

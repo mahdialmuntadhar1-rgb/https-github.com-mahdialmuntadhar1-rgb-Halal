@@ -26,6 +26,7 @@ export interface Env {
   R2_BUCKET: R2Bucket;
   JWT_SECRET?: string;
   ENVIRONMENT?: string;
+  CORS_ORIGIN?: string;
 }
 
 export interface AuthUser {
@@ -52,7 +53,12 @@ export class HttpError extends Error {
 }
 
 export function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
+  const payload =
+    data && typeof data === 'object' && !Array.isArray(data) && !('success' in data)
+      ? { success: true, ...data }
+      : data;
+
+  return new Response(JSON.stringify(payload), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -67,11 +73,10 @@ export function noContent(): Response {
 
 export function errorResponse(error: unknown): Response {
   if (error instanceof HttpError) {
-    return json({ error: error.message, details: error.details }, error.status);
+    return json({ success: false, error: error.message, details: error.details }, error.status);
   }
 
-  console.error(error);
-  return json({ error: 'Internal server error' }, 500);
+  return json({ success: false, error: 'Internal server error' }, 500);
 }
 
 export async function readJson<T extends Record<string, unknown>>(request: Request): Promise<T> {
@@ -125,7 +130,7 @@ export function uuid(): string {
 }
 
 export async function getUserById(env: Env, id: string): Promise<AuthUser | null> {
-  const row = await env.DB.prepare('SELECT id, email, role FROM users WHERE id = ?').bind(id).first<AuthUser>();
+  const row = await env.DB.prepare('SELECT id, email, role FROM halal_users WHERE id = ?').bind(id).first<AuthUser>();
   if (!row) return null;
   return { id: String(row.id), email: String(row.email), role: row.role === 'admin' ? 'admin' : 'member' };
 }
@@ -140,3 +145,4 @@ export function requireAdmin(ctx: RequestContext): AuthUser {
   if (user.role !== 'admin') throw new HttpError(403, 'Admin access required.');
   return user;
 }
+

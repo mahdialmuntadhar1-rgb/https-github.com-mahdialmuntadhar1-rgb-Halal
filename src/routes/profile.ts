@@ -11,8 +11,8 @@ function ageSql(): string {
 export async function profileForUser(ctx: RequestContext, userId: string): Promise<Record<string, unknown>> {
   const row = await ctx.env.DB.prepare(
     `SELECT u.id AS user_id, u.email, u.role, u.verified, p.*, ${ageSql()} AS age
-     FROM users u
-     LEFT JOIN profiles p ON p.user_id = u.id
+     FROM halal_users u
+     LEFT JOIN halal_profiles p ON p.user_id = u.id
      WHERE u.id = ?`,
   )
     .bind(userId)
@@ -42,13 +42,14 @@ export function filterProfilePhoto(row: Record<string, unknown>, viewerId: strin
 
 export async function handleProfile(ctx: RequestContext): Promise<Response | null> {
   const { request, url, env } = ctx;
+  const path = url.pathname.replace(/^\/api(?=\/)/, '');
   const user = requireUser(ctx);
 
-  if (url.pathname === '/api/profile/me' && request.method === 'GET') {
+  if (path === '/profile/me' && request.method === 'GET') {
     return json({ profile: await profileForUser(ctx, user.id) });
   }
 
-  if (url.pathname === '/api/profile/me' && request.method === 'PUT') {
+  if (path === '/profile/me' && request.method === 'PUT') {
     const body = await readJson(request);
     const birthYear = Number(body.birthYear);
     if (body.birthYear !== undefined && (!Number.isInteger(birthYear) || birthYear < currentYear() - 100 || birthYear > currentYear() - 18)) {
@@ -56,17 +57,18 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
     }
 
     await env.DB.prepare(
-      `INSERT INTO profiles (
-        user_id, full_name, gender, birth_year, country, governorate, city, religion, sect, ethnicity,
+      `INSERT INTO halal_profiles (
+        user_id, full_name, gender, birth_year, country, governorate, district, city, religion, sect, ethnicity,
         marital_status, education, occupation, bio, intention, timeline, wants_children,
         communication_preference, photo_url, photo_visibility, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(user_id) DO UPDATE SET
         full_name = excluded.full_name,
         gender = excluded.gender,
         birth_year = excluded.birth_year,
         country = excluded.country,
         governorate = excluded.governorate,
+        district = excluded.district,
         city = excluded.city,
         religion = excluded.religion,
         sect = excluded.sect,
@@ -90,6 +92,7 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
         body.birthYear === undefined ? null : birthYear,
         optionalString(body, 'country', 80) || 'Iraq',
         optionalString(body, 'governorate', 80),
+        optionalString(body, 'district', 80) || optionalString(body, 'city', 80),
         optionalString(body, 'city', 80),
         optionalString(body, 'religion', 40) || 'islam',
         optionalString(body, 'sect', 40) || 'sunni',
@@ -110,44 +113,44 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
     return json({ profile: await profileForUser(ctx, user.id) });
   }
 
-  const savedMatch = url.pathname.match(/^\/api\/saved-profiles\/([^/]+)$/);
+  const savedMatch = path.match(/^\/saved-profiles\/([^/]+)$/);
   if (savedMatch && request.method === 'POST') {
     const savedUserId = decodeURIComponent(savedMatch[1]);
     if (savedUserId === user.id) throw new HttpError(400, 'You cannot save your own profile.');
-    await env.DB.prepare('INSERT OR IGNORE INTO saved_profiles (user_id, saved_user_id) VALUES (?, ?)')
+    await env.DB.prepare('INSERT OR IGNORE INTO halal_saved_profiles (user_id, saved_user_id) VALUES (?, ?)')
       .bind(user.id, savedUserId)
       .run();
     return json({ saved: true });
   }
 
   if (savedMatch && request.method === 'DELETE') {
-    await env.DB.prepare('DELETE FROM saved_profiles WHERE user_id = ? AND saved_user_id = ?')
+    await env.DB.prepare('DELETE FROM halal_saved_profiles WHERE user_id = ? AND saved_user_id = ?')
       .bind(user.id, decodeURIComponent(savedMatch[1]))
       .run();
     return json({ saved: false });
   }
 
-  if (url.pathname === '/api/reports' && request.method === 'GET') {
+  if (path === '/reports' && request.method === 'GET') {
     requireAdmin(ctx);
-    const rows = await env.DB.prepare('SELECT * FROM reports ORDER BY created_at DESC LIMIT 100').all();
+    const rows = await env.DB.prepare('SELECT * FROM halal_reports ORDER BY created_at DESC LIMIT 100').all();
     return json({ reports: rows.results || [] });
   }
 
-  const reportMatch = url.pathname.match(/^\/api\/reports\/profiles\/([^/]+)$/);
+  const reportMatch = path.match(/^\/reports\/profiles\/([^/]+)$/);
   if (reportMatch && request.method === 'POST') {
     const body = await readJson(request);
     const id = uuid();
-    await env.DB.prepare('INSERT INTO reports (id, reporter_id, target_type, target_id, reason) VALUES (?, ?, ?, ?, ?)')
+    await env.DB.prepare('INSERT INTO halal_reports (id, reporter_id, target_type, target_id, reason) VALUES (?, ?, ?, ?, ?)')
       .bind(id, user.id, 'profile', decodeURIComponent(reportMatch[1]), optionalString(body, 'reason', 500) || 'Reported by member')
       .run();
-    const report = await env.DB.prepare('SELECT * FROM reports WHERE id = ?').bind(id).first();
+    const report = await env.DB.prepare('SELECT * FROM halal_reports WHERE id = ?').bind(id).first();
     return json({ report }, 201);
   }
 
-  const moderateMatch = url.pathname.match(/^\/api\/admin\/reports\/([^/]+)\/resolve$/);
+  const moderateMatch = path.match(/^\/admin\/reports\/([^/]+)\/resolve$/);
   if (moderateMatch && request.method === 'POST') {
     requireAdmin(ctx);
-    await env.DB.prepare("UPDATE reports SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = ?")
+    await env.DB.prepare("UPDATE halal_reports SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = ?")
       .bind(decodeURIComponent(moderateMatch[1]))
       .run();
     return noContent();
@@ -155,3 +158,4 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
 
   return null;
 }
+
