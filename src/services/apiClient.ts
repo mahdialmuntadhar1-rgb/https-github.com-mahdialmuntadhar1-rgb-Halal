@@ -111,25 +111,25 @@ export const apiClient = {
   /**
    * AUTHENTICATION
    */
-  async login(email: string, password: string): Promise<{ token: string; user: User }> {
+  async login(identifier: string, password: string): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock login response
-      if (!email || !password) {
-        throw new Error('Email and password are required');
+      if (!identifier || !password) {
+        throw new Error('Email/phone and password are required');
       }
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
       const user: User = {
         id: 'me',
-        email,
-        name: email.split('@')[0],
+        email: identifier.includes('@') ? identifier : 'demo@example.com',
+        name: identifier.split('@')[0],
         membershipStatus: 'free',
         createdAt: new Date().toISOString(),
-        role: email.includes('admin') || email.includes('safar') ? 'admin' : 'user'
+        role: identifier.includes('admin') || identifier.includes('safar') ? 'admin' : 'user'
       };
       
       // Update mock api profile
       await mockApi.updateCurrentUserProfile({
-        email,
+        email: user.email,
         name: user.name,
         role: user.role
       });
@@ -141,7 +141,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     });
 
     if (data.token) {
@@ -150,17 +150,17 @@ export const apiClient = {
     return data;
   },
 
-  async register(email: string, password: string, name: string, gender: 'male' | 'female'): Promise<{ token: string; user: User }> {
+  async register(fullName: string, governorate: string, email: string, phone: string | undefined, password: string): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock register response
-      if (!email || !password || !name) {
-        throw new Error('Please fill in all registration fields');
+      if (!fullName || !governorate || !email || !password) {
+        throw new Error('Please fill in all required registration fields');
       }
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
       const user: User = {
         id: 'me',
         email,
-        name,
+        name: fullName,
         membershipStatus: 'free',
         createdAt: new Date().toISOString(),
         role: email.includes('admin') ? 'admin' : 'user'
@@ -169,12 +169,13 @@ export const apiClient = {
       // Reset mock profile with basic data
       await mockApi.updateCurrentUserProfile({
         email,
-        name,
-        gender,
+        name: fullName,
+        governorate,
+        gender: undefined, // do not send gender on register
         role: user.role,
-        age: 25, // default
-        education: 'Bachelor Degree',
-        profession: 'Professional'
+        age: 0, // not onboarded
+        education: '',
+        profession: ''
       });
 
       return { token: 'mock_jwt_token_for_demo', user };
@@ -184,7 +185,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, gender }),
+      body: JSON.stringify({ fullName, governorate, email, phone, password }),
     });
 
     if (data.token) {

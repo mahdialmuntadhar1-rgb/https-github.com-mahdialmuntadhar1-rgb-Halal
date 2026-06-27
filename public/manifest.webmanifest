@@ -1,0 +1,19 @@
+{
+  "name": "HALAL — Halal Marriage Platform",
+  "short_name": "HALAL",
+  "description": "Premium Shari'a-compliant marriage app for serious unions inside Iraq and Kurdistan.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#40798C",
+  "categories": ["social", "lifestyle"],
+  "icons": [
+    {
+      "src": "/pwa-icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

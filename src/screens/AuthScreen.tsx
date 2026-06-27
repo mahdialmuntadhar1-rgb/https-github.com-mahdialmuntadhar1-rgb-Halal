@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages } from 'lucide-react';
+import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages, MapPin, Phone } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import { apiClient } from '../services/apiClient';
+
+const GOVERNORATES = [
+  'Baghdad', 'Basra', 'Nineveh', 'Erbil', 'Sulaymaniyah', 'Duhok', 'Kirkuk',
+  'Najaf', 'Karbala', 'Babil', 'Wasit', 'Diyala', 'Anbar', 'Salah al-Din',
+  'Maysan', 'Dhi Qar', 'Muthanna', 'Qadisiyah', 'Halabja'
+];
 
 interface AuthScreenProps {
   locale: AppLanguage;
@@ -15,10 +21,18 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const isRtl = t.dir === 'rtl';
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
-  const [email, setEmail] = useState('');
+  
+  // Login form state
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState<'male' | 'female'>('male');
+  
+  // Registration form state
+  const [name, setName] = useState(''); // Full Name
+  const [email, setEmail] = useState('');
+  const [governorate, setGovernorate] = useState('Baghdad');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState(''); // Optional
+
   const [isLoading, setIsLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
 
@@ -28,13 +42,13 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!identifier || !password) {
       triggerToast(txt('Please fill in all fields.', 'يرجى تعبئة كافة الحقول.', 'تکایە هەموو بڕگەکان پڕبکەرەوە.'));
       return;
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.login(email, password);
+      const result = await apiClient.login(identifier, password);
       triggerToast(txt('✨ Logged in successfully.', '✨ تم تسجيل الدخول بنجاح.', '✨ بە سەرکەوتوویی چوویتە ژوورەوە.'));
       
       // Load current user profile immediately after login success
@@ -49,13 +63,17 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !name) {
-      triggerToast(txt('Please fill in all fields.', 'يرجى تعبئة كافة الحقول.', 'تکایە هەموو بڕگەکان پڕبکەرەوە.'));
+    if (!email || !password || !confirmPassword || !name || !governorate) {
+      triggerToast(txt('Please fill in all required fields.', 'يرجى تعبئة كافة الحقول المطلوبة.', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە.'));
+      return;
+    }
+    if (password !== confirmPassword) {
+      triggerToast(txt('Passwords do not match.', 'كلمتا المرور غير متطابقتين.', 'وشە نهێنییەکان وەک یەک نین.'));
       return;
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.register(email, password, name, gender);
+      const result = await apiClient.register(name, governorate, email, phone.trim() || undefined, password);
       triggerToast(txt('✨ Account created successfully.', '✨ تم إنشاء الحساب بنجاح.', '✨ هەژمارەکەت بە سەرکەوتوویی دروستکرا.'));
       
       const profile = await apiClient.getCurrentUser();
@@ -120,23 +138,48 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
           <p className="mt-2 text-xs sm:text-sm text-[#6B635B] font-medium leading-relaxed max-w-sm mx-auto">
             {mode === 'login' ? t.loginSub : mode === 'register' ? t.registerSub : t.forgotPasswordSub}
           </p>
+
+          {/* Progress / Step messages */}
+          {mode === 'register' && (
+            <div className="mt-4 inline-flex flex-col items-center gap-1 bg-[#40798C]/10 border border-[#40798C]/15 px-4 py-2.5 rounded-2xl w-full text-center">
+              <span className="text-xs font-black text-[#2F5968] uppercase tracking-wider font-mono">
+                {txt('Step 1 of 3: Create account', 'الخطوة الأولى من ٣: إنشاء الحساب', 'هەنگاوی ١ لە ٣: دروستکردنی هەژمار')}
+              </span>
+              <span className="text-[10px] font-bold text-[#40798C]">
+                {txt('Marriage profile comes after login', 'ملف الزواج المبارك يكتمل بعد تسجيل الدخول', 'زانیاری پڕۆفایلی هاوسەرگیری لە دوای چوونە ژوورەوە دەبێت')}
+              </span>
+            </div>
+          )}
+
+          {mode === 'login' && (
+            <div className="mt-4 inline-flex flex-col items-center gap-1 bg-stone-100 border border-stone-200 px-4 py-2.5 rounded-2xl w-full text-center">
+              <span className="text-xs font-black text-stone-700 uppercase tracking-wider font-mono">
+                {txt('Log in to your account', 'تسجيل الدخول إلى حسابك', 'چوونە ناو هەژمارەکەت')}
+              </span>
+              <span className="text-[10px] font-bold text-stone-500">
+                {txt('Complete your respectful marriage profile after login', 'استكمل ملف زواجك الوقور بمجرد تسجيل الدخول', 'پڕۆفایلی هاوسەرگیرییە ڕێزدارەکەت دوای چوونە ژوورەوە تەواو بکە')}
+              </span>
+            </div>
+          )}
         </div>
 
         {mode === 'login' && (
           <form className="mt-8 space-y-5" onSubmit={handleLogin} id="login-form">
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">{t.emailLabel}</label>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Email or Phone Number', 'البريد الإلكتروني أو رقم الهاتف', 'ئیمەیڵ یان ژمارەی مۆبایل')}
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
                     <Mail className="h-4.5 w-4.5" />
                   </div>
                   <input
-                    type="email"
+                    type="text"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder={txt('email@example.com or phone number', 'البريد الإلكتروني أو رقم الهاتف', 'ئیمەیڵ یان ژمارەی مۆبایل')}
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
                 </div>
@@ -197,6 +240,22 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                 {t.signUpBtn}
               </button>
             </div>
+
+            {/* Premium Trust Notes */}
+            <div className="mt-6 pt-5 border-t border-stone-200/50 space-y-2.5">
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('Privacy protected: Shari\'a compliant masking', 'الخصوصية محمية: حجب البيانات المتوافق مع الشريعة', 'پارێزگاری لە تایبەتمەندی: شاردنەوەی شەرعی')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('No public phone numbers: Guardian contacts only', 'لا توجد أرقام هواتف عامة: تواصل أولياء الأمور فقط', 'ژمارەی مۆبایلی گشتی نییە: تەنها بۆ پەیوەندی سەرپەرشتیارەکان')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('Serious marriage only: Manual verification', 'للزواج الجاد فقط: فحص وتدقيق يدوي وقور', 'تەنها بۆ هاوسەرگیری جدی: پشتڕاستکردنەوەی دەستی')}</span>
+              </div>
+            </div>
           </form>
         )}
 
@@ -205,7 +264,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('Your Sincere Name', 'الاسم الكريم', 'ناوی تەواو')}
+                  {txt('Full Name', 'الاسم الكامل', 'ناوی تەواو')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -216,9 +275,30 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={t.enterName}
+                    placeholder={txt('Enter your full name', 'أدخل اسمك الكامل', 'ناوی تەواوی خۆت بنووسە')}
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Governorate', 'المحافظة', 'پارێزگا')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <MapPin className="h-4.5 w-4.5" />
+                  </div>
+                  <select
+                    required
+                    value={governorate}
+                    onChange={(e) => setGovernorate(e.target.value)}
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-semibold transition"
+                  >
+                    {GOVERNORATES.map((govName) => (
+                      <option key={govName} value={govName}>{govName}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -234,6 +314,24 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Phone Number (Optional)', 'رقم الهاتف (اختياري)', 'ژمارەی مۆبایل (ئارەزوومەندانە)')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <Phone className="h-4.5 w-4.5" />
+                  </div>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +964 770..."
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
                 </div>
@@ -257,32 +355,21 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-2">{t.gender}</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setGender('male')}
-                    className={`py-3 px-4 rounded-xl border text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-2 ${
-                      gender === 'male'
-                        ? 'bg-stone-900 border-stone-900 text-white shadow-md'
-                        : 'bg-white border-stone-200 text-warm-charcoal hover:bg-stone-50'
-                    }`}
-                  >
-                    <span>🤵</span>
-                    <span>{txt('Male', 'ذكر', 'پیاو')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGender('female')}
-                    className={`py-3 px-4 rounded-xl border text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-2 ${
-                      gender === 'female'
-                        ? 'bg-[#FF7F50] border-[#FF7F50] text-white shadow-md'
-                        : 'bg-white border-stone-200 text-warm-charcoal hover:bg-stone-50'
-                    }`}
-                  >
-                    <span>🧕</span>
-                    <span>{txt('Female', 'أنثى', 'ئافرەت')}</span>
-                  </button>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Confirm Password', 'تأكيد كلمة المرور', 'دوپاتکردنەوەی وشەی تێپەڕ')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <Lock className="h-4.5 w-4.5" />
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
                 </div>
               </div>
             </div>
@@ -314,6 +401,22 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
               >
                 {t.signInBtn}
               </button>
+            </div>
+
+            {/* Premium Trust Notes */}
+            <div className="mt-6 pt-5 border-t border-stone-200/50 space-y-2.5">
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('Privacy protected: Shari\'a compliant masking', 'الخصوصية محمية: حجب البيانات المتوافق مع الشريعة', 'پارێزگاری لە تایبەتمەندی: شاردنەوەی شەرعی')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('No public phone numbers: Guardian contacts only', 'لا توجد أرقام هواتف عامة: تواصل أولياء الأمور فقط', 'ژمارەی مۆبایلی گشتی نییە: تەنها بۆ پەیوەندی سەرپەرشتیارەکان')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-[#524B44] font-semibold">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{txt('Serious marriage only: Manual verification', 'للزواج الجاد فقط: فحص وتدقيق يدوي وقور', 'تەنها بۆ هاوسەرگیری جدی: پشتڕاستکردنەوەی دەستی')}</span>
+              </div>
             </div>
           </form>
         )}

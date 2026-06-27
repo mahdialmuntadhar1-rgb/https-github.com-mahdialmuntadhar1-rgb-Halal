@@ -74,3 +74,30 @@
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+/* Infinite scrolling marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-rtl {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 30s linear infinite;
+}
+
+.animate-marquee:hover, .animate-marquee-rtl:hover {
+  animation-play-state: paused;
+}
+

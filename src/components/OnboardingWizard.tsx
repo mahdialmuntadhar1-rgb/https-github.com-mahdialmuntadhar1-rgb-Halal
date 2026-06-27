@@ -212,7 +212,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
 
     try {
       // 1. Call Register
-      const authResponse = await apiClient.register(emailToUse, password, name, finalGender);
+      const authResponse = await apiClient.register(name, governorate, emailToUse, undefined, password);
       
       let finalAvatarUrl = "";
       let finalPhotoStatus: 'blurred' | 'hidden' | 'initials' | 'visible' = 'visible';
@@ -322,33 +322,33 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
           </div>
 
           {/* Cards Container */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 pt-4">
             
             {/* Card 1: Bride */}
             <button
               type="button"
               onClick={() => { setRole('bride'); }}
-              className={`p-8 rounded-[2rem] border-2 text-center transition-all duration-300 cursor-pointer group flex flex-col items-center justify-center space-y-4 relative overflow-hidden ${
+              className={`p-4 sm:p-8 rounded-2xl sm:rounded-[2rem] border-2 text-center transition-all duration-300 cursor-pointer group flex flex-col items-center justify-center space-y-2 sm:space-y-4 relative overflow-hidden ${
                 role === 'bride'
                   ? 'bg-gradient-to-br from-pink-550 to-pink-500 border-accent-pink text-white shadow-2xl scale-[1.02]'
                   : 'bg-white border-stone-200 hover:border-accent-pink/60 text-warm-charcoal shadow-md hover:shadow-lg'
               }`}
               style={role === 'bride' ? { background: 'linear-gradient(135deg, #EC4899, #DB2777)' } : {}}
             >
-              <div className="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center text-4xl shadow-inner group-hover:scale-110 transition duration-300">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-pink-100 flex items-center justify-center text-2xl sm:text-4xl shadow-inner group-hover:scale-110 transition duration-300">
                 👰
               </div>
-              <div className="space-y-1">
-                <span className="block text-xl font-serif font-black tracking-tight">
+              <div className="space-y-0.5 sm:space-y-1">
+                <span className="block text-sm sm:text-xl font-serif font-black tracking-tight">
                   {txt("Bride", "العروس 👰", "بووک 👰")}
                 </span>
-                <span className={`block text-xs font-bold uppercase tracking-wider ${role === 'bride' ? 'text-pink-100' : 'text-stone-500'}`}>
-                  {txt("Seeking a Husband", "تبحث عن زوج صالح", "بەدوای هاوسەردا دەگەڕێت")}
+                <span className={`block text-[9px] sm:text-xs font-bold uppercase tracking-wider ${role === 'bride' ? 'text-pink-100' : 'text-stone-500'}`}>
+                  {txt("Seeking a Husband", "تبحث عن زوج", "بۆ هاوسەرگیری")}
                 </span>
               </div>
               {role === 'bride' && (
-                <div className="absolute top-4 right-4 bg-white text-pink-600 p-1.5 rounded-full shadow-md">
-                  <Check className="w-4 h-4 stroke-[3px]" />
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white text-pink-600 p-1 rounded-full shadow-md">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 stroke-[3px]" />
                 </div>
               )}
             </button>
@@ -357,26 +357,26 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
             <button
               type="button"
               onClick={() => { setRole('groom'); }}
-              className={`p-8 rounded-[2rem] border-2 text-center transition-all duration-300 cursor-pointer group flex flex-col items-center justify-center space-y-4 relative overflow-hidden ${
+              className={`p-4 sm:p-8 rounded-2xl sm:rounded-[2rem] border-2 text-center transition-all duration-300 cursor-pointer group flex flex-col items-center justify-center space-y-2 sm:space-y-4 relative overflow-hidden ${
                 role === 'groom'
                   ? 'bg-gradient-to-br from-stone-900 to-stone-800 border-stone-900 text-white shadow-2xl scale-[1.02]'
                   : 'bg-white border-stone-200 hover:border-stone-400 text-warm-charcoal shadow-md hover:shadow-lg'
               }`}
             >
-              <div className="w-20 h-20 rounded-full bg-sky-100 flex items-center justify-center text-4xl shadow-inner group-hover:scale-110 transition duration-300">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-sky-100 flex items-center justify-center text-2xl sm:text-4xl shadow-inner group-hover:scale-110 transition duration-300">
                 👨
               </div>
-              <div className="space-y-1">
-                <span className="block text-xl font-serif font-black tracking-tight">
+              <div className="space-y-0.5 sm:space-y-1">
+                <span className="block text-sm sm:text-xl font-serif font-black tracking-tight">
                   {txt("Groom", "العريس 👨", "زاوا 👨")}
                 </span>
-                <span className={`block text-xs font-bold uppercase tracking-wider ${role === 'groom' ? 'text-sky-300' : 'text-stone-500'}`}>
-                  {txt("Seeking a Wife", "يبحث عن زوجة صالحة", "بەدوای هاوسەردا دەگەڕێت")}
+                <span className={`block text-[9px] sm:text-xs font-bold uppercase tracking-wider ${role === 'groom' ? 'text-sky-300' : 'text-stone-500'}`}>
+                  {txt("Seeking a Wife", "يبحث عن زوجة", "بۆ هاوسەرگیری")}
                 </span>
               </div>
               {role === 'groom' && (
-                <div className="absolute top-4 right-4 bg-white text-stone-950 p-1.5 rounded-full shadow-md">
-                  <Check className="w-4 h-4 stroke-[3px]" />
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white text-stone-950 p-1 rounded-full shadow-md">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 stroke-[3px]" />
                 </div>
               )}
             </button>

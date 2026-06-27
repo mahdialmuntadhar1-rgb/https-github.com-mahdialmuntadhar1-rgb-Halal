@@ -263,6 +263,82 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           </div>
         </div>
 
+        {/* MARRIAGE SCROLLING TICKER */}
+        <div className="w-full bg-[#FAF7F2] border border-[#E8DCC4]/60 rounded-2xl sm:rounded-3xl py-3.5 sm:py-5 overflow-hidden shadow-xs relative" id="marriage-scrolling-marquee">
+          <div className="absolute top-0 bottom-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
+          
+          <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-6 mb-2 border-b border-[#EADFC9]/50 pb-1.5 sm:pb-2">
+            <span className="flex h-2.5 w-2.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-[10px] sm:text-xs font-black text-[#40798C] uppercase tracking-widest font-mono">
+              {locale === 'en' ? 'Today in Zawaj: Live Success Marquees & Blessed Activity' : locale === 'ar' ? 'اليوم في زواج: قصص مباركة وأنشطة الخطوبة الحية' : 'ئەمڕۆ لە زەواج: چیرۆکی پیرۆز و دەستپێشخەرییەکان'}
+            </span>
+          </div>
+
+          <div className="overflow-hidden w-full relative">
+            <div className={`flex gap-4 sm:gap-8 ${locale === 'ar' ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
+              {/* Combine twice for infinite seamless scroll */}
+              {[...Array(2)].map((_, repeatIdx) => (
+                <div key={repeatIdx} className="flex gap-4 sm:gap-8 items-center shrink-0">
+                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
+                    <span className="text-base sm:text-lg">💍</span>
+                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
+                      {locale === 'en' 
+                        ? 'Blessed Union: Groom (31, Baghdad) & Bride (27, Erbil) successfully engaged!' 
+                        : locale === 'ar' 
+                          ? 'عقد مبارك: تم بحمد الله خطوبة عريس (٣١، بغداد) وعروسة (٢٧، أربيل)!' 
+                          : 'مارەبڕینی پیرۆز: زاوا (٣١، بەغداد) و بووک (٢٧، هەولێر) مارەبڕان!'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
+                    <span className="text-base sm:text-lg">✨</span>
+                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
+                      {locale === 'en' 
+                        ? 'Sincere Match: Groom (29, Basra) & Bride (25, Baghdad) chatting under Chaperon!' 
+                        : locale === 'ar' 
+                          ? 'توافق جاد: عريس (٢٩، البصرة) وعروسة (٢٥، بغداد) في حوار محمي!' 
+                          : 'هاوتایی جدی: زاوا (٢٩، بەسرە) و بووک (٢٥، بەغداد) لە گفتوگۆدان!'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
+                    <span className="text-base sm:text-lg">❤️</span>
+                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
+                      {locale === 'en' 
+                        ? 'Sacred Covenant: Groom (34, Kirkuk) & Bride (30, Sulaymaniyah) matched!' 
+                        : locale === 'ar' 
+                          ? 'ميثاق غليظ: توافق مبارك بين عريس (٣٤، كركوك) وعروسة (٣٠، السليمانية)!' 
+                          : 'پەیمانی پیرۆز: هاوتایی لە نێوان زاوا (٣٤، کەرکوک) و بووک (٣٠، سلێمانی)!'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
+                    <span className="text-base sm:text-lg">💍</span>
+                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
+                      {locale === 'en' 
+                        ? 'Mubarak Marriage: Groom (28, Duhok) & Bride (26, Nineveh) happily married!' 
+                        : locale === 'ar' 
+                          ? 'زواج مبارك: تم بحمد الله زواج عريس (٢٨، دهوك) وعروسة (٢٦، نينوى)!' 
+                          : 'هاوسەرگیری بەختەوەر: زاوا (٢٨، دهۆک) و بووک (٢٦، نەینەوا) هاوسەرگیریان کرد!'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
+                    <span className="text-base sm:text-lg">✨</span>
+                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
+                      {locale === 'en' 
+                        ? 'Respectful Connection: Groom (33, Najaf) & Bride (29, Karbala) approved!' 
+                        : locale === 'ar' 
+                          ? 'تواصل كريم: قبول متبادل بين عريس (٣٣، النجف) وعروسة (٢٩، كربلاء)!' 
+                          : 'پەیوەندی بەڕێز: ڕەزامەندی دوولایەنە لە نێوان زاوا (٣٣، نەجەف) و بووک (٢٩، کەربەلا)!'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Short & Single-Line Header */}
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-[15px] min-[360px]:text-[17px] xs:text-[22px] sm:text-[32px] md:text-[40px] font-serif text-warm-charcoal tracking-tight font-display font-black leading-tight selection:bg-[#40798C]/15">

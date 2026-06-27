@@ -17,6 +17,8 @@ import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
 import CommunityFeed from './components/CommunityFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
+import GenderSelectionScreen from './screens/GenderSelectionScreen';
+import FloatingInstallButton from './components/FloatingInstallButton';
 import { useLocale } from './hooks/useLocale';
 import { apiClient } from './services/apiClient';
 import { Sparkles, Check, Heart } from 'lucide-react';
@@ -71,6 +73,13 @@ export default function App() {
           setIsAuthenticated(true);
           setMatches(matchesResult.matches);
           setConversations(convs);
+
+          // Route initial loaded user appropriately
+          if (!profile.gender) {
+            setTab('gender-selection');
+          } else if (!profile.age || profile.age === 0 || !profile.education || !profile.profession) {
+            setTab('onboarding');
+          }
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -101,11 +110,42 @@ export default function App() {
       ]);
       setMatches(matchesResult.matches);
       setConversations(convs);
-      setTab('explore');
+      
+      // Route user correctly
+      if (!profile.gender) {
+        setTab('gender-selection');
+      } else if (!profile.age || profile.age === 0 || !profile.education || !profile.profession) {
+        setTab('onboarding');
+      } else {
+        setTab('explore');
+      }
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
       setIsLoadingSession(false);
+    }
+  };
+
+  const handleSelectGenderInScreen = async (gender: 'male' | 'female') => {
+    if (!userProfile) return;
+    try {
+      const updatedProfile = {
+        ...userProfile,
+        gender,
+        photoPrivacy: gender === 'female' ? ('hidden_by_default' as const) : ('visible' as const)
+      };
+      const saved = await apiClient.updateCurrentUserProfile(updatedProfile);
+      setUserProfile(saved);
+      triggerToast(
+        locale === 'en'
+          ? `✨ Gender set to ${gender}. Let's fill out your parameters!`
+          : locale === 'ckb'
+            ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
+            : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
+      );
+      setTab('onboarding');
+    } catch (err) {
+      console.error("Failed to update gender", err);
     }
   };
 
@@ -266,7 +306,7 @@ export default function App() {
 
   const profileStrength = calculateProfileStrength();
   const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
-  const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin'].includes(currentTab);
+  const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin', 'onboarding', 'gender-selection'].includes(currentTab);
 
   return (
     <div 
@@ -313,6 +353,13 @@ export default function App() {
           />
         ) : (
           <>
+            {currentTab === 'gender-selection' && (
+              <GenderSelectionScreen
+                locale={locale}
+                onSelectGender={handleSelectGenderInScreen}
+              />
+            )}
+
             {currentTab === 'landing' && (
               <LandingScreen
                 locale={locale}
@@ -516,6 +563,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Floating PWA Install Button for mobile users */}
+      <FloatingInstallButton locale={locale} />
 
     </div>
   );

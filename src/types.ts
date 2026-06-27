@@ -5,7 +5,7 @@
 
 export type AppLanguage = 'en' | 'ar' | 'ckb';
 
-export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin';
+export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin' | 'gender-selection';
 
 export interface User {
   id: string;
@@ -48,7 +48,7 @@ export interface PartnerPreferences {
 export interface UserProfile {
   name: string;
   age: number;
-  gender: 'male' | 'female';
+  gender?: 'male' | 'female';
   country: string;
   governorate?: string;
   city?: string;

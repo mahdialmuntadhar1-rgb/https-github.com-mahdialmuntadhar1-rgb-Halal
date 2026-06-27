@@ -281,34 +281,116 @@ function generateMatches(): MatchProfile[] {
     }
   };
 
-  // Generate 2 females and 2 males for each of the 19 governorates (Total = 76)
+  // Localized bio & intention templates for Kurdish profiles
+  const ABOUT_ME_FEMALE_KURDISH = [
+    "مامۆستای قوتابخانەی بنەڕەتیم لە [city]. حەز بە خوێندنەوەی کتێبی مێژوویی و چاندنی گوڵ دەکەم. کچێکی هێمنم و هیوادارم خێزانێکی بەختیار پێکبهێنم لەسەر بنەمای فەزڵ و دڵسۆزی.",
+    "فەرمانبەر یان دەرمانسازم لە شاری [city]. کاتەکانی خۆم بە فێربوونی بەردەوام و یارمەتیدانی خێزانەکەم بەسەر دەبەم. پارێزگاری لە بەها ڕەسەنەکانمان دەکەم بە شێوازێکی هاوچەرخ.",
+    "ئەندازیاری تەلارسازیم لە ناوچەی [city]. کچێکی جدی و بەڕێزم، خێزان لە ژیانی مندا شوێنی یەکەمی هەیە. حەزم لە کالیگرافی و هونەری کوردییە و مەیلم بۆ سروشت زۆرە.",
+    "گەشەپێدەری نەرمەکاڵام لە [city]. حەز بە تەکنەلۆجیا و کارکردنی بەرهەمدار دەکەم. کەسێکی ڕاستگۆم و ڕێز لە مەرجە بەرزە ئەخلاقییەکان و سنورە تایبەتەکان دەگرم.",
+    "پەرستارم لە نەخۆشخانەیەکی حکومی لە [city]. هەوڵدەدەم هەمیشە هاوکاری نەخۆشان بکەم. کەسێکی متمانەپێکراو و دڵسۆزم و کاتی بەتاڵم لەگەڵ خێزانەکەم بەسەر دەبەم."
+  ];
+
+  const INTENTION_FEMALE_KURDISH = [
+    "هیوادارم هاوسەرێکی دیندار و جدی و پاڵپشت بدۆزمەوە بۆ دروستکردنی ماڵێکی پڕ لە ئارامی و دڵخۆشی بەپێی دابونەریتی کوردی و بەها بەرزەکان.",
+    "دەخوازم خێزانێکی جێگیر پێکبهێنم کە تێیدا ڕێز و گفتوگۆی بنیاتنەر هەبێت، و منداڵەکانمان بە پەروەردەیەکی دروست و بەها ئیسلامییەکان گەورە بکەین.",
+    "بەدوای هاوبەشێکی ڕێزداردا دەگەڕێم کە پاڵپشتی خوێندن و پێشکەوتنم بکات، پێکەوە ماڵێکی بەهێز و پڕ لە خۆشەویستی دروست بکەین."
+  ];
+
+  const ABOUT_ME_MALE_KURDISH = [
+    "وەک ئەندازیاری کارەبا کاردەکەم لە [city]. کەسێکی ڕاستگۆ و ڕێزدارم، حەز بە گەشتکردن بە ناو سروشت و خوێندنەوەی کتێبی ئیسلامی و گەشەی فکری دەکەم بە دڵسۆزی.",
+    "پزیشکی دڵم لە شاری [city]. ژیانی پیشەییم زۆر گرنگە بەڵام پەرۆشم بۆ دروستکردنی سەرەتایەکی نوێ لەگەڵ هاوسەرێکی دڵسۆز و جدی کە پێکەوە ئایندەیەکی جوان بنیاد بنێین.",
+    "مامۆستای مێژووم لە قوتابخانەی ئامادەیی لە [city]. بە کاتی بەتاڵم سەرقاڵی کالیگرافی و خوێندنەوەی مێژووم. کەسێکی خێزانپەروەر و دیندارم.",
+    "گەشەپێدەری سیستەمم لە [city]. کار و پیشە بە دڵسۆزی دەکەم، کات بۆ چالاکی کۆمەڵایەتی و وەرزش و فێربوونی زانیاری نوێ تەرخان دەکەم و بە توندی بڕوام بە خێزان هەیە."
+  ];
+
+  const INTENTION_MALE_KURDISH = [
+    "ئامادەم بۆ پێکەوەنانی خێزانێکی جێگیر لەسەر بنەمای ڕێز و دڵسۆزی دوولایەنە. دڵنیایی دەدەم لە پاڵپشتی تەواو بۆ هاوسەرەکەم و گەورەکردنی منداڵەکانمان بە بەها جوانەکان.",
+    "خوازیارم هاوسەرێکی خوداترس و بەڕێز بدۆزمەوە کە پێکەوە بتوانین ماڵێکی ئارام و دوور لە کێشە دروست بکەین کە تێیدا ڕێزی دایک و باوکمان بەرز ڕابگرین.",
+    "دەمهوێت هاوسەرێکی خاوەن بەها و ڕەوشتی بەرز پێکبهێنم کە هاوشان لەگەڵ کارەکەمدا، پاڵپشتی یەکتر بین بۆ بەدیهێنانی خەونەکانمان."
+  ];
+
+  // Localized bio & intention templates for Arabic profiles
+  const ABOUT_ME_FEMALE_ARABIC = [
+    "أعمل كطبيبة صيدلانية في [city]. إنسانية العمل تلهمني، وأقضي وقت فراغي في قراءة كتب التغذية والطهي الصحي وكتابة الخط العربي العريق والاهتمام بالعائلة.",
+    "معلمة لغة عربية في مدرسة ابتدائية بـ [city]. أحب تعليم الأطفال والقراءة الهادفة وتنسيق النباتات المنزلية. أحافظ على الهدوء والستر والتقاليد العائلية العريقة.",
+    "مهندسة برمجيات من [city]. مهتمة بالتطوير التكنولوجي والابتكار الرقمي. إنسانة ملتزمة، صريحة، وأعتبر الاستقرار الأسري وبناء جيل صالح أولويتي الكبرى.",
+    "أخصائية علاج طبيعي في مستشفى حكومي بـ [city]. مخلصة في عملي، محبة للخير، وأسعى دائمًا لنشر الأمل ومساعدة المحتاجين بكل أمانة وصدق متقاسمين قيمًا طيبة.",
+    "مصممة غرافيك وفنون بصرية في [city]. أحب الفنون العريقة، التراث العراقي، والجلسات العائلية الهادئة. هادئة الطباع وملتزمة بحدود الخصوصية والوقار."
+  ];
+
+  const INTENTION_FEMALE_ARABIC = [
+    "أسعى للعثور على زوج صالح ومسؤول لبناء بيت مسلم دافئ ومستقر، يسوده التفاهم المتبادل وتربية أبنائنا على الأخلاق الكريمة والمحبة.",
+    "أرغب في تكوين أسرة مستقرة مبنية على الاحترام المتبادل والمشورة (الشورى)، مع رفيق درب يقدر طموحي العملي ويساندني في طاعة الله.",
+    "أتمنى الارتباط بإنسان واعي ومحترم يتفهم قيمة الأسرة ويشاركني بناء حياة كريمة، ملتزمًا بالعهود والأخلاق الإسلامية والتقاليد العراقية الأصيلة."
+  ];
+
+  const ABOUT_ME_MALE_ARABIC = [
+    "أعمل كمهندس كهرباء وشبكات طاقة في [city]. شخص متزن، جاد في عملي وحياتي، أهتم بمتابعة المحاضرات الفكرية، والمشاركة في الأنشطة الخيرية المحلية والبر بوالدي.",
+    "أخصائي طب وجراحة القلب في [city]. مخلص لمهنتي الإنسانية، وأسعى لبناء أسرة صالحة مع شريكة حياة تقدر السعي الجاد وتشاركني بناء مستقبل مستقر وآمن.",
+    "مدرس مادة التاريخ للمرحلة الإعدادية بـ [city]. مهتم بالخط العربي التراثي والمطالعة المستمرة. إنسان هادئ الطباع، بار بوالدي، وأبحث عن الاستقرار التام.",
+    "مطور حلول تكنولوجية في [city]. أوازن بين عملي التقني ومطالعة الكتب، وممارسة الرياضة والاهتمام بالتقاليد الاجتماعية والترابط الأسري المقدس.",
+    "أخصائي في إدارة سلاتب الإمداد والخدمات اللوجستية بـ [city]. أحب السفر، الرحلات النهرية الهادئة، وأقدر الحوار العقلاني الرصين والصراحة المطلقة في الحياة."
+  ];
+
+  const INTENTION_MALE_ARABIC = [
+    "مستعد لتأسيس بيت زوجي مستقر ومبارك مبني على الاحترام والمودة والرحمة، مع تقديم كامل الدعم والتقدير لشريكة عمري وتوفير حياة كريمة لها.",
+    "أبحث عن زوجة صالحة ووقورة لبناء أسرة هادئة ومحترمة، تملأها السكينة ونقاسم معًا الأفراح والمسؤوليات بروح المشورة والاحترام المتبادل.",
+    "أسعى للارتباط بامرأة طيبة الأخلاق لنكون لبعضنا سندًا ورفيقين في الدنيا والآخرة، ونربي أبناءنا على حب الله والخير ومكارم الأخلاق الشريفة."
+  ];
+
+  // Generate 10 females and 10 males for each of the 19 governorates (Total = 380)
   GOVERNORATES.forEach((gov, govIdx) => {
     // Determine ethnicities in mixed regions (Kirkuk, Diyala, Nineveh)
     const getEthnicity = (gender: 'male' | 'female', index: number) => {
       if (gov.isKurdish) return 'kurdish';
       if (gov.name === 'Kirkuk') {
-        return index === 0 ? 'kurdish' : index === 1 ? 'others' : 'arab'; // others matches Turkmen
+        return index % 3 === 0 ? 'kurdish' : index % 3 === 1 ? 'others' : 'arab'; // others matches Turkmen
       }
       if (gov.name === 'Diyala') {
-        return index === 0 ? 'arab' : 'kurdish';
+        return index % 2 === 0 ? 'arab' : 'kurdish';
       }
       if (gov.name === 'Nineveh') {
-        return index === 0 ? 'arab' : 'others'; // Turkmen or Assyrian/others
+        return index % 2 === 0 ? 'arab' : 'others'; // Turkmen or Assyrian/others
       }
       return 'arab';
     };
 
-    // Female 1
-    const fId1 = `f${govIdx * 2 + 1}`;
-    // Female 2
-    const fId2 = `f${govIdx * 2 + 2}`;
-    // Male 1
-    const mId1 = `m${govIdx * 2 + 1}`;
-    // Male 2
-    const mId2 = `m${govIdx * 2 + 2}`;
+    // Helper to determine the stable ID of a profile to match existing custom overrides
+    const getProfileId = (gender: 'male' | 'female', indexInGov: number): string => {
+      if (gov.name === 'Sulaymaniyah' && indexInGov === 0) {
+        return gender === 'female' ? 'f1' : 'm5';
+      }
+      if (gov.name === 'Baghdad' && indexInGov === 0) {
+        return gender === 'female' ? 'f2' : 'm1';
+      }
+      if (gov.name === 'Erbil' && indexInGov === 0 && gender === 'male') {
+        return 'm2';
+      }
+      if (gov.name === 'Najaf' && indexInGov === 0 && gender === 'female') {
+        return 'f3';
+      }
+      if (gov.name === 'Basra' && indexInGov === 0 && gender === 'male') {
+        return 'm3';
+      }
+      if (gov.name === 'Duhok' && indexInGov === 0 && gender === 'female') {
+        return 'f4';
+      }
+      if (gov.name === 'Nineveh' && indexInGov === 0 && gender === 'male') {
+        return 'm4';
+      }
+      if (gov.name === 'Kirkuk' && indexInGov === 0 && gender === 'female') {
+        return 'f5';
+      }
+      
+      const prefix = gender === 'female' ? 'f' : 'm';
+      const govShort = gov.name.replace(/\s+/g, '').toLowerCase();
+      return `${prefix}_${govShort}_${indexInGov}`;
+    };
 
     // Helper to generate a realistic profile
-    const createProfile = (id: string, gender: 'male' | 'female', indexInGov: number): MatchProfile => {
+    const createProfile = (gender: 'male' | 'female', indexInGov: number): MatchProfile => {
+      const id = getProfileId(gender, indexInGov);
+
       // Check if custom override exists for this specific ID
       if (customMatches[id] && customMatches[id].gender === gender && customMatches[id].governorate === gov.name) {
         return {
@@ -348,7 +430,7 @@ function generateMatches(): MatchProfile[] {
       }
 
       // Generate programmatically
-      const age = 22 + ((govIdx * indexInGov + 7) % 11); // Deterministic age between 22 and 32
+      const age = 22 + ((govIdx * 3 + indexInGov * 7) % 11); // Deterministic age between 22 and 32
       const eth = getEthnicity(gender, indexInGov);
       
       let name = "";
@@ -356,7 +438,7 @@ function generateMatches(): MatchProfile[] {
       let profObj = { title: "", edu: "" };
 
       if (gender === 'female') {
-        profObj = PROFESSIONS_FEMALE[(govIdx * 2 + indexInGov) % PROFESSIONS_FEMALE.length];
+        profObj = PROFESSIONS_FEMALE[(govIdx * 3 + indexInGov * 2) % PROFESSIONS_FEMALE.length];
         avatarUrl = FEMALE_AVATARS[(govIdx * 2 + indexInGov) % FEMALE_AVATARS.length];
         if (eth === 'kurdish') {
           name = FEMALE_KURDISH_NAMES[(govIdx * 2 + indexInGov) % FEMALE_KURDISH_NAMES.length];
@@ -366,7 +448,7 @@ function generateMatches(): MatchProfile[] {
           name = FEMALE_ARABIC_NAMES[(govIdx * 2 + indexInGov) % FEMALE_ARABIC_NAMES.length];
         }
       } else {
-        profObj = PROFESSIONS_MALE[(govIdx * 2 + indexInGov) % PROFESSIONS_MALE.length];
+        profObj = PROFESSIONS_MALE[(govIdx * 3 + indexInGov * 2) % PROFESSIONS_MALE.length];
         avatarUrl = MALE_AVATARS[(govIdx * 2 + indexInGov) % MALE_AVATARS.length];
         if (eth === 'kurdish') {
           name = MALE_KURDISH_NAMES[(govIdx * 2 + indexInGov) % MALE_KURDISH_NAMES.length];
@@ -378,16 +460,16 @@ function generateMatches(): MatchProfile[] {
       }
 
       // Deduplicate names slightly
-      if (id === 'f37') name = "Choman";
-      if (id === 'f38') name = "Sheno";
-      if (id === 'm37') name = "Hawkar";
-      if (id === 'm38') name = "Hejar";
+      if (name === "Mustafa" && indexInGov > 0) name = "Yousef";
+      if (name === "Sara" && indexInGov > 0) name = "Tabarak";
 
       const sect = (gov.isKurdish) ? "sunni" : (gov.name === "Kirkuk" && eth === 'others' ? "sunni" : gov.defaultSect);
       const isOnline = (govIdx + indexInGov) % 3 !== 0;
       
-      const photoPrivacyOptions: Array<'visible' | 'blurred' | 'hidden' | 'initials'> = ['visible', 'blurred', 'hidden', 'initials'];
-      const photoStatus = photoPrivacyOptions[(govIdx + indexInGov) % photoPrivacyOptions.length];
+      // Females: always blurred/initials (never public/visible) to ensure safety. Males: optional (some visible, some blurred)
+      const photoStatus = gender === 'female'
+        ? (indexInGov % 3 === 0 ? 'blurred' : (indexInGov % 3 === 1 ? 'initials' : 'hidden'))
+        : (indexInGov % 3 === 0 ? 'visible' : (indexInGov % 3 === 1 ? 'blurred' : 'initials'));
 
       const vals = [
         ["Family Support", "Honesty", "Spiritual Grounding"],
@@ -421,13 +503,33 @@ function generateMatches(): MatchProfile[] {
       const citiesList = arabicCities[gov.name] || [gov.name];
       const city = citiesList[indexInGov % citiesList.length];
 
-      const aboutMe = gender === 'female' 
-        ? `I am a serious, dedicated ${profObj.title.toLowerCase()} in ${city}. In my spare time, I appreciate reading books on history, traditional calligraphy, and spending quiet moments with my family. I value standard traditional manners, continuous learning, and clear spiritual goals in life.`
-        : `I work as a ${profObj.title.toLowerCase()} in the ${gov.name} region. I balance a focused professional routine with historical studies, local community support, and regular family gatherings. I seek a supportive, family-focused partner to establish a quiet, respectful home on shared faith.`;
+      // Determine language and template of descriptions
+      const useKurdishText = gov.isKurdish || eth === 'kurdish';
+      
+      let aboutMe = "";
+      let intention = "";
 
-      const intention = gender === 'female'
-        ? `Seeking a moral, supportive partner to build a serene family dynamic. Our home should be centered on respectful counseling (shura), academic exploration, and nurturing children with traditional Iraqi values.`
-        : `Ready to establish a stable, mature household based on mutual consultation and respect. I wish to support my partner’s aspirations while securing a happy, faith-rooted future together.`;
+      if (useKurdishText) {
+        if (gender === 'female') {
+          const rawTemplate = ABOUT_ME_FEMALE_KURDISH[(govIdx + indexInGov) % ABOUT_ME_FEMALE_KURDISH.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_FEMALE_KURDISH[(govIdx + indexInGov) % INTENTION_FEMALE_KURDISH.length];
+        } else {
+          const rawTemplate = ABOUT_ME_MALE_KURDISH[(govIdx + indexInGov) % ABOUT_ME_MALE_KURDISH.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_MALE_KURDISH[(govIdx + indexInGov) % INTENTION_MALE_KURDISH.length];
+        }
+      } else {
+        if (gender === 'female') {
+          const rawTemplate = ABOUT_ME_FEMALE_ARABIC[(govIdx + indexInGov) % ABOUT_ME_FEMALE_ARABIC.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_FEMALE_ARABIC[(govIdx + indexInGov) % INTENTION_FEMALE_ARABIC.length];
+        } else {
+          const rawTemplate = ABOUT_ME_MALE_ARABIC[(govIdx + indexInGov) % ABOUT_ME_MALE_ARABIC.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_MALE_ARABIC[(govIdx + indexInGov) % INTENTION_MALE_ARABIC.length];
+        }
+      }
 
       const comPref = photoStatus === 'hidden' || photoStatus === 'initials'
         ? "Prefers initials representation to safeguard family dignity until mutual fit is approved"
@@ -447,7 +549,7 @@ function generateMatches(): MatchProfile[] {
         profession: profObj.title,
         education: profObj.edu,
         intention,
-        timeline: indexInGov === 0 ? "Within 6 months" : "Within 1 year",
+        timeline: indexInGov % 2 === 0 ? "Within 6 months" : "Within 1 year",
         wantsChildren: "Yes, definitely",
         communicationPreference: comPref,
         valuesSummary: vals,
@@ -469,10 +571,11 @@ function generateMatches(): MatchProfile[] {
       };
     };
 
-    list.push(createProfile(fId1, 'female', 0));
-    list.push(createProfile(fId2, 'female', 1));
-    list.push(createProfile(mId1, 'male', 0));
-    list.push(createProfile(mId2, 'male', 1));
+    // Push exactly 10 females and 10 males per governorate
+    for (let i = 0; i < 10; i++) {
+      list.push(createProfile('female', i));
+      list.push(createProfile('male', i));
+    }
   });
 
   return list;
