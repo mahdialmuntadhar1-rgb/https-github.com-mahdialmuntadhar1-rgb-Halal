@@ -12,6 +12,7 @@ interface FilterPanelProps {
   handleResetFilters: () => void;
   filteredCount: number;
   locale: AppLanguage;
+  userGender?: 'male' | 'female';
 }
 
 export default function FilterPanel({
@@ -21,7 +22,8 @@ export default function FilterPanel({
   setShowAdvancedFilters,
   handleResetFilters,
   filteredCount,
-  locale
+  locale,
+  userGender
 }: FilterPanelProps) {
 
   const [expandedMore, setExpandedMore] = useState(false);
@@ -160,24 +162,36 @@ export default function FilterPanel({
               <span className="text-[10px] tracking-wider font-extrabold text-[#7E776F] uppercase block">
                 {txt("GENDER", "الجنس", "ڕەگەز")}
               </span>
-              <div className="flex flex-wrap gap-2">
-                {genderPills.map((p) => {
-                  const isSelected = filters.gender === p.value;
-                  return (
-                    <button
-                      key={p.value}
-                      onClick={() => setFilters(prev => ({ ...prev, gender: p.value as any }))}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition duration-200 cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#0B5C43] text-white border-transparent shadow-sm hover:bg-[#094d38]'
-                          : 'bg-white border-[#E4DDD3] text-[#4E4B45] hover:bg-stone-50 hover:border-[#DDD6C9]'
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  );
-                })}
-              </div>
+              {userGender ? (
+                <div className="bg-[#FAF8F5] border border-[#E6DCC3] rounded-xl px-4 py-2.5 text-xs font-semibold text-[#0B5C43] flex items-center gap-1.5 shadow-sm">
+                  <span>💍</span>
+                  <span>
+                    {userGender === 'male'
+                      ? txt("Auto-matching: Showing brides only", "مطابقة تلقائية: يتم عرض العرائس فقط", "گونجاندنی خۆکار: تەنها کچان پیشان دەدرێن")
+                      : txt("Auto-matching: Showing grooms only", "مطابقة تلقائية: يتم عرض العرسان فقط", "گونجاندنی خۆکار: تەنها کوڕان پیشان دەدرێن")}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {genderPills.map((p) => {
+                    const isSelected = filters.gender === p.value;
+                    return (
+                      <button
+                        key={p.value}
+                        type="button"
+                        onClick={() => setFilters(prev => ({ ...prev, gender: p.value as any }))}
+                        className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition duration-200 cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#0B5C43] text-white border-transparent shadow-sm hover:bg-[#094d38]'
+                            : 'bg-white border-[#E4DDD3] text-[#4E4B45] hover:bg-stone-50 hover:border-[#DDD6C9]'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
           </div>

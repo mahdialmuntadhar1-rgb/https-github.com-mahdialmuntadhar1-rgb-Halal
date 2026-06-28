@@ -135,6 +135,15 @@ export default function MatchExplorerScreen({
     });
   };
 
+  // Enforce gender filter integrity dynamically against user's registered gender
+  useEffect(() => {
+    if (userGender === 'male' && filters.gender !== 'female') {
+      setFilters(prev => ({ ...prev, gender: 'female' }));
+    } else if (userGender === 'female' && filters.gender !== 'male') {
+      setFilters(prev => ({ ...prev, gender: 'male' }));
+    }
+  }, [userGender, filters.gender]);
+
   // Helper to score profile completeness
   const getCompleteness = (m: MatchProfile): number => {
     let score = 0;
@@ -262,6 +271,7 @@ export default function MatchExplorerScreen({
           displayedMatches.length
         }
         locale={locale}
+        userGender={userGender}
       />
 
       {/* Demo Warning Label */}

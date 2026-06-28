@@ -32,10 +32,11 @@ interface LandingScreenProps {
   isAuthenticated: boolean;
   userProfileName?: string;
   userProfile?: UserProfile;
+  preSelectedGender?: 'male' | 'female' | null;
 }
 
 // 19 Governorates list with English, Arabic, and Kurdish translations
-const GOVERNORATE_OPTIONS = [
+export const GOVERNORATE_OPTIONS = [
   { id: 'Baghdad', en: 'Baghdad (بغداد / بەغداد)', ar: 'بغداد (Baghdad)', ckb: 'بەغداد (Baghdad)' },
   { id: 'Erbil', en: 'Erbil (أربيل / هەولێر)', ar: 'أربيل (Erbil)', ckb: 'هەولێر (Erbil)' },
   { id: 'Sulaymaniyah', en: 'Sulaymaniyah (السليمانية / سلێمانی)', ar: 'السليمانية (Sulaymaniyah)', ckb: 'سلێمانی (Sulaymaniyah)' },
@@ -80,7 +81,7 @@ const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: strin
   Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
 };
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isEn = locale === 'en';
   const isCkb = locale === 'ckb';
@@ -107,11 +108,21 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
   const filteredMatches = useMemo(() => {
     let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
     
-    if (activeCategory === 'brides') {
-      result = result.filter(m => m.gender === 'female');
-    } else if (activeCategory === 'grooms') {
-      result = result.filter(m => m.gender === 'male');
-    } else if (activeCategory === 'professionals') {
+    const activeG = userProfile?.gender || preSelectedGender;
+    // ENFORCE AUTOMATIC OPPOSITE GENDER MATCHING IF LOGGED IN OR PRE-SELECTED
+    if (activeG) {
+      const opposite = activeG === 'male' ? 'female' : 'male';
+      result = result.filter(m => m.gender === opposite);
+    } else {
+      // If not logged in, apply category pills (brides / grooms)
+      if (activeCategory === 'brides') {
+        result = result.filter(m => m.gender === 'female');
+      } else if (activeCategory === 'grooms') {
+        result = result.filter(m => m.gender === 'male');
+      }
+    }
+    
+    if (activeCategory === 'professionals') {
       result = result.filter(m => 
         m.education.toLowerCase().includes('bachelor') || 
         m.education.toLowerCase().includes('doctor') || 
@@ -126,17 +137,19 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     // Return sorted by compatibility score or verification
     const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
     
-    if (isProfileIncomplete) {
+    if (isProfileIncomplete && !userProfile?.gender) {
       const women = sorted.filter(m => m.gender === 'female').slice(0, 2);
       const men = sorted.filter(m => m.gender === 'male').slice(0, 2);
       return [...women, ...men];
     }
     
     return sorted;
-  }, [selectedGov, activeCategory, isProfileIncomplete]);
+  }, [selectedGov, activeCategory, userProfile, isProfileIncomplete]);
 
   // Featured Active Candidates (filtered active profiles who have been online)
   const featuredCandidates = useMemo(() => {
+    const activeG = userProfile?.gender || preSelectedGender;
+    
     // Pick 4 outstanding profiles from diverse regions
     const baghdadGroom = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'male' && m.id === 'm1');
     const erbilGroom = INITIAL_MATCHES.find(m => m.governorate === 'Erbil' && m.gender === 'male' && m.id === 'm2');
@@ -144,13 +157,25 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     const baghdadBride = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'female' && m.id === 'f2');
     
     const candidates: MatchProfile[] = [];
-    if (slemaniBride) candidates.push(slemaniBride);
-    if (erbilGroom) candidates.push(erbilGroom);
-    if (baghdadBride) candidates.push(baghdadBride);
-    if (baghdadGroom) candidates.push(baghdadGroom);
+    
+    if (activeG === 'male') {
+      // User is male, show brides only
+      if (slemaniBride) candidates.push(slemaniBride);
+      if (baghdadBride) candidates.push(baghdadBride);
+    } else if (activeG === 'female') {
+      // User is female, show grooms only
+      if (erbilGroom) candidates.push(erbilGroom);
+      if (baghdadGroom) candidates.push(baghdadGroom);
+    } else {
+      // Not selected yet, show both
+      if (slemaniBride) candidates.push(slemaniBride);
+      if (erbilGroom) candidates.push(erbilGroom);
+      if (baghdadBride) candidates.push(baghdadBride);
+      if (baghdadGroom) candidates.push(baghdadGroom);
+    }
     
     return candidates;
-  }, []);
+  }, [userProfile, preSelectedGender]);
 
   const getGovDisplayName = (govId: string) => {
     const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
@@ -194,6 +219,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         setTab={setTab}
         isAuthenticated={isAuthenticated}
         userProfileName={userProfileName}
+        selectedGov={selectedGov}
+        setSelectedGov={setSelectedGov}
+        showToast={showToast}
+        userProfile={userProfile}
+        preSelectedGender={preSelectedGender}
       />
 
       {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
@@ -224,27 +254,21 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             {/* Controls row */}
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-stone-100 pb-6">
               
-              {/* Dropdown column */}
+              {/* Dropdown status display */}
               <div className="space-y-2 flex-grow max-w-md">
                 <label className="block text-[11px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
-                  📍 {txt("Select Governorate", "المحافظة المطلوبة", "پارێزگا دیاری بکە")}
+                  📍 {txt("Selected Location", "الموقع المحدد حالياً", "ناوچەی دیاریکراو")}
                 </label>
-                <div className="relative">
-                  <select
-                    value={selectedGov}
-                    onChange={(e) => {
-                      setSelectedGov(e.target.value);
-                      showToast(txt(`Displaying candidates from ${e.target.value}`, `عرض المقبلين على الزواج من محافظة ${getGovDisplayName(e.target.value)}`, `پیشاندانی کاندیدەکانی پارێزگای ${getGovDisplayName(e.target.value)}`));
-                    }}
-                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E6DCC3] focus:border-[#40798C] focus:ring-1 focus:ring-[#40798C] text-sm font-black text-warm-charcoal outline-none cursor-pointer shadow-xs transition"
-                  >
-                    {GOVERNORATE_OPTIONS.map((gov) => (
-                      <option key={gov.id} value={gov.id}>
-                        {isEn ? gov.en : isCkb ? gov.ckb : gov.ar}
-                      </option>
-                    ))}
-                  </select>
-                  <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#40798C]" />
+                <div className="flex items-center gap-3 bg-[#FAF8F5] border border-[#E6DCC3] px-5 py-3 rounded-2xl text-start">
+                  <span className="text-xl">📍</span>
+                  <div>
+                    <span className="block text-xs text-stone-500 font-semibold leading-none mb-1">
+                      {txt("Currently exploring", "تستكشف الآن في", "ئێستا دەگەڕێیت لە")}
+                    </span>
+                    <span className="text-sm font-black text-[#40798C] leading-none">
+                      {getGovDisplayName(selectedGov)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -254,24 +278,29 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   🎯 {txt("Category alignment", "الفئة والتصنيف", "پۆلێنکردن")}
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: 'all', labelEn: 'All Matches', labelAr: 'الكل', labelCkb: 'هەموو' },
-                    { id: 'brides', labelEn: 'Brides (Women)', labelAr: 'العرائس 👩‍💼', labelCkb: 'کچان 👩‍💼' },
-                    { id: 'grooms', labelEn: 'Grooms (Men)', labelAr: 'العرسان 👨‍💼', labelCkb: 'کوڕان 👨‍💼' },
-                    { id: 'professionals', labelEn: 'Academic & Career', labelAr: 'أكاديمي ومهني 🎓', labelCkb: 'ئەکادیمی و پیشەیی 🎓' }
-                  ].map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveCategory(cat.id as any)}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-                        activeCategory === cat.id
-                          ? 'bg-[#40798C] border-[#40798C] text-white shadow-md shadow-[#40798C]/20'
-                          : 'bg-[#FAF8F5] border-[#E6DCC3] hover:bg-stone-50 text-stone-500'
-                      }`}
-                    >
-                      {txt(cat.labelEn, cat.labelAr, cat.labelCkb)}
-                    </button>
-                  ))}
+                  {(() => {
+                    const activeG = userProfile?.gender || preSelectedGender;
+                    return [
+                      { id: 'all', labelEn: activeG === 'male' ? 'All Brides' : activeG === 'female' ? 'All Grooms' : 'All Matches', labelAr: activeG === 'male' ? 'كل العرائس 👰' : activeG === 'female' ? 'كل العرسان 🤵' : 'الكل', labelCkb: activeG === 'male' ? 'هەموو بووکەکان' : activeG === 'female' ? 'هەموو زاواکان' : 'هەموو' },
+                      ...(!activeG ? [
+                        { id: 'brides', labelEn: 'Brides (Women)', labelAr: 'العرائس 👩‍💼', labelCkb: 'کچان 👩‍💼' },
+                        { id: 'grooms', labelEn: 'Grooms (Men)', labelAr: 'العرسان 👨‍💼', labelCkb: 'کوڕان 👨‍💼' }
+                      ] : []),
+                      { id: 'professionals', labelEn: 'Academic & Career', labelAr: 'أكاديمي ومهني 🎓', labelCkb: 'ئەکادیمی و پیشەیی 🎓' }
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id as any)}
+                        className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                          activeCategory === cat.id
+                            ? 'bg-[#40798C] border-[#40798C] text-white shadow-md shadow-[#40798C]/20'
+                            : 'bg-[#FAF8F5] border-[#E6DCC3] hover:bg-stone-50 text-stone-500'
+                        }`}
+                      >
+                        {txt(cat.labelEn, cat.labelAr, cat.labelCkb)}
+                      </button>
+                    ));
+                  })()}
                 </div>
               </div>
 

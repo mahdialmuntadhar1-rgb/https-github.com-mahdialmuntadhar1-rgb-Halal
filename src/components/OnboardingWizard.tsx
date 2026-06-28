@@ -40,7 +40,15 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
   
   // STEP 1: Choose Role (👰 Bride / 👨 Groom)
   // Bride -> Female, Groom -> Male
-  const [role, setRole] = useState<'bride' | 'groom'>('groom');
+  const [role, setRole] = useState<'bride' | 'groom'>(() => {
+    return initialProfile?.gender === 'female' ? 'bride' : 'groom';
+  });
+
+  React.useEffect(() => {
+    if (initialProfile?.gender) {
+      setRole(initialProfile.gender === 'female' ? 'bride' : 'groom');
+    }
+  }, [initialProfile?.gender]);
 
   // STEP 2: Essential Information
   const [name, setName] = useState(initialProfile?.name || '');
@@ -212,7 +220,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
 
     try {
       // 1. Call Register
-      const authResponse = await apiClient.register(name, governorate, emailToUse, undefined, password);
+      const authResponse = await apiClient.register(name, governorate, district, emailToUse, undefined, password);
       
       let finalAvatarUrl = "";
       let finalPhotoStatus: 'blurred' | 'hidden' | 'initials' | 'visible' = 'visible';
@@ -381,6 +389,23 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
               )}
             </button>
 
+          </div>
+
+          {/* Respectful Matchmaking Role Policy Explanation */}
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-center space-y-1 max-w-lg mx-auto" id="onboarding-role-notice">
+            <p className="text-xs sm:text-sm font-black text-warm-charcoal flex items-center justify-center gap-1.5">
+              <span>{role === 'groom' ? '🤵' : '👰'}</span>
+              <span>
+                {role === 'groom' 
+                  ? txt("We will show you suitable women for marriage.", "سوف نقوم بعرض النساء والعرائس الصالحات للزواج الشرعي لك.", "ئێمە کچانی شیاو بۆ هاوسەرگیری شەرعی بە تۆ پیشان دەدەین.")
+                  : txt("We will show you suitable men for marriage.", "سوف نقوم بعرض الرجال العرسان الصالحين للزواج الشرعي لك.", "ئێمە پیاوانی شیاو بۆ هاوسەرگیری شەرعی بە تۆ پیشان دەدەین.")}
+              </span>
+            </p>
+            <p className="text-[10px] sm:text-xs text-stone-500 font-medium leading-relaxed">
+              {role === 'groom'
+                ? txt("Our system aligns with respectful, Islamic traditions (Zawaj). Selecting Groom means you are searching for a serious matrimonial bride.", "يتماشى نظامنا مع تقاليد الزواج الإسلامي الشرعي النبيل. اختيارك لـ (العريس) يعني أنك تبحث عن زوجة صالحة لتأسيس أسرة كريمة.", "سیستەمەکەمان لەگەڵ دابونەریتی هاوسەرگیری شەرعی ئیسلامیدا دەگونجێت. دیاریکردنی (زاوا) واتە تۆ بەدوای هاوسەرێکی شیاودا دەگەڕێیت.")
+                : txt("Our system aligns with respectful, Islamic traditions (Zawaj). Selecting Bride means you are searching for a serious matrimonial groom.", "يتماشى نظامنا مع تقاليد الزواج الإسلامي الشرعي النبيل. اختياركِ لـ (العروس) يعني أنكِ تبحثين عن شريك حياة صالح وزوج ملتزم.", "سیستەمەکەمان لەگەڵ دابونەریتی هاوسەرگیری شەرعی ئیسلامیدا دەگونجێت. دیاریکردنی (بووک) واتە تۆ بەدوای هاوسەرێکی شیاودا دەگەڕێیت.")}
+            </p>
           </div>
 
           <div className="pt-6">

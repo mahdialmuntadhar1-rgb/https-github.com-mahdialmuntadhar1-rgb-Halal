@@ -38,6 +38,7 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [preselectedGender, setPreselectedGender] = useState<'male' | 'female' | null>(null);
 
   // Load Slideshow photos
   const loadHeroImages = async () => {
@@ -102,7 +103,22 @@ export default function App() {
     setIsLoadingSession(true);
     localStorage.setItem('halal_token', token);
     try {
-      setUserProfile(profile);
+      let currentProfile = profile;
+      if (preselectedGender) {
+        try {
+          const updated = {
+            ...profile,
+            gender: preselectedGender,
+            photoPrivacy: preselectedGender === 'female' ? ('hidden_by_default' as const) : ('visible' as const)
+          };
+          currentProfile = await apiClient.updateCurrentUserProfile(updated);
+          setPreselectedGender(null); // Clear it
+        } catch (err) {
+          console.error("Failed to update preselected gender", err);
+        }
+      }
+
+      setUserProfile(currentProfile);
       setIsAuthenticated(true);
       const [matchesResult, convs] = await Promise.all([
         apiClient.getMatches(),
@@ -112,7 +128,13 @@ export default function App() {
       setConversations(convs);
       
       // Route user correctly: registration and login are separate from onboarding now
-      setTab('explore');
+      if (!currentProfile.gender) {
+        setTab('gender-selection');
+      } else if (!currentProfile.age || currentProfile.age === 0 || !currentProfile.education || !currentProfile.profession) {
+        setTab('onboarding');
+      } else {
+        setTab('explore');
+      }
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -359,10 +381,13 @@ export default function App() {
                 locale={locale}
                 onSelectGender={async (gender) => {
                   if (!isAuthenticated || !userProfile) {
+                    setPreselectedGender(gender);
                     triggerToast(
                       locale === 'en' 
-                        ? `💍 Please authenticate first to seal your profile and select matches!` 
-                        : `💍 يرجى تسجيل الدخول أولاً لتحديد تفضيلاتك وتصفح الملفات!`
+                        ? `💍 Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!` 
+                        : locale === 'ckb'
+                          ? `💍 ڕەگەز دیاریکرا بە ${gender === 'male' ? 'زاوا' : 'بووک'}. تکایە بۆ بەردەوامبوون پڕۆفایلەکەت دروست بکە یان بچۆ ژوورەوە!`
+                          : `💍 تم تحديد الجنس كـ ${gender === 'male' ? 'عريس' : 'عروسة'}. يرجى إنشاء حسابك أو تسجيل الدخول للمتابعة!`
                     );
                     setTab('onboarding');
                     return;
@@ -387,6 +412,7 @@ export default function App() {
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
                 userProfile={userProfile || undefined}
+                preSelectedGender={preselectedGender}
               />
             )}
 
@@ -396,7 +422,7 @@ export default function App() {
                 userProfile={userProfile || {
                   name: '',
                   age: 24,
-                  gender: 'male',
+                  gender: preselectedGender || 'male',
                   country: 'Iraq',
                   governorate: 'Baghdad',
                   religion: 'islam',
@@ -404,7 +430,7 @@ export default function App() {
                   education: "Bachelor Degree",
                   profession: 'Professional',
                   languages: ['Arabic'],
-                  photoPrivacy: 'visible',
+                  photoPrivacy: preselectedGender === 'female' ? 'hidden_by_default' : 'visible',
                   values: ['Family First', 'Mutual Respect']
                 }}
                 onComplete={handleOnboardingComplete}

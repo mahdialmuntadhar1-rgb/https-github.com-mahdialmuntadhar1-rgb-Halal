@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight, Sparkles, LogIn, Compass, User } from 'lucide-react';
+import { Heart, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight, Sparkles, LogIn, Compass, User, MapPin, GraduationCap, Check } from 'lucide-react';
 import { Language, TRANSLATIONS } from '../lib/translations';
-import { AppTab } from '../types';
+import { AppTab, MatchProfile, UserProfile } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { GOVERNORATE_OPTIONS } from '../screens/LandingScreen';
+import { INITIAL_MATCHES } from '../data/matches';
 
 interface HeroProps {
   locale: Language;
@@ -11,6 +13,11 @@ interface HeroProps {
   setTab: (tab: AppTab) => void;
   isAuthenticated: boolean;
   userProfileName?: string;
+  selectedGov?: string;
+  setSelectedGov?: (gov: string) => void;
+  showToast?: (msg: string) => void;
+  userProfile?: UserProfile;
+  preSelectedGender?: 'male' | 'female' | null;
 }
 
 const CAROUSEL_SLIDES = [
@@ -86,7 +93,7 @@ const CAROUSEL_SLIDES = [
   }
 ];
 
-export default function Hero({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName }: HeroProps) {
+export default function Hero({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, selectedGov, setSelectedGov, showToast, userProfile, preSelectedGender }: HeroProps) {
   const t = TRANSLATIONS[locale];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
@@ -127,7 +134,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
         
         {/* PREMIUM ROMANTIC CAROUSEL */}
         <div 
-          className="relative w-full h-[380px] sm:h-[480px] md:h-[550px] lg:h-[580px] bg-warm-charcoal rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/25 group/carousel"
+          className="relative w-full aspect-square sm:aspect-auto h-auto sm:h-[480px] md:h-[520px] lg:h-[550px] bg-warm-charcoal rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/25 group/carousel"
           id="romantic-carousel-container"
         >
           {/* SLIDING IMAGES */}
@@ -174,21 +181,21 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           </button>
 
           {/* OVERLAY SLIDE TEXT & CTAs */}
-          <div className="absolute inset-x-0 bottom-0 z-20 p-6 sm:p-12 md:p-16 text-center flex flex-col items-center justify-end h-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="absolute inset-x-0 bottom-0 z-20 p-4 sm:p-12 md:p-16 text-center flex flex-col items-center justify-end h-full max-w-4xl mx-auto space-y-3 sm:space-y-6">
             
             {/* Decent badge */}
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/20 border border-accent-coral/40 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold text-white tracking-widest uppercase shadow-inner">
-              <Heart className="w-3.5 h-3.5 text-accent-pink fill-accent-pink animate-pulse" />
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/20 border border-accent-coral/40 px-3 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-mono font-bold text-white tracking-widest uppercase shadow-inner">
+              <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-accent-pink fill-accent-pink animate-pulse" />
               <span>{locale === 'en' ? 'Halal Matchmaking' : locale === 'ar' ? 'منصة الزواج الحلال' : 'هاوسەرگیری حەڵاڵ'}</span>
             </span>
 
             {/* Title */}
-            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-white tracking-tight font-display font-black leading-tight max-w-3xl drop-shadow-md">
+            <h2 className="text-base xs:text-lg sm:text-3xl md:text-4xl lg:text-5xl font-serif text-white tracking-tight font-display font-black leading-tight max-w-3xl drop-shadow-md">
               {CAROUSEL_SLIDES[currentIndex].title[locale] || CAROUSEL_SLIDES[currentIndex].title.en}
             </h2>
 
             {/* Subtitle */}
-            <p className="text-xs sm:text-sm md:text-base text-warm-ivory/90 font-medium max-w-xl mx-auto leading-relaxed drop-shadow-xs">
+            <p className="hidden xs:block text-[10px] sm:text-sm md:text-base text-warm-ivory/90 font-medium max-w-xl mx-auto leading-relaxed drop-shadow-xs">
               {CAROUSEL_SLIDES[currentIndex].subtitle[locale] || CAROUSEL_SLIDES[currentIndex].subtitle.en}
             </p>
 
@@ -263,78 +270,53 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           </div>
         </div>
 
-        {/* MARRIAGE SCROLLING TICKER */}
-        <div className="w-full bg-[#FAF7F2] border border-[#E8DCC4]/60 rounded-2xl sm:rounded-3xl py-3.5 sm:py-5 overflow-hidden shadow-xs relative" id="marriage-scrolling-marquee">
-          <div className="absolute top-0 bottom-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
-          <div className="absolute top-0 bottom-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
-          
-          <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-6 mb-2 border-b border-[#EADFC9]/50 pb-1.5 sm:pb-2">
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-            <span className="text-[10px] sm:text-xs font-black text-[#40798C] uppercase tracking-widest font-mono">
-              {locale === 'en' ? 'Today in Zawaj: Live Success Marquees & Blessed Activity' : locale === 'ar' ? 'اليوم في زواج: قصص مباركة وأنشطة الخطوبة الحية' : 'ئەمڕۆ لە زەواج: چیرۆکی پیرۆز و دەستپێشخەرییەکان'}
-            </span>
+
+
+        {/* STANDOUT GOVERNORATE FILTER SECTION (HIGH-CONTRAST & HIGH-VISIBILITY) */}
+        <div 
+          className="max-w-xl mx-auto w-full bg-[#1C3D47] text-white rounded-[2rem] p-6 sm:p-7 border border-[#2F5866] shadow-xl text-center space-y-4 relative overflow-hidden" 
+          id="standout-governorate-filter-card"
+        >
+          {/* Subtle elegant background decoration */}
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-[#40798C]/20 rounded-full blur-xl pointer-events-none" />
+
+          <div className="space-y-1 relative z-10">
+            <h3 className="text-sm sm:text-lg font-serif font-black tracking-wide text-amber-200">
+              {locale === 'en' ? 'Explore Compatibility Partners Directly' : locale === 'ar' ? 'استكشف شركاء التوافق مباشرة' : 'هاوبەشانی گونجاو بە شێوەیەکی ڕاستەوخۆ ببینە'}
+            </h3>
+            <p className="text-[10px] sm:text-xs text-stone-300 font-medium max-w-sm mx-auto">
+              {locale === 'en' 
+                ? 'Select your governorate to view verified brides and grooms in your region instantly.' 
+                : locale === 'ar' 
+                  ? 'اختر محافظتك لاستعراض المقبلين على الزواج في منطقتك فوراً وبكل وقار.' 
+                  : 'پارێزگاکەت هەڵبژێرە بۆ بینینی کاندیدەکانی هاوسەرگیری لە ناوچەکەتدا بە شێوەیەکی ڕاستەوخۆ.'}
+            </p>
           </div>
 
-          <div className="overflow-hidden w-full relative">
-            <div className={`flex gap-4 sm:gap-8 ${locale === 'ar' ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-              {/* Combine twice for infinite seamless scroll */}
-              {[...Array(2)].map((_, repeatIdx) => (
-                <div key={repeatIdx} className="flex gap-4 sm:gap-8 items-center shrink-0">
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">💍</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Blessed Union: Groom (31, Baghdad) & Bride (27, Erbil) successfully engaged!' 
-                        : locale === 'ar' 
-                          ? 'عقد مبارك: تم بحمد الله خطوبة عريس (٣١، بغداد) وعروسة (٢٧، أربيل)!' 
-                          : 'مارەبڕینی پیرۆز: زاوا (٣١، بەغداد) و بووک (٢٧، هەولێر) مارەبڕان!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">✨</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Sincere Match: Groom (29, Basra) & Bride (25, Baghdad) chatting under Chaperon!' 
-                        : locale === 'ar' 
-                          ? 'توافق جاد: عريس (٢٩، البصرة) وعروسة (٢٥، بغداد) في حوار محمي!' 
-                          : 'هاوتایی جدی: زاوا (٢٩، بەسرە) و بووک (٢٥، بەغداد) لە گفتوگۆدان!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">❤️</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Sacred Covenant: Groom (34, Kirkuk) & Bride (30, Sulaymaniyah) matched!' 
-                        : locale === 'ar' 
-                          ? 'ميثاق غليظ: توافق مبارك بين عريس (٣٤، كركوك) وعروسة (٣٠، السليمانية)!' 
-                          : 'پەیمانی پیرۆز: هاوتایی لە نێوان زاوا (٣٤، کەرکوک) و بووک (٣٠، سلێمانی)!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">💍</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Mubarak Marriage: Groom (28, Duhok) & Bride (26, Nineveh) happily married!' 
-                        : locale === 'ar' 
-                          ? 'زواج مبارك: تم بحمد الله زواج عريس (٢٨، دهوك) وعروسة (٢٦، نينوى)!' 
-                          : 'هاوسەرگیری بەختەوەر: زاوا (٢٨، دهۆک) و بووک (٢٦، نەینەوا) هاوسەرگیریان کرد!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">✨</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Respectful Connection: Groom (33, Najaf) & Bride (29, Karbala) approved!' 
-                        : locale === 'ar' 
-                          ? 'تواصل كريم: قبول متبادل بين عريس (٣٣، النجف) وعروسة (٢٩، كربلاء)!' 
-                          : 'پەیوەندی بەڕێز: ڕەزامەندی دوولایەنە لە نێوان زاوا (٣٣، نەجەف) و بووک (٢٩، کەربەلا)!'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          <div className="max-w-xs mx-auto relative z-10 pt-1">
+            <div className="relative">
+              <select
+                value={selectedGov || 'Baghdad'}
+                onChange={(e) => {
+                  if (setSelectedGov) {
+                    setSelectedGov(e.target.value);
+                  }
+                  if (showToast) {
+                    const selectedItem = GOVERNORATE_OPTIONS.find(g => g.id === e.target.value);
+                    const name = selectedItem ? (locale === 'en' ? selectedItem.en : locale === 'ckb' ? selectedItem.ckb : selectedItem.ar) : e.target.value;
+                    showToast(locale === 'en' ? `Displaying candidates from ${name}` : locale === 'ar' ? `عرض المقبلين على الزواج من محافظة ${name}` : `پیشاندانی کاندیدەکانی پارێزگای ${name}`);
+                  }
+                }}
+                className="w-full pl-10 pr-4 py-3 bg-white text-warm-charcoal border border-[#2F5866] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer shadow-md transition"
+              >
+                {GOVERNORATE_OPTIONS.map((gov) => (
+                  <option key={gov.id} value={gov.id} className="text-warm-charcoal font-bold">
+                    {locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar}
+                  </option>
+                ))}
+              </select>
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-coral" />
             </div>
           </div>
         </div>
@@ -347,90 +329,363 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
         </div>
 
         {/* Two Large Gender Selection Cards (Aligned Side-by-Side on One Row) */}
-        <div className="max-w-4xl mx-auto grid grid-cols-2 gap-3.5 sm:gap-8 items-stretch">
-          
-          {/* Card 1: I am a man */}
-          <div 
-            onClick={() => onSelectGender('male')}
-            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-accent-coral/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-coral/5 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
-            id="select-gender-male"
-          >
-            {/* Background texture */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#40798C]/5 rounded-full blur-xl pointer-events-none" />
-            
-            <div className="space-y-2 sm:space-y-3">
-              <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
-                <img 
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400" 
-                  alt={t.iamMan} 
-                  className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                <span className="absolute bottom-1 right-1 rtl:right-auto rtl:left-1 sm:bottom-3 sm:left-3 sm:rtl:left-auto sm:rtl:right-3 text-[6.5px] sm:text-[10px] font-mono font-medium text-white/95 bg-black/45 backdrop-blur-md px-1 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">
-                  {t.respectPortrayal}
-                </span>
+        {(() => {
+          const activeG = userProfile?.gender || preSelectedGender;
+          const isMaleSelected = activeG === 'male';
+          const isFemaleSelected = activeG === 'female';
+
+          return (
+            <div className="max-w-4xl mx-auto grid grid-cols-2 gap-3.5 sm:gap-8 items-stretch">
+              
+              {/* Card 1: I am a man */}
+              <div 
+                onClick={() => onSelectGender('male')}
+                className={`group cursor-pointer bg-white/40 backdrop-blur-md border rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-coral/5 flex flex-col justify-between relative overflow-hidden ${
+                  isMaleSelected
+                    ? 'border-[#0B5C43] ring-2 ring-[#0B5C43]/20 shadow-xl scale-[1.01]'
+                    : isFemaleSelected
+                      ? 'border-white/10 opacity-40 grayscale hover:opacity-70 hover:grayscale-0'
+                      : 'border-white/20 hover:border-accent-coral/40 hover:-translate-y-1'
+                }`}
+                id="select-gender-male"
+              >
+                {/* Background texture */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#40798C]/5 rounded-full blur-xl pointer-events-none" />
+                
+                {isMaleSelected && (
+                  <div className="absolute top-2 left-2 z-10 bg-[#0B5C43] text-white text-[8px] sm:text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5 stroke-[3px]" />
+                    <span>
+                      {locale === 'en' ? 'Groom (Selected)' : locale === 'ar' ? 'عريس (تم التحديد)' : 'زاوا (دیاریکرا)'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
+                    <img 
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400" 
+                      alt={t.iamMan} 
+                      className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                    <span className="absolute bottom-1 right-1 rtl:right-auto rtl:left-1 sm:bottom-3 sm:left-3 sm:rtl:left-auto sm:rtl:right-3 text-[6.5px] sm:text-[10px] font-mono font-medium text-white/95 bg-black/45 backdrop-blur-md px-1 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">
+                      {t.respectPortrayal}
+                    </span>
+                  </div>
+                  <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
+                    {t.iamMan}
+                  </h3>
+                  <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
+                    {t.iamManDesc}
+                  </p>
+                </div>
+                
+                <div className="pt-1 sm:pt-3">
+                  <span className={`inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md transition-all ${
+                    isMaleSelected
+                      ? 'bg-[#0B5C43] text-white shadow-emerald-950/20'
+                      : 'bg-accent-coral text-white shadow-accent-coral/15 group-hover:bg-[#316070]'
+                  }`}>
+                    <span>{isMaleSelected ? (locale === 'en' ? 'Sincere Groom Profile' : locale === 'ar' ? 'ملف عريس جاد' : 'پڕۆفایلی زاوای جدی') : t.startBtn}</span>
+                    <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
+                  </span>
+                </div>
               </div>
-              <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
-                {t.iamMan}
-              </h3>
-              <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
-                {t.iamManDesc}
-              </p>
-            </div>
-            
-            <div className="pt-1 sm:pt-3">
-              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-accent-coral text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-accent-coral/15 group-hover:bg-[#316070] transition-all">
-                <span>{t.startBtn}</span>
-                <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
-              </span>
-            </div>
-          </div>
 
-          {/* Card 2: I am a woman */}
-          <div 
-            onClick={() => onSelectGender('female')}
-            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-accent-pink/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-pink/5 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
-            id="select-gender-female"
-          >
-            {/* Background texture */}
-            <div className="absolute top-0 left-0 w-24 h-24 bg-accent-pink/5 rounded-full blur-xl pointer-events-none" />
+              {/* Card 2: I am a woman */}
+              <div 
+                onClick={() => onSelectGender('female')}
+                className={`group cursor-pointer bg-white/40 backdrop-blur-md border rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-pink/5 flex flex-col justify-between relative overflow-hidden ${
+                  isFemaleSelected
+                    ? 'border-accent-pink ring-2 ring-accent-pink/20 shadow-xl scale-[1.01]'
+                    : isMaleSelected
+                      ? 'border-white/10 opacity-40 grayscale hover:opacity-70 hover:grayscale-0'
+                      : 'border-white/20 hover:border-accent-pink/40 hover:-translate-y-1'
+                }`}
+                id="select-gender-female"
+              >
+                {/* Background texture */}
+                <div className="absolute top-0 left-0 w-24 h-24 bg-accent-pink/5 rounded-full blur-xl pointer-events-none" />
 
-            <div className="space-y-2 sm:space-y-3">
-              <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
-                <img 
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400" 
-                  alt={t.iamWoman} 
-                  className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                <span className="absolute bottom-1 right-1 rtl:right-auto rtl:left-1 sm:bottom-3 sm:left-3 sm:rtl:left-auto sm:rtl:right-3 text-[6.5px] sm:text-[10px] font-mono font-medium text-white/95 bg-black/45 backdrop-blur-md px-1 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">
-                  {t.protectedOptions}
-                </span>
+                {isFemaleSelected && (
+                  <div className="absolute top-2 right-2 z-10 bg-accent-pink text-white text-[8px] sm:text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5 stroke-[3px]" />
+                    <span>
+                      {locale === 'en' ? 'Bride (Selected)' : locale === 'ar' ? 'عروس (تم التحديد)' : 'بووک (دیاریکرا)'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
+                    <img 
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400" 
+                      alt={t.iamWoman} 
+                      className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                    <span className="absolute bottom-1 right-1 rtl:right-auto rtl:left-1 sm:bottom-3 sm:left-3 sm:rtl:left-auto sm:rtl:right-3 text-[6.5px] sm:text-[10px] font-mono font-medium text-white/95 bg-black/45 backdrop-blur-md px-1 py-0.5 sm:px-2.5 sm:py-1 rounded-md whitespace-nowrap">
+                      {t.protectedOptions}
+                    </span>
+                  </div>
+                  <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
+                    {t.iamWoman}
+                  </h3>
+                  <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
+                    {t.iamWomanDesc}
+                  </p>
+                </div>
+                
+                <div className="pt-1 sm:pt-3">
+                  <span className={`inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md transition-all ${
+                    isFemaleSelected
+                      ? 'bg-accent-pink text-white shadow-pink-950/20'
+                      : 'bg-accent-pink text-white shadow-accent-pink/15 group-hover:opacity-95'
+                  }`}>
+                    <span>{isFemaleSelected ? (locale === 'en' ? 'Sincere Bride Profile' : locale === 'ar' ? 'ملف عروس جاد' : 'پڕۆفایلی بووکی جدی') : t.startBtn}</span>
+                    <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
+                  </span>
+                </div>
               </div>
-              <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
-                {t.iamWoman}
-              </h3>
-              <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
-                {t.iamWomanDesc}
-              </p>
-            </div>
-            
-            <div className="pt-1 sm:pt-3">
-              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-accent-pink text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-accent-pink/15 group-hover:opacity-95 transition-all">
-                <span>{t.startBtn}</span>
-                <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
-              </span>
-            </div>
-          </div>
 
+            </div>
+          );
+        })()}
+
+        {/* Dynamic Gender/Partner Matching Guidance Banner */}
+        <div className="max-w-4xl mx-auto" id="gender-matching-guidance-banner">
+          <div className="bg-[#FAF8F5] border border-[#E6DCC3] rounded-2xl p-4 sm:p-5 text-center space-y-1.5 shadow-sm">
+            {(() => {
+              const activeG = userProfile?.gender || preSelectedGender;
+              if (activeG === 'male') {
+                return (
+                  <>
+                    <p className="text-xs sm:text-sm font-black text-[#0B5C43] flex items-center justify-center gap-1.5">
+                      💍 {locale === 'en' 
+                        ? "We will show you suitable women for marriage." 
+                        : locale === 'ar' 
+                          ? "سوف نقوم بعرض النساء والعرائس الصالحات للزواج الشرعي لك." 
+                          : "ئێمە کچانی شیاو بۆ هاوسەرگیری شەرعی بە تۆ پیشان دەدەین."}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-stone-500 font-medium">
+                      {locale === 'en'
+                        ? "Registered as Groom. The search automatically displays verified brides seeking a pious marital household."
+                        : locale === 'ar'
+                          ? "مسجل كعريس. يقوم البحث تلقائياً بعرض العرائس الموثقات اللواتي يبحثن عن شريك حياة صالح لتأسيس بيت مسلم."
+                          : "وەک زاوا تۆمارکراویت. گەڕانەکە خۆکارانە بووکە پشتڕاستکراوەکان پیشان دەدات کە بەدوای هاوسەرێکی چاکدا دەگەڕێن."}
+                    </p>
+                  </>
+                );
+              } else if (activeG === 'female') {
+                return (
+                  <>
+                    <p className="text-xs sm:text-sm font-black text-accent-pink flex items-center justify-center gap-1.5">
+                      💍 {locale === 'en' 
+                        ? "We will show you suitable men for marriage." 
+                        : locale === 'ar' 
+                          ? "سوف نقوم بعرض الرجال العرسان الصالحين للزواج الشرعي لك." 
+                          : "ئێمە پیاوانی شیاو بۆ هاوسەرگیری شەرعی بە تۆ پیشان دەدەین."}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-stone-500 font-medium">
+                      {locale === 'en'
+                        ? "Registered as Bride. The search automatically displays verified grooms seeking a traditional marital union."
+                        : locale === 'ar'
+                          ? "مسجلة كعروس. يقوم البحث تلقائياً بعرض العرسان الرجال الموثقين الذين يبحثون عن شريكة حياة صالحة لتأسيس أسرة كريمة."
+                          : "وەک بووک تۆمارکراویت. گەڕانەکە خۆکارانە زاوا پشتڕاستکراوەکان پیشان دەدات کە بەدوای هاوسەرێکی شیاودا دەگەڕێن."}
+                    </p>
+                  </>
+                );
+              } else {
+                return (
+                  <>
+                    <p className="text-xs sm:text-sm font-black text-[#0B5C43] flex items-center justify-center gap-1.5">
+                      ⚖️ {locale === 'en'
+                        ? "Halal Marital Selection: This is who I am"
+                        : locale === 'ar'
+                          ? "الاختيار الشرعي للزواج: أنا رجل / أنا امرأة"
+                          : "دیاریکردنی شەرعی بۆ هاوسەرگیری: من پیاوم / من ژنم"}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-stone-500 font-medium">
+                      {locale === 'en'
+                        ? "Choosing a button specifies your own gender. The application automatically filters and connects you with the opposite gender to ensure a traditional, serious marital search."
+                        : locale === 'ar'
+                          ? "اختيار الزر يحدد جنسك الحقيقي (هويتك). يقوم التطبيق تلقائياً بالبحث وعرض الجنس الآخر لضمان زواج شرعي جاد وتقليدي ومحترم."
+                          : "دیاریکردنی دوگمەکە ڕەگەزی ڕاستەقینەی خۆت دیاریدەکات. ئەپڵیکەیشنەکە خۆکارانە فلتەر دەکات و دەتگەیەنێت بە ڕەگەزی بەرامبەر بۆ هاوسەرگیرییەکی شەرعی."}
+                    </p>
+                  </>
+                );
+              }
+            })()}
+          </div>
         </div>
+ 
+         {/* HORIZONTAL CANDIDATES SCROLL ROW */}
+         {(() => {
+           let pool = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === (selectedGov || 'Baghdad').toLowerCase());
+           
+           const activeG = userProfile?.gender || preSelectedGender;
+           if (activeG) {
+             const opposite = activeG === 'male' ? 'female' : 'male';
+             pool = pool.filter(m => m.gender === opposite);
+           }
+          
+          const localFilteredMatches = pool.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+            
+          const getGovDisplayNameLocal = (govId: string) => {
+            const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
+            if (!gov) return govId;
+            return locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar;
+          };
 
-        {/* Emotionally powerful tagline */}
-        <p className="text-xs sm:text-sm font-medium text-warm-charcoal font-serif tracking-wide italic text-center max-w-lg mx-auto">
-          "{t.tagline}"
-        </p>
+          const handleLocalProfileClick = (candidate: any) => {
+            if (!isAuthenticated) {
+              if (showToast) {
+                showToast(
+                  locale === 'en'
+                    ? "💍 Please login or create an account to view deep lifestyle values & send requests!"
+                    : locale === 'ar'
+                      ? "💍 يرجى تسجيل الدخول أو إنشاء حساب لاستكشاف تفاصيل القيم العائلية والتواصل الجاد!"
+                      : "💍 تکایە سەرەتا بچۆ ژوورەوە یان پڕۆفایل دروست بکە بۆ دیتنی بەهاکان!"
+                );
+              }
+              setTab('onboarding');
+            } else {
+              onExploreMatches();
+            }
+          };
+
+          return (
+            <div className="max-w-4xl mx-auto space-y-4 pt-8 pb-4 text-start" id="governorate-horizontal-scroll-row">
+              <div className="flex justify-between items-end border-b border-[#E8DCC4]/40 pb-2">
+                <div>
+                  <h4 className="text-sm sm:text-base font-serif font-black text-warm-charcoal flex items-center gap-1.5">
+                    <Sparkles className="w-4.5 h-4.5 text-accent-coral" />
+                    <span>
+                      {locale === 'en' 
+                        ? 'Candidates Nearby' 
+                        : locale === 'ar' 
+                          ? 'المرشحون القريبون منك' 
+                          : 'کاندیدەکانی نزیک لە تۆ'}
+                    </span>
+                  </h4>
+                  <p className="text-[10px] sm:text-xs text-stone-500 font-medium">
+                    {locale === 'en' 
+                      ? `Active profiles from ${getGovDisplayNameLocal(selectedGov || 'Baghdad')}` 
+                      : locale === 'ar' 
+                        ? `الملفات النشطة والجادة في محافظة ${getGovDisplayNameLocal(selectedGov || 'Baghdad')}` 
+                        : `پڕۆفایلە چالاکەکان لە پارێزگای ${getGovDisplayNameLocal(selectedGov || 'Baghdad')}`}
+                  </p>
+                </div>
+                
+                <button
+                  onClick={onExploreMatches}
+                  className="text-[10px] sm:text-xs font-black text-[#40798C] hover:text-accent-coral transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <span>
+                    {locale === 'en' 
+                      ? 'View All' 
+                      : locale === 'ar' 
+                        ? 'عرض الكل' 
+                        : 'بینینی هەموو'}
+                  </span>
+                  <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
+                </button>
+              </div>
+
+              <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent snap-x">
+                {localFilteredMatches.length > 0 ? (
+                  localFilteredMatches.map((candidate) => {
+                    const isFemale = candidate.gender === 'female';
+                    return (
+                      <div
+                        key={`hero-scroll-${candidate.id}`}
+                        onClick={() => handleLocalProfileClick(candidate)}
+                        className="flex-shrink-0 w-44 bg-white/70 backdrop-blur-md border border-[#E6DCC3] hover:border-accent-coral/40 rounded-2xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 snap-start text-start relative overflow-hidden group select-none"
+                      >
+                        <div className="space-y-3">
+                          {/* Avatar Image */}
+                          <div className="relative aspect-square w-full rounded-xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
+                            {isFemale ? (
+                              <>
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover blur-lg scale-110 select-none pointer-events-none opacity-85"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[4px] flex flex-col items-center justify-center text-center p-2">
+                                  <div className="w-9 h-9 rounded-full bg-white border border-accent-pink/20 shadow-sm flex items-center justify-center text-accent-pink font-serif font-black text-xs">
+                                    {candidate.name.charAt(0)}
+                                  </div>
+                                  <span className="mt-1.5 text-[8px] font-bold text-stone-700 bg-white/90 border border-stone-200 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                    🔒 {locale === 'en' ? 'Protected' : locale === 'ar' ? 'محمية' : 'پارێزراو'}
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                              </>
+                            )}
+                            
+                            {candidate.verified && (
+                              <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white p-0.5 rounded-full shadow-sm">
+                                <ShieldCheck className="w-3 h-3" />
+                              </span>
+                            )}
+
+                            <span className="absolute bottom-1.5 left-1.5 text-[7px] sm:text-[8px] font-mono font-extrabold text-[#40798C] bg-white/90 px-1.5 py-0.5 rounded-md">
+                              💖 {candidate.compatibilityScore}%
+                            </span>
+                          </div>
+
+                          {/* Name & Basic details */}
+                          <div className="space-y-0.5">
+                            <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal group-hover:text-[#40798C] transition-colors truncate">
+                              {isFemale ? (locale === 'en' ? candidate.name : locale === 'ckb' ? (candidate as any).nameCkb || candidate.name : (candidate as any).nameAr || candidate.name) : candidate.name}, <span className="font-sans font-medium text-stone-500">{candidate.age}</span>
+                            </h5>
+                            <p className="text-[9px] font-extrabold text-stone-500 flex items-center gap-0.5 truncate">
+                              <GraduationCap className="w-3 h-3 text-[#40798C] shrink-0" />
+                              <span className="truncate">{candidate.profession}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 mt-2 border-t border-stone-100 flex items-center justify-between text-[8px] font-bold">
+                          <span className="text-stone-400">
+                            📍 {candidate.city}
+                          </span>
+                          <span className="text-[#40798C] group-hover:text-accent-coral transition-colors flex items-center gap-0.5">
+                            <span>{locale === 'en' ? 'View' : locale === 'ar' ? 'عرض' : 'بینین'}</span>
+                            <ArrowRight className="w-2.5 h-2.5 transform rtl:rotate-180" />
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="w-full py-8 text-center text-xs font-semibold text-stone-400 bg-white/50 rounded-2xl border border-dashed border-[#E6DCC3]/80">
+                    {locale === 'en' 
+                      ? 'No candidates in this governorate yet.' 
+                      : locale === 'ar' 
+                        ? 'لا يوجد مرشحون في هذه المحافظة حالياً.' 
+                        : 'هیچ کاندیدێک لەم پارێزگایەدا نییە تا ئێستا.'}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
 
         {/* Quick entry links */}
         <div className="flex justify-center gap-4 text-xs font-bold">
