@@ -5,7 +5,7 @@
 
 export type AppLanguage = 'en' | 'ar' | 'ckb';
 
-export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin' | 'gender-selection';
+export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin' | 'gender-selection' | 'postcards';
 
 export interface User {
   id: string;
@@ -62,6 +62,8 @@ export interface UserProfile {
   maritalStatus?: string;
   intention?: string;
   email?: string;
+  phone?: string;
+  district?: string;
   role?: 'admin' | 'user';
   badges?: string[];
   savedMatches?: string[]; // Array of match profile IDs that are bookmarked
@@ -139,6 +141,9 @@ export interface MatchProfile {
   relocation?: string;
   familyValues?: string;
   lifestyle?: string;
+  isDemoProfile?: boolean;
+  phone?: string;
+  district?: string;
 }
 
 export interface HeroImage {

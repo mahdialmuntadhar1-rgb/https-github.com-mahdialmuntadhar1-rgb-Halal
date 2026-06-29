@@ -150,7 +150,7 @@ export const apiClient = {
     return data;
   },
 
-  async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string): Promise<{ token: string; user: User }> {
+  async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock register response
       if (!fullName || !governorate || !district || !email || !password) {
@@ -169,12 +169,14 @@ export const apiClient = {
       // Reset mock profile with basic data
       await mockApi.updateCurrentUserProfile({
         email,
+        phone,
         name: fullName,
         governorate,
         city: district, // district stored as city
+        district,
         gender: undefined, // do not send gender on register
         role: user.role,
-        age: 0, // not onboarded
+        age: age || 24,
         education: '',
         profession: ''
       });
@@ -186,7 +188,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName, governorate, email, phone, password }),
+      body: JSON.stringify({ fullName, governorate, district, email, phone, password, age }),
     });
 
     if (data.token) {
@@ -389,6 +391,17 @@ export const apiClient = {
     }
 
     return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/accept`, {
+      method: 'PUT',
+      headers: getHeaders(),
+    });
+  },
+
+  async declineIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {
+    if (getIsDemoMode()) {
+      return mockApi.declineIntroductionRequest(matchId);
+    }
+
+    return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/decline`, {
       method: 'PUT',
       headers: getHeaders(),
     });

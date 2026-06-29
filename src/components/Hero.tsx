@@ -270,62 +270,22 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           </div>
         </div>
 
-
-
-        {/* STANDOUT GOVERNORATE FILTER SECTION (HIGH-CONTRAST & HIGH-VISIBILITY) */}
-        <div 
-          className="max-w-xl mx-auto w-full bg-[#1C3D47] text-white rounded-[2rem] p-6 sm:p-7 border border-[#2F5866] shadow-xl text-center space-y-4 relative overflow-hidden" 
-          id="standout-governorate-filter-card"
-        >
-          {/* Subtle elegant background decoration */}
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-[#40798C]/20 rounded-full blur-xl pointer-events-none" />
-
-          <div className="space-y-1 relative z-10">
-            <h3 className="text-sm sm:text-lg font-serif font-black tracking-wide text-amber-200">
-              {locale === 'en' ? 'Explore Compatibility Partners Directly' : locale === 'ar' ? 'استكشف شركاء التوافق مباشرة' : 'هاوبەشانی گونجاو بە شێوەیەکی ڕاستەوخۆ ببینە'}
-            </h3>
-            <p className="text-[10px] sm:text-xs text-stone-300 font-medium max-w-sm mx-auto">
-              {locale === 'en' 
-                ? 'Select your governorate to view verified brides and grooms in your region instantly.' 
-                : locale === 'ar' 
-                  ? 'اختر محافظتك لاستعراض المقبلين على الزواج في منطقتك فوراً وبكل وقار.' 
-                  : 'پارێزگاکەت هەڵبژێرە بۆ بینینی کاندیدەکانی هاوسەرگیری لە ناوچەکەتدا بە شێوەیەکی ڕاستەوخۆ.'}
-            </p>
-          </div>
-
-          <div className="max-w-xs mx-auto relative z-10 pt-1">
-            <div className="relative">
-              <select
-                value={selectedGov || 'Baghdad'}
-                onChange={(e) => {
-                  if (setSelectedGov) {
-                    setSelectedGov(e.target.value);
-                  }
-                  if (showToast) {
-                    const selectedItem = GOVERNORATE_OPTIONS.find(g => g.id === e.target.value);
-                    const name = selectedItem ? (locale === 'en' ? selectedItem.en : locale === 'ckb' ? selectedItem.ckb : selectedItem.ar) : e.target.value;
-                    showToast(locale === 'en' ? `Displaying candidates from ${name}` : locale === 'ar' ? `عرض المقبلين على الزواج من محافظة ${name}` : `پیشاندانی کاندیدەکانی پارێزگای ${name}`);
-                  }
-                }}
-                className="w-full pl-10 pr-4 py-3 bg-white text-warm-charcoal border border-[#2F5866] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer shadow-md transition"
-              >
-                {GOVERNORATE_OPTIONS.map((gov) => (
-                  <option key={gov.id} value={gov.id} className="text-warm-charcoal font-bold">
-                    {locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar}
-                  </option>
-                ))}
-              </select>
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-coral" />
-            </div>
-          </div>
-        </div>
-
         {/* Short & Single-Line Header */}
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-[15px] min-[360px]:text-[17px] xs:text-[22px] sm:text-[32px] md:text-[40px] font-serif text-warm-charcoal tracking-tight font-display font-black leading-tight selection:bg-[#40798C]/15">
-            {locale === 'en' ? 'Halal Matchmaking for Serious Intentions' : locale === 'ar' ? 'زواج حلال لأصحاب النوايا الجادة' : 'هاوسەرگیری حەڵاڵ بۆ کەسانی جدی'}
+        <div className="max-w-4xl mx-auto text-center space-y-2">
+          <h2 className="text-[16px] min-[360px]:text-[18px] xs:text-[23px] sm:text-[34px] md:text-[42px] font-serif text-warm-charcoal tracking-tight font-display font-black leading-tight selection:bg-[#40798C]/15">
+            {locale === 'en' 
+              ? 'Zawaj Al Araqi' 
+              : locale === 'ckb'
+                ? 'زەواجی عێراقی'
+                : 'زواج العراقي'}
           </h2>
+          <p className="text-xs sm:text-base md:text-lg text-stone-600 font-medium max-w-2xl mx-auto">
+            {locale === 'en' 
+              ? 'Zawaj Al Araqi — For serious marriage in a respectful way that fits our society' 
+              : locale === 'ckb'
+                ? 'زەواجی عێراقی — بۆ هاوسەرگیری جدی بە شێوازێکی ڕێزدار کە لەگەڵ کۆمەڵگاکەماندا بگونجێت'
+                : 'زواج العراقي — للزواج الجاد بطريقة محترمة تناسب مجتمعنا'}
+          </p>
         </div>
 
         {/* Two Large Gender Selection Cards (Aligned Side-by-Side on One Row) */}
@@ -455,6 +415,68 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           );
         })()}
 
+        {/* Search & Governorate Selection Card directly below Gender Cards */}
+        <div className="max-w-2xl mx-auto w-full bg-white/70 backdrop-blur-md border border-[#E6DCC3]/80 rounded-[2rem] p-6 sm:p-8 shadow-xl text-center space-y-4 relative overflow-hidden" id="homepage-search-card">
+          <div className="space-y-1.5">
+            <h3 className="text-sm sm:text-base font-serif font-black text-warm-charcoal">
+              {locale === 'en' ? 'Search Matches across Iraq' : locale === 'ar' ? 'البحث عن شريك العمر في العراق' : 'گەڕان بەدوای هاوسەری گونجاو لە عێراقدا'}
+            </h3>
+            <p className="text-[10px] sm:text-xs text-stone-500 font-medium">
+              {locale === 'en' 
+                ? 'Select a governorate or search across all of Iraq to explore matching brides or grooms.' 
+                : locale === 'ar' 
+                  ? 'اختر محافظة محددة أو ابحث في كل العراق لاستكشاف شريكك المتوافق شرعياً ووقاراً.' 
+                  : 'پارێزگایەک هەڵبژێرە یان لە هەموو عێراقدا بگەڕێ بۆ دۆزینەوەی هاوبەشی گونجاو.'}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+            {/* Governorate Select Dropdown with All Iraq Option */}
+            <div className="relative w-full sm:w-56">
+              <select
+                value={selectedGov || 'all'}
+                onChange={(e) => {
+                  if (setSelectedGov) {
+                    setSelectedGov(e.target.value);
+                  }
+                  if (showToast) {
+                    const name = e.target.value === 'all' 
+                      ? (locale === 'en' ? 'All Iraq' : locale === 'ar' ? 'كل العراق' : 'هەموو عێراق')
+                      : (GOVERNORATE_OPTIONS.find(g => g.id === e.target.value) 
+                        ? (locale === 'en' ? GOVERNORATE_OPTIONS.find(g => g.id === e.target.value)!.en : locale === 'ckb' ? GOVERNORATE_OPTIONS.find(g => g.id === e.target.value)!.ckb : GOVERNORATE_OPTIONS.find(g => g.id === e.target.value)!.ar)
+                        : e.target.value);
+                    showToast(locale === 'en' ? `Selected location: ${name}` : locale === 'ar' ? `الموقع المختار: ${name}` : `ناوچەی هەڵبژێردراو: ${name}`);
+                  }
+                }}
+                className="w-full pl-10 pr-4 py-3 bg-[#FAF8F5] text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer shadow-inner hover:border-accent-coral/30 transition"
+              >
+                <option value="all" className="text-warm-charcoal font-black">
+                  {locale === 'en' ? 'All Iraq (كل العراق)' : locale === 'ar' ? 'كل العراق (All Iraq)' : 'هەموو عێراق (All Iraq)'}
+                </option>
+                {GOVERNORATE_OPTIONS.map((gov) => (
+                  <option key={gov.id} value={gov.id} className="text-warm-charcoal font-bold">
+                    {locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar}
+                  </option>
+                ))}
+              </select>
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-coral" />
+            </div>
+
+            {/* Clear Action Button: Explore / Search Matches */}
+            <button
+              onClick={onExploreMatches}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-accent-coral to-[#E05345] hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-lg shadow-accent-coral/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer shrink-0"
+              id="homepage-explore-cta-btn"
+            >
+              <Compass className="w-4 h-4 text-white animate-spin-slow" />
+              <span>
+                {locale === 'en' ? 'Search Matches' : locale === 'ar' ? 'ابحث عن شريك العمر' : 'گەڕان بەدوای هاوبەشدا'}
+              </span>
+              <ArrowRight className="w-3.5 h-3.5 text-white transform rtl:rotate-180" />
+            </button>
+          </div>
+        </div>
+
         {/* Dynamic Gender/Partner Matching Guidance Banner */}
         <div className="max-w-4xl mx-auto" id="gender-matching-guidance-banner">
           <div className="bg-[#FAF8F5] border border-[#E6DCC3] rounded-2xl p-4 sm:p-5 text-center space-y-1.5 shadow-sm">
@@ -524,7 +546,9 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
  
          {/* HORIZONTAL CANDIDATES SCROLL ROW */}
          {(() => {
-           let pool = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === (selectedGov || 'Baghdad').toLowerCase());
+           let pool = (!selectedGov || selectedGov.toLowerCase() === 'all' || selectedGov.toLowerCase() === 'all iraq')
+             ? INITIAL_MATCHES
+             : INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
            
            const activeG = userProfile?.gender || preSelectedGender;
            if (activeG) {
@@ -535,6 +559,9 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           const localFilteredMatches = pool.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
             
           const getGovDisplayNameLocal = (govId: string) => {
+            if (!govId || govId.toLowerCase() === 'all' || govId.toLowerCase() === 'all iraq') {
+              return locale === 'en' ? 'All Iraq' : locale === 'ar' ? 'كل العراق' : 'هەموو عێراق';
+            }
             const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
             if (!gov) return govId;
             return locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar;

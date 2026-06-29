@@ -265,6 +265,32 @@ export const mockApi = {
     return { success: true, match: updatedMatch };
   },
 
+  async declineIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {
+    await delay(200);
+
+    mockIntroductionRequests = mockIntroductionRequests.map(r => 
+      r.receiverId === matchId || r.senderId === matchId ? { ...r, status: 'declined' } : r
+    );
+
+    let updatedMatch: MatchProfile | undefined;
+    mockMatches = mockMatches.map(m => {
+      if (m.id === matchId) {
+        updatedMatch = {
+          ...m,
+          requestStatus: 'declined'
+        };
+        return updatedMatch;
+      }
+      return m;
+    });
+
+    if (!updatedMatch) {
+      throw new Error(`Match with ID ${matchId} not found`);
+    }
+
+    return { success: true, match: updatedMatch };
+  },
+
   /**
    * Fetches the current conversations list
    */

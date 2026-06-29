@@ -115,6 +115,18 @@ export default function Header({
               <span>{t.chat}</span>
             </button>
 
+            {/* Postbox Tab */}
+            <button
+              onClick={() => setTab('postcards')}
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
+                currentTab === 'postcards'
+                  ? 'bg-[#40798C] text-white shadow-md'
+                  : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
+              }`}
+            >
+              <span>✉️ {txt('Postbox', 'صندوق البريد', 'سندوقی پۆستە')}</span>
+            </button>
+
             {/* Admin control panel tab */}
             {isAdmin && (
               <button

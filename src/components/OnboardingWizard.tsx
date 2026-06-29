@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile, AppLanguage } from '../types';
 import { apiClient } from '../services/apiClient';
+import { GOVERNORATE_OPTIONS } from '../screens/LandingScreen';
 import { 
   Check, 
   ArrowRight, 
@@ -24,12 +25,6 @@ interface OnboardingWizardProps {
   onComplete: (profile: UserProfile) => void;
   initialProfile: UserProfile;
 }
-
-const GOVERNORATES = [
-  'Baghdad', 'Basra', 'Nineveh', 'Erbil', 'Sulaymaniyah', 'Duhok', 'Kirkuk',
-  'Najaf', 'Karbala', 'Babil', 'Wasit', 'Diyala', 'Anbar', 'Salah al-Din',
-  'Maysan', 'Dhi Qar', 'Muthanna', 'Qadisiyah', 'Halabja'
-];
 
 export default function OnboardingWizard({ locale, onComplete, initialProfile }: OnboardingWizardProps) {
   const isEn = locale === 'en';
@@ -220,7 +215,7 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
 
     try {
       // 1. Call Register
-      const authResponse = await apiClient.register(name, governorate, district, emailToUse, undefined, password);
+      const authResponse = await apiClient.register(name, governorate, district, emailToUse, undefined, password, age);
       
       let finalAvatarUrl = "";
       let finalPhotoStatus: 'blurred' | 'hidden' | 'initials' | 'visible' = 'visible';
@@ -483,8 +478,10 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
                   onChange={(e) => setGovernorate(e.target.value)}
                   className="block w-full px-4 py-3 bg-white border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-accent-coral focus:border-accent-coral text-sm font-semibold transition"
                 >
-                  {GOVERNORATES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
+                  {GOVERNORATE_OPTIONS.map((gov) => (
+                    <option key={gov.id} value={gov.id}>
+                      {isEn ? gov.en : isCkb ? gov.ckb : gov.ar}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -761,8 +758,10 @@ export default function OnboardingWizard({ locale, onComplete, initialProfile }:
                 className="block w-full px-4 py-3 bg-white border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-1 focus:ring-accent-coral focus:border-accent-coral text-sm font-semibold transition"
               >
                 <option value="Any">{txt("Any Governorate / Flexible", "أي محافظة / مرن", "هەر پارێزگایەک")}</option>
-                {GOVERNORATES.map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                {GOVERNORATE_OPTIONS.map((gov) => (
+                  <option key={gov.id} value={gov.id}>
+                    {isEn ? gov.en : isCkb ? gov.ckb : gov.ar}
+                  </option>
                 ))}
               </select>
             </div>

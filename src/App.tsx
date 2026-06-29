@@ -17,11 +17,12 @@ import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
 import CommunityFeed from './components/CommunityFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
+import Postbox from './components/Postbox';
 import GenderSelectionScreen from './screens/GenderSelectionScreen';
 import FloatingInstallButton from './components/FloatingInstallButton';
 import { useLocale } from './hooks/useLocale';
 import { apiClient } from './services/apiClient';
-import { Sparkles, Check, Heart, Home, Compass, MessageCircle, User } from 'lucide-react';
+import { Sparkles, Check, Heart, Home, Compass, MessageCircle, User, Inbox } from 'lucide-react';
 import { HeroImage, AppTab } from './types';
 
 export default function App() {
@@ -286,6 +287,30 @@ export default function App() {
     }
   };
 
+  const handleAcceptRequest = async (matchId: string) => {
+    try {
+      await apiClient.acceptIntroductionRequest(matchId);
+      const [updatedMatchesListRes, updatedConvs] = await Promise.all([
+        apiClient.getMatches(),
+        apiClient.getConversations()
+      ]);
+      setMatches(updatedMatchesListRes.matches);
+      setConversations(updatedConvs);
+    } catch (err) {
+      console.error("Failed to accept proposal request", err);
+    }
+  };
+
+  const handleDeclineRequest = async (matchId: string) => {
+    try {
+      await apiClient.declineIntroductionRequest(matchId);
+      const updatedMatchesListRes = await apiClient.getMatches();
+      setMatches(updatedMatchesListRes.matches);
+    } catch (err) {
+      console.error("Failed to decline proposal request", err);
+    }
+  };
+
   // Quick navigation into deep Chat
   const handleInitiateChat = (matchId: string) => {
     setActiveMatchId(matchId);
@@ -449,6 +474,18 @@ export default function App() {
                 onToggleSaveMatch={handleToggleSaveMatch}
                 userProfile={userProfile}
                 onUpdateUserProfile={handleUpdateUserProfile}
+                onNavigateToTab={setTab}
+              />
+            )}
+
+            {currentTab === 'postcards' && userProfile && (
+              <Postbox
+                locale={locale}
+                userProfile={userProfile}
+                matches={matches}
+                onAcceptRequest={handleAcceptRequest}
+                onDeclineRequest={handleDeclineRequest}
+                triggerToast={triggerToast}
                 onNavigateToTab={setTab}
               />
             )}
@@ -649,6 +686,35 @@ export default function App() {
             )}
           </div>
           <span className="text-[10px] sm:text-xs tracking-tight">{t.chat}</span>
+        </button>
+
+        {/* Postbox Option */}
+        <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              triggerToast(
+                locale === 'en' 
+                  ? '💍 Please log in to view received postcards.' 
+                  : '💍 يرجى تسجيل الدخول أولاً لتصفح الرسائل والبطاقات البريدية.'
+              );
+              setTab('onboarding');
+            } else {
+              setTab('postcards');
+            }
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'postcards' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-postcards-btn"
+        >
+          <div className="relative">
+            <Inbox className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'postcards' ? 'scale-110' : ''}`} />
+          </div>
+          <span className="text-[10px] sm:text-xs tracking-tight">
+            {locale === 'en' ? 'Postbox' : locale === 'ar' ? 'صندوقي' : 'سندوقی پۆستە'}
+          </span>
         </button>
 
         {/* My Dossier Option */}

@@ -89,26 +89,42 @@ export default function MatchExplorerScreen({
   // Default user location is Baghdad if not provided
   const userGov = userGovernorate || 'Baghdad';
 
-  const [filters, setFilters] = useState<SearchFilters>({
-    gender: userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : 'all',
-    minAge: 18,
-    maxAge: 45,
-    locationSearchPreference: 'Across all Iraq',
-    governorate: 'All Iraq',
-    city: 'All Cities',
-    religion: 'all',
-    sect: 'all',
-    ethnicity: 'all',
-    education: 'All Education Levels',
-    profession: 'All Professions',
-    seriousness: 'All Seriousness Levels',
-    familyValues: 'All Values Styles',
-    wantsChildren: 'All',
-    smoking: 'All',
-    photoVisibility: 'All',
-    verifiedOnly: false,
-    timeline: 'all',
-    sortBy: 'compatibility'
+  const [filters, setFilters] = useState<SearchFilters>(() => {
+    const savedGov = localStorage.getItem('home_filter_governorate') || 'all';
+    const savedMinAge = localStorage.getItem('home_filter_minAge');
+    const savedMaxAge = localStorage.getItem('home_filter_maxAge');
+    const savedGender = localStorage.getItem('home_filter_gender');
+
+    // Clean up temporary local storage keys to keep them fresh
+    localStorage.removeItem('home_filter_governorate');
+    localStorage.removeItem('home_filter_minAge');
+    localStorage.removeItem('home_filter_maxAge');
+    localStorage.removeItem('home_filter_gender');
+
+    const mappedGov = savedGov === 'all' ? 'All Iraq' : savedGov;
+    const initialGender = (savedGender as 'male' | 'female' | 'all') || (userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : 'all');
+
+    return {
+      gender: initialGender,
+      minAge: savedMinAge ? Number(savedMinAge) : 18,
+      maxAge: savedMaxAge ? Number(savedMaxAge) : 55,
+      locationSearchPreference: mappedGov === 'All Iraq' ? 'Across all Iraq' : 'Within governorate',
+      governorate: mappedGov,
+      city: 'All Cities',
+      religion: 'all',
+      sect: 'all',
+      ethnicity: 'all',
+      education: 'All Education Levels',
+      profession: 'All Professions',
+      seriousness: 'All Seriousness Levels',
+      familyValues: 'All Values Styles',
+      wantsChildren: 'All',
+      smoking: 'All',
+      photoVisibility: 'All',
+      verifiedOnly: false,
+      timeline: 'all',
+      sortBy: 'compatibility'
+    };
   });
 
   const handleResetFilters = () => {

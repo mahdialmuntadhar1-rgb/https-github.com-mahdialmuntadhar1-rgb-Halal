@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages, MapPin, Phone } from 'lucide-react';
+import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages, MapPin, Phone, Calendar } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import { apiClient } from '../services/apiClient';
 
-const GOVERNORATES = [
-  'Baghdad', 'Basra', 'Nineveh', 'Erbil', 'Sulaymaniyah', 'Duhok', 'Kirkuk',
-  'Najaf', 'Karbala', 'Babil', 'Wasit', 'Diyala', 'Anbar', 'Salah al-Din',
-  'Maysan', 'Dhi Qar', 'Muthanna', 'Qadisiyah', 'Halabja'
+const GOVERNORATE_DETAILS = [
+  { id: 'Baghdad', label: 'Baghdad (بغداد / بەغداد)' },
+  { id: 'Erbil', label: 'Erbil (أربيل / هەولێر)' },
+  { id: 'Sulaymaniyah', label: 'Sulaymaniyah (السليمانية / سلێمانی)' },
+  { id: 'Duhok', label: 'Duhok (دهوك / دهۆک)' },
+  { id: 'Halabja', label: 'Halabja (حلبجة / هەڵەبجە)' },
+  { id: 'Kirkuk', label: 'Kirkuk (كركوك / کەرکوک)' },
+  { id: 'Nineveh', label: 'Nineveh (نينوى / نەینەوا)' },
+  { id: 'Basra', label: 'Basra (البصرة / بەسرە)' },
+  { id: 'Najaf', label: 'Najaf (النجف / نەجەف)' },
+  { id: 'Karbala', label: 'Karbala (كربلاء / کەربەلا)' },
+  { id: 'Babil', label: 'Babel (بابل / بابل)' },
+  { id: 'Anbar', label: 'Anbar (الأنبار / ئەنبار)' },
+  { id: 'Diyala', label: 'Diyala (ديالى / دیالە)' },
+  { id: 'Salah al-Din', label: 'Salah al-Din (صلاح الدين / سەڵاحەدین)' },
+  { id: 'Wasit', label: 'Wasit (واسط / واسیت)' },
+  { id: 'Maysan', label: 'Maysan (ميسان / میسان)' },
+  { id: 'Dhi Qar', label: 'Dhi Qar (ذي قار / زیقار)' },
+  { id: 'Muthanna', label: 'Muthanna (المثنى / موتەنا)' },
+  { id: 'Qadisiyah', label: 'Qadisiyah (القادسية / قادسیە)' }
 ];
 
 interface AuthScreenProps {
@@ -30,9 +46,10 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const [name, setName] = useState(''); // Full Name
   const [email, setEmail] = useState('');
   const [governorate, setGovernorate] = useState('Baghdad');
-  const [district, setDistrict] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [phone, setPhone] = useState(''); // Optional
+  const [phone, setPhone] = useState(''); // Required now
+  const [age, setAge] = useState<number | ''>(''); // Required Age
+  const [district, setDistrict] = useState(''); // Required District
 
   const [isLoading, setIsLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
@@ -64,26 +81,24 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !name || !governorate || !district.trim()) {
-      triggerToast(txt('Please fill in all required fields.', 'يرجى تعبئة كافة الحقول المطلوبة.', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە.'));
+    if (!email || !password || !confirmPassword || !name || !governorate || !phone || !age || !district) {
+      triggerToast(txt('Please fill in all required fields (Name, Email, Phone, Age, District).', 'يرجى تعبئة كافة الحقول المطلوبة (الاسم، البريد، الهاتف، العمر، القضاء).', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە (ناو، ئیمەیڵ، مۆبایل، تەمەن، قەزا).'));
+      return;
+    }
+    const parsedAge = Number(age);
+    if (isNaN(parsedAge) || parsedAge < 18 || parsedAge > 75) {
+      triggerToast(txt('Age must be a valid number between 18 and 75.', 'يجب أن يكون العمر رقماً صالحاً بين ١٨ و ٧٥ عاماً.', 'تەمەن دەبێت ژمارەیەکی دروست بێت لە نێوان ١٨ بۆ ٧٥ ساڵدا.'));
       return;
     }
     if (password !== confirmPassword) {
-      triggerToast(txt('Passwords do not match.', 'كلمتا المرور غير متطابقتين.', 'وشە نهێنییەکان وەک یەک نین.'));
+      triggerToast(txt('Passwords do not match.', 'كلمتا المرور غير متطابقتين.', 'وشە نهێنییەکان وەک یەک نين.'));
       return;
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.register(name, governorate, district.trim(), email, phone.trim() || undefined, password);
+      const result = await apiClient.register(name, governorate, district, email, phone.trim(), password, parsedAge);
       triggerToast(txt('✨ Account created successfully.', '✨ تم إنشاء الحساب بنجاح.', '✨ هەژمارەکەت بە سەرکەوتوویی دروستکرا.'));
       
-      // Update district on the profile immediately
-      try {
-        await apiClient.updateCurrentUserProfile({ city: district.trim() });
-      } catch (e) {
-        console.warn("Could not set city/district on newly created profile:", e);
-      }
-
       const profile = await apiClient.getCurrentUser();
       onAuthSuccess(result.token, profile);
     } catch (err: any) {
@@ -301,31 +316,12 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                     required
                     value={governorate}
                     onChange={(e) => setGovernorate(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-semibold transition"
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-semibold transition animate-fade-in"
                   >
-                    {GOVERNORATES.map((govName) => (
-                      <option key={govName} value={govName}>{govName}</option>
+                    {GOVERNORATE_DETAILS.map((gov) => (
+                      <option key={gov.id} value={gov.id}>{gov.label}</option>
                     ))}
                   </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('District / Neighborhood', 'القضاء / الحي', 'قەزا یان گەڕەک')}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-                    <MapPin className="h-4.5 w-4.5 text-accent-coral" />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    placeholder={txt('e.g. Karrada, Erbil Center...', 'مثال: الكرادة، مركز أربيل...', 'بۆ نموونە: کەڕادە، سەنتەری هەولێر...')}
-                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
-                  />
                 </div>
               </div>
 
@@ -348,7 +344,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
               <div>
                 <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('Phone Number (Optional)', 'رقم الهاتف (اختياري)', 'ژمارەی مۆبایل (ئارەزوومەندانە)')}
+                  {txt('Phone Number', 'رقم الهاتف', 'ژمارەی مۆبایل')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -356,9 +352,50 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                   </div>
                   <input
                     type="tel"
+                    required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +964 770..."
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('Age', 'العمر', 'تەمەن')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <Calendar className="h-4.5 w-4.5" />
+                  </div>
+                  <input
+                    type="number"
+                    required
+                    min={18}
+                    max={75}
+                    value={age}
+                    onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="e.g. 25"
+                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                  {txt('District / Neighborhood', 'القضاء / الحي', 'قەزا یان گەڕەک')}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                    <MapPin className="h-4.5 w-4.5" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                    placeholder={txt('e.g. Karrada or Mansour', 'مثال: الكرادة أو المنصور', 'بۆ نموونە: کەڕادە یان مەنسور')}
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
                 </div>
