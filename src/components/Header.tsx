@@ -45,15 +45,12 @@ export default function Header({
               <span className="text-white font-serif font-bold text-xl">Z</span>
             </div>
             <div className="text-start">
-              <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                <span className="text-2xl font-serif font-bold tracking-tight text-warm-charcoal">{t.brand}</span>
-                <span className="text-[10px] bg-accent-coral/10 text-accent-coral font-bold px-2.5 py-0.5 rounded-full border border-accent-coral/20 tracking-wider">
-                  {t.marriageOnly}
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-3 sm:rtl:space-x-reverse gap-y-0.5">
+                <span className="text-2xl font-serif font-bold tracking-tight text-warm-charcoal whitespace-nowrap">{t.brand}</span>
+                <p className="text-xs text-[#6B635B] font-medium hidden xs:block">
+                  <span className="hidden sm:inline-block text-[#40798C] mr-2">•</span> {t.slogan}
+                </p>
               </div>
-              <p className="text-xs text-[#6B635B] hidden sm:block font-medium">
-                {t.slogan}
-              </p>
             </div>
           </div>
 
