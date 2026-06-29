@@ -76,12 +76,8 @@ export default function App() {
           setMatches(matchesResult.matches);
           setConversations(convs);
 
-          // Route initial loaded user appropriately
-          if (!profile.gender) {
-            setTab('gender-selection');
-          } else if (!profile.age || profile.age === 0 || !profile.education || !profile.profession) {
-            setTab('onboarding');
-          }
+          // Route initial loaded user appropriately - allow full explore access
+          setTab('explore');
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -129,13 +125,7 @@ export default function App() {
       setConversations(convs);
       
       // Route user correctly: registration and login are separate from onboarding now
-      if (!currentProfile.gender) {
-        setTab('gender-selection');
-      } else if (!currentProfile.age || currentProfile.age === 0 || !currentProfile.education || !currentProfile.profession) {
-        setTab('onboarding');
-      } else {
-        setTab('explore');
-      }
+      setTab('explore');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -564,9 +554,6 @@ export default function App() {
             {/* Branding */}
             <div className="md:col-span-5 space-y-4">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center">
-                  <span className="text-white font-serif font-bold text-sm">Z</span>
-                </div>
                 <span className="text-xl font-serif font-bold tracking-wider text-white font-display">{t.brand}</span>
               </div>
               <p className="text-xs text-[#C3BFB9]/80 max-w-sm font-normal">

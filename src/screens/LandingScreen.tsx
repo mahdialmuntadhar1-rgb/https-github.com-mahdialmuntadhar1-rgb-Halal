@@ -165,12 +165,6 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     // Return sorted by compatibility score or verification
     const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
     
-    if (isProfileIncomplete && !userProfile?.gender) {
-      const women = sorted.filter(m => m.gender === 'female').slice(0, 2);
-      const men = sorted.filter(m => m.gender === 'male').slice(0, 2);
-      return [...women, ...men];
-    }
-    
     return sorted;
   }, [selectedGov, activeCategory, userProfile, isProfileIncomplete, minAge, maxAge, genderPref, preSelectedGender]);
 
@@ -446,14 +440,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
                     </h4>
                     <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
-                      {txt("Limited Access", "وصول محدود", "دەستپێگەیشتنی سنووردار")}
+                      {txt("Onboarding Pending", "الملف الشخصي معلّق", "پڕۆفایل چاوەڕوانکراوە")}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
                     {txt(
-                      "To ensure a respectful, serious, and Shari'a-compliant matchmaking process, you are currently shown exactly two women and two men. Please complete your marriage profile parameters to unlock full access, custom match lists, and private filters.",
-                      "لضمان تعارف وقور وجاد متوافق مع الشريعة الغراء، يظهر لك حالياً امرأتان ورجلان فقط. يرجى إكمال بيانات ملفك الشخصي لتتمكن من استكشاف كافة الشركاء المناسبين وتفعيل مرشحات البحث المتقدمة والخاصة.",
-                      "بۆ دڵنیابوون لەوەی کە پڕۆسەی هاوسەرگیری بە شێوەیەکی ڕێزدار و جدی ئەنجام دەدرێت، لە ئێستادا تەنها دوو ژن و دوو پیاو پیشان دەدرێن. تکایە پڕۆفایلی خۆت تەواو بکە بۆ بەدەستهێنانی دەستپێگەیشتنی تەواو."
+                      "You can search and explore matches freely. However, to express serious marital interest, send postcards, or build custom serious connections, you must complete your full marriage profile form.",
+                      "يمكنك البحث واستكشاف الشركاء بحرية كاملة، ولكن لإرسال طلبات التعارف الجادة والبطاقات البريدية وبدء تواصل وقور، يرجى ملء استمارة ملفك الشخصي بالكامل.",
+                      "دەتوانیت کاندیدەکان بە سەربەستی ببینی و بگەڕێیت، بەڵام بۆ دەربڕینی نیەتی جدی هاوسەرگیری یان ناردنی نامەی پێشەکی، دەبێت پڕۆفایلی خۆت بە تەواوی پڕبکەیتەوە."
                     )}
                   </p>
                 </div>
@@ -462,7 +456,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>{txt("Complete Profile Now", "أكمل ملفك الشخصي الآن", "ئێستا پڕۆفایلەکەت تەواو بکە")}</span>
+                  <span>{txt("Complete Form Now", "أكمل الاستمارة الآن", "ئێستا پڕۆفایلەکە تەواو بکە")}</span>
                 </button>
               </div>
             )}

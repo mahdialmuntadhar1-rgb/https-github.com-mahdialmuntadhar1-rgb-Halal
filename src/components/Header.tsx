@@ -40,15 +40,12 @@ export default function Header({
         <div className="flex justify-between items-center h-20">
           
           {/* Logo & Slogan */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center shadow-lg shadow-accent-coral/20 shrink-0">
-              <span className="text-white font-serif font-bold text-xl">Z</span>
-            </div>
+          <div className="flex items-center cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
             <div className="text-start">
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-3 sm:rtl:space-x-reverse gap-y-0.5">
-                <span className="text-2xl font-serif font-bold tracking-tight text-warm-charcoal whitespace-nowrap">{t.brand}</span>
-                <p className="text-xs text-[#6B635B] font-medium hidden xs:block">
-                  <span className="hidden sm:inline-block text-[#40798C] mr-2">•</span> {t.slogan}
+              <div className="flex flex-row items-baseline space-x-2 sm:space-x-3 rtl:space-x-reverse">
+                <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-warm-charcoal whitespace-nowrap">{t.brand}</span>
+                <p className="text-[10px] sm:text-xs text-[#6B635B] font-medium hidden xs:block whitespace-nowrap">
+                  <span className="text-[#40798C] mx-1 sm:mx-2">•</span> {t.slogan}
                 </p>
               </div>
             </div>

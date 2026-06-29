@@ -81,8 +81,8 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !name || !governorate || !phone || !age || !district) {
-      triggerToast(txt('Please fill in all required fields (Name, Email, Phone, Age, District).', 'يرجى تعبئة كافة الحقول المطلوبة (الاسم، البريد، الهاتف، العمر، القضاء).', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە (ناو، ئیمەیڵ، مۆبایل، تەمەن، قەزا).'));
+    if (!email || !password || !confirmPassword || !name || !governorate || !age) {
+      triggerToast(txt('Please fill in all required fields (Name, Governorate, Email, Age, Password).', 'يرجى تعبئة كافة الحقول المطلوبة (الاسم الكامل، المحافظة، البريد الإلكتروني، العمر، كلمة المرور).', 'تکایە هەموو بڕگە داواکراوەکان پڕبکەرەوە (ناو، پارێزگا، ئیمەیڵ، تەمەن، وشەی تێپەڕ).'));
       return;
     }
     const parsedAge = Number(age);
@@ -96,7 +96,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
     }
     setIsLoading(true);
     try {
-      const result = await apiClient.register(name, governorate, district, email, phone.trim(), password, parsedAge);
+      const result = await apiClient.register(name, governorate, "", email, phone ? phone.trim() : undefined, password, parsedAge);
       triggerToast(txt('✨ Account created successfully.', '✨ تم إنشاء الحساب بنجاح.', '✨ هەژمارەکەت بە سەرکەوتوویی دروستکرا.'));
       
       const profile = await apiClient.getCurrentUser();
@@ -151,10 +151,6 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
         <div className="absolute bottom-0 left-0 transform -translate-x-1/3 translate-y-1/3 w-28 h-28 bg-[#40798C]/20 rounded-full blur-xl pointer-events-none" />
 
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-2xl bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center shadow-lg shadow-accent-coral/20 mb-4">
-            <span className="text-white font-serif font-bold text-2xl">H</span>
-          </div>
-          
           <h2 className="text-3xl font-serif font-black text-warm-charcoal tracking-tight font-display">
             {mode === 'login' ? t.loginTitle : mode === 'register' ? t.registerTitle : t.forgotPasswordLabel}
           </h2>
@@ -344,7 +340,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
 
               <div>
                 <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('Phone Number', 'رقم الهاتف', 'ژمارەی مۆبایل')}
+                  {txt('Phone Number (Optional)', 'رقم الهاتف (اختياري)', 'ژمارەی مۆبایل (ئارەزوومەندانە)')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -352,7 +348,6 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                   </div>
                   <input
                     type="tel"
-                    required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +964 770..."
@@ -377,25 +372,6 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
                     value={age}
                     onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="e.g. 25"
-                    className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
-                  {txt('District / Neighborhood', 'القضاء / الحي', 'قەزا یان گەڕەک')}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-                    <MapPin className="h-4.5 w-4.5" />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    placeholder={txt('e.g. Karrada or Mansour', 'مثال: الكرادة أو المنصور', 'بۆ نموونە: کەڕادە یان مەنسور')}
                     className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
                   />
                 </div>

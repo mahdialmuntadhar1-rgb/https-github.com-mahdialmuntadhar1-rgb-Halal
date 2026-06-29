@@ -274,17 +274,17 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
         <div className="max-w-4xl mx-auto text-center space-y-2">
           <h2 className="text-[16px] min-[360px]:text-[18px] xs:text-[23px] sm:text-[34px] md:text-[42px] font-serif text-warm-charcoal tracking-tight font-display font-black leading-tight selection:bg-[#40798C]/15">
             {locale === 'en' 
-              ? 'Zawaj Al Araqi' 
+              ? 'Zawaaj Al Iraq' 
               : locale === 'ckb'
-                ? 'زەواجی عێراقی'
-                : 'زواج العراقي'}
+                ? 'هاوسەرگیری عێراقی'
+                : 'الزواج العراقي'}
           </h2>
           <p className="text-xs sm:text-base md:text-lg text-stone-600 font-medium max-w-2xl mx-auto">
             {locale === 'en' 
-              ? 'Zawaj Al Araqi — For serious marriage in a respectful way that fits our society' 
+              ? 'Zawaaj Al Iraq — For serious marriage in a respectful way that fits our society' 
               : locale === 'ckb'
-                ? 'زەواجی عێراقی — بۆ هاوسەرگیری جدی بە شێوازێکی ڕێزدار کە لەگەڵ کۆمەڵگاکەماندا بگونجێت'
-                : 'زواج العراقي — للزواج الجاد بطريقة محترمة تناسب مجتمعنا'}
+                ? 'هاوسەرگیری عێراقی — بۆ هاوسەرگیری جدی بە شێوازێکی ڕێزدار کە لەگەڵ کۆمەڵگاکەماندا بگونجێت'
+                : 'الزواج العراقي — للزواج الجاد بطريقة محترمة تناسب مجتمعنا'}
           </p>
         </div>
 

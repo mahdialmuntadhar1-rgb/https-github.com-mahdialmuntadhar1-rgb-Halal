@@ -153,7 +153,7 @@ export const apiClient = {
   async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock register response
-      if (!fullName || !governorate || !district || !email || !password) {
+      if (!fullName || !governorate || !email || !password) {
         throw new Error('Please fill in all required registration fields');
       }
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
