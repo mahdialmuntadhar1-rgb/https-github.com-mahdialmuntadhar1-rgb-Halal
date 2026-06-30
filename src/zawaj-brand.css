@@ -1,0 +1,186 @@
+﻿:root {
+  --zawaj-pink: #FF4FD8;
+  --zawaj-purple: #9D4DFF;
+  --zawaj-soft-purple: #C77DFF;
+  --zawaj-light-pink: #FF8AE2;
+  --zawaj-bg: #FFFFFF;
+  --zawaj-bg-soft: #F8F5FF;
+  --zawaj-text: #1E1E2F;
+  --zawaj-muted: #6B6478;
+  --zawaj-gradient: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 60%, #C77DFF 100%);
+  --zawaj-glow: 0 0 22px rgba(255, 79, 216, 0.35), 0 0 38px rgba(157, 77, 255, 0.28);
+  --zawaj-shadow: 0 18px 45px rgba(157, 77, 255, 0.16);
+}
+
+html,
+body,
+#root {
+  background:
+    radial-gradient(circle at top left, rgba(255, 79, 216, 0.14), transparent 34%),
+    radial-gradient(circle at top right, rgba(157, 77, 255, 0.14), transparent 36%),
+    var(--zawaj-bg) !important;
+  color: var(--zawaj-text) !important;
+}
+
+header,
+nav,
+.app-header,
+.site-header,
+.navbar {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom: 1px solid rgba(157, 77, 255, 0.18) !important;
+  backdrop-filter: blur(16px);
+}
+
+.hero,
+.hero-section,
+.home-hero,
+.banner,
+.landing-hero {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 79, 216, 0.24), transparent 36%),
+    radial-gradient(circle at 80% 15%, rgba(157, 77, 255, 0.24), transparent 38%),
+    linear-gradient(135deg, #FFFFFF, #F8F5FF) !important;
+  border-radius: 28px !important;
+  box-shadow: var(--zawaj-shadow) !important;
+}
+
+h1,
+h2,
+h3,
+.logo-text,
+.brand-title {
+  color: var(--zawaj-text) !important;
+}
+
+.logo-text,
+.gradient-text,
+.brand-gradient,
+.highlight-text {
+  background: var(--zawaj-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+button,
+.btn,
+.button,
+a[class*="btn"],
+a[class*="button"] {
+  border-radius: 999px !important;
+}
+
+button[type="submit"],
+.btn-primary,
+.primary-button,
+.cta-button,
+.register-button,
+.install-button,
+.floating-button,
+a[href*="register"],
+a[href*="signup"],
+a[href*="profile"],
+a[href*="match"],
+a[href*="start"] {
+  background: var(--zawaj-gradient) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: var(--zawaj-glow) !important;
+  font-weight: 700 !important;
+}
+
+.card,
+.profile-card,
+.match-card,
+.feature-card,
+.step-card,
+.listing-card {
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    var(--zawaj-gradient) border-box !important;
+  border: 1px solid transparent !important;
+  border-radius: 24px !important;
+  box-shadow: 0 14px 38px rgba(157, 77, 255, 0.13) !important;
+}
+
+.search-box,
+.search-panel,
+.filters,
+.filter-panel {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(157, 77, 255, 0.18) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 12px 34px rgba(255, 79, 216, 0.10) !important;
+  backdrop-filter: blur(14px);
+}
+
+input,
+select,
+textarea {
+  background: #FFFFFF !important;
+  color: var(--zawaj-text) !important;
+  border: 1px solid rgba(157, 77, 255, 0.28) !important;
+  border-radius: 16px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: var(--zawaj-purple) !important;
+  box-shadow: 0 0 0 4px rgba(157, 77, 255, 0.15) !important;
+}
+
+.badge,
+.tag,
+.chip,
+.status-badge {
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.15), rgba(157, 77, 255, 0.15)) !important;
+  color: var(--zawaj-purple) !important;
+  border: 1px solid rgba(157, 77, 255, 0.24) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+a {
+  color: var(--zawaj-purple);
+}
+
+a:hover {
+  color: var(--zawaj-pink);
+}
+
+.bottom-nav,
+.mobile-nav,
+.tabbar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-top: 1px solid rgba(157, 77, 255, 0.18) !important;
+  box-shadow: 0 -10px 28px rgba(157, 77, 255, 0.10) !important;
+}
+
+.empty-state,
+.no-results {
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.12), rgba(157, 77, 255, 0.12)) !important;
+  border: 1px dashed rgba(157, 77, 255, 0.32) !important;
+  border-radius: 24px !important;
+}
+
+@media (max-width: 768px) {
+  .hero,
+  .hero-section,
+  .home-hero,
+  .banner,
+  .card,
+  .profile-card,
+  .match-card,
+  .feature-card {
+    border-radius: 20px !important;
+  }
+
+  button,
+  .btn,
+  .button {
+    min-height: 44px;
+  }
+}
