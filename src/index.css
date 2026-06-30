@@ -5,278 +5,36 @@
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* Zawaj Al Araqi official bright brand palette */
-  --color-brand-pink: #FF4FD8;
-  --color-brand-purple: #9D4DFF;
-  --color-brand-soft-purple: #C77DFF;
-  --color-brand-highlight-pink: #FF8AE2;
-  --color-brand-bg: #F8F5FF;
-  --color-brand-white: #FFFFFF;
-  --color-brand-charcoal: #1E1E2F;
-
-  /* Backward-compatible aliases used across existing components */
-  --color-warm-ivory: #F8F5FF;
-  --color-warm-charcoal: #1E1E2F;
-  --color-accent-coral: #FF4FD8;
-  --color-accent-pink: #FF8AE2;
-  --color-accent-blue: #9D4DFF;
-}
-
-:root {
-  color: #1E1E2F;
-  background: #F8F5FF;
-  color-scheme: light;
-}
-
-html {
-  background: #F8F5FF;
-}
-
-body {
-  min-height: 100vh;
-  color: #1E1E2F;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(255, 79, 216, 0.16), transparent 30%),
-    radial-gradient(circle at 88% 18%, rgba(157, 77, 255, 0.18), transparent 34%),
-    linear-gradient(180deg, #FFFFFF 0%, #F8F5FF 42%, #FFFFFF 100%);
-}
-
-::selection {
-  color: #FFFFFF;
-  background: #9D4DFF;
-}
-
-/* Zawaj Al Araqi reusable brand helpers */
-.brand-page-bg {
-  color: #1E1E2F;
-  background:
-    radial-gradient(circle at top left, rgba(255, 79, 216, 0.16), transparent 30%),
-    radial-gradient(circle at top right, rgba(157, 77, 255, 0.18), transparent 32%),
-    linear-gradient(180deg, #FFFFFF 0%, #F8F5FF 54%, #FFFFFF 100%);
-}
-
-.brand-gradient {
-  background: linear-gradient(135deg, #FF4FD8 0%, #C77DFF 46%, #9D4DFF 100%);
-}
-
-.brand-gradient-text {
-  color: #9D4DFF;
-  background: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.brand-glow {
-  box-shadow:
-    0 16px 42px rgba(157, 77, 255, 0.18),
-    0 8px 24px rgba(255, 79, 216, 0.14);
-}
-
-.brand-card,
-.brand-postcard {
-  color: #1E1E2F;
-  background:
-    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
-    linear-gradient(135deg, rgba(255, 79, 216, 0.72), rgba(157, 77, 255, 0.72)) border-box;
-  border: 1px solid transparent;
-  border-radius: 1.5rem;
-  box-shadow:
-    0 18px 46px rgba(30, 30, 47, 0.08),
-    0 10px 28px rgba(157, 77, 255, 0.12),
-    0 6px 18px rgba(255, 79, 216, 0.10);
-}
-
-.brand-postcard {
-  position: relative;
-  overflow: hidden;
-}
-
-.brand-postcard::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 5px;
-  background: linear-gradient(90deg, #FF4FD8, #C77DFF, #9D4DFF);
-}
-
-.brand-glass {
-  color: #1E1E2F;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(157, 77, 255, 0.18);
-  box-shadow:
-    0 16px 40px rgba(30, 30, 47, 0.08),
-    0 8px 24px rgba(255, 79, 216, 0.10);
-}
-
-.brand-button-primary {
-  color: #FFFFFF;
-  background: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 100%);
-  box-shadow:
-    0 14px 30px rgba(157, 77, 255, 0.28),
-    0 8px 18px rgba(255, 79, 216, 0.22);
-  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
-}
-
-.brand-button-primary:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.04);
-  box-shadow:
-    0 18px 38px rgba(157, 77, 255, 0.34),
-    0 10px 22px rgba(255, 79, 216, 0.28);
-}
-
-.brand-button-secondary {
-  color: #1E1E2F;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(157, 77, 255, 0.34);
-  box-shadow: 0 10px 24px rgba(157, 77, 255, 0.10);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
-
-.brand-button-secondary:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 79, 216, 0.62);
-  box-shadow:
-    0 14px 30px rgba(157, 77, 255, 0.16),
-    0 8px 18px rgba(255, 79, 216, 0.14);
-}
-
-.brand-pill {
-  color: #1E1E2F;
-  background: linear-gradient(135deg, rgba(255, 79, 216, 0.12), rgba(157, 77, 255, 0.12));
-  border: 1px solid rgba(157, 77, 255, 0.22);
-  border-radius: 999px;
+  
+  --color-warm-ivory: #FAF9F6;
+  --color-warm-charcoal: #2D2A26;
+  --color-accent-coral: #9333EA;
+  --color-accent-pink: #FF1493;
+  --color-accent-blue: #40798C;
 }
 
 /* Glassmorphism helpers */
 .glass-pane {
-  color: #1E1E2F;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(157, 77, 255, 0.18);
-  box-shadow:
-    0 8px 32px 0 rgba(30, 30, 47, 0.08),
-    0 6px 18px rgba(255, 79, 216, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 32px 0 rgba(45, 42, 38, 0.08);
 }
 
 .glass-pane-dark {
-  color: #FFFFFF;
-  background:
-    linear-gradient(135deg, rgba(30, 30, 47, 0.92), rgba(80, 40, 132, 0.88)),
-    linear-gradient(135deg, #FF4FD8, #9D4DFF);
+  background: rgba(45, 42, 38, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 16px 42px rgba(30, 30, 47, 0.22),
-    0 10px 24px rgba(157, 77, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15);
 }
 
 .glass-pill {
-  color: #1E1E2F;
-  background: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(157, 77, 255, 0.20);
-}
-
-/* Homepage postcard overrides for the existing Zawaj landing UI */
-#romantic-carousel-container {
-  background:
-    linear-gradient(#1E1E2F, #1E1E2F) padding-box,
-    linear-gradient(135deg, #FF4FD8, #C77DFF, #9D4DFF) border-box !important;
-  border: 2px solid transparent !important;
-  box-shadow:
-    0 24px 70px rgba(30, 30, 47, 0.18),
-    0 18px 42px rgba(157, 77, 255, 0.26),
-    0 8px 24px rgba(255, 79, 216, 0.20) !important;
-}
-
-#carousel-cta-create,
-#carousel-cta-browse,
-#homepage-explore-cta-btn {
-  color: #FFFFFF !important;
-  background: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 100%) !important;
-  border-color: rgba(255, 255, 255, 0.34) !important;
-  box-shadow:
-    0 14px 32px rgba(157, 77, 255, 0.32),
-    0 8px 22px rgba(255, 79, 216, 0.28) !important;
-}
-
-#carousel-cta-login,
-#carousel-cta-profile,
-#carousel-cta-explore {
-  background: rgba(255, 255, 255, 0.16) !important;
-  border-color: rgba(255, 255, 255, 0.34) !important;
-  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.08) !important;
-}
-
-#select-gender-male,
-#select-gender-female,
-#homepage-search-card,
-#gender-matching-guidance-banner > div {
-  color: #1E1E2F !important;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)) padding-box,
-    linear-gradient(135deg, rgba(255, 79, 216, 0.74), rgba(157, 77, 255, 0.74)) border-box !important;
-  border: 1px solid transparent !important;
-  box-shadow:
-    0 18px 46px rgba(30, 30, 47, 0.08),
-    0 10px 28px rgba(157, 77, 255, 0.13),
-    0 6px 18px rgba(255, 79, 216, 0.10) !important;
-}
-
-#select-gender-male,
-#select-gender-female,
-#governorate-horizontal-scroll-row .snap-start {
-  position: relative;
-}
-
-#select-gender-male::before,
-#select-gender-female::before,
-#governorate-horizontal-scroll-row .snap-start::before,
-#homepage-search-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  background: linear-gradient(90deg, #FF4FD8, #C77DFF, #9D4DFF);
-  pointer-events: none;
-}
-
-#homepage-search-card select {
-  color: #1E1E2F !important;
-  background: #FFFFFF !important;
-  border-color: rgba(157, 77, 255, 0.28) !important;
-}
-
-#homepage-search-card select:focus {
-  border-color: #9D4DFF !important;
-  box-shadow: 0 0 0 4px rgba(157, 77, 255, 0.12) !important;
-}
-
-#governorate-horizontal-scroll-row .snap-start {
-  color: #1E1E2F !important;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)) padding-box,
-    linear-gradient(135deg, rgba(255, 79, 216, 0.52), rgba(157, 77, 255, 0.52)) border-box !important;
-  border: 1px solid transparent !important;
-  box-shadow:
-    0 14px 34px rgba(30, 30, 47, 0.07),
-    0 8px 20px rgba(157, 77, 255, 0.10) !important;
-}
-
-#governorate-horizontal-scroll-row .snap-start:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 18px 42px rgba(30, 30, 47, 0.09),
-    0 12px 28px rgba(255, 79, 216, 0.14),
-    0 10px 24px rgba(157, 77, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 /* Scrollbar styling */
@@ -342,3 +100,4 @@ body {
 .animate-marquee:hover, .animate-marquee-rtl:hover {
   animation-play-state: paused;
 }
+

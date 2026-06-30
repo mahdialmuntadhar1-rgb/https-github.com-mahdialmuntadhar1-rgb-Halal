@@ -230,13 +230,13 @@ export default function Postbox({
                   onClick={() => setSelectedPostcard(p)}
                   className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer text-start relative overflow-hidden flex items-center gap-4 ${
                     isActive 
-                      ? 'bg-white border-accent-coral shadow-md scale-[1.01] ring-1 ring-accent-coral' 
-                      : 'bg-white/80 border-stone-200 hover:border-stone-300 hover:bg-white shadow-xs'
+                      ? 'bg-slate-900 border-accent-pink shadow-[0_0_15px_rgba(255,20,147,0.4)] scale-[1.01] ring-1 ring-accent-pink text-white' 
+                      : 'bg-slate-950/90 border-purple-500/30 hover:border-accent-pink hover:bg-slate-900 shadow-xs text-stone-200'
                   }`}
                 >
                   {/* Status Ribbon on card */}
                   <div className={`absolute top-0 right-0 w-2.5 h-full ${
-                    p.status === 'accepted' ? 'bg-emerald-500' : p.status === 'declined' ? 'bg-stone-300' : 'bg-accent-coral'
+                    p.status === 'accepted' ? 'bg-emerald-500' : p.status === 'declined' ? 'bg-stone-500' : 'bg-accent-pink'
                   }`} />
 
                   {/* Sender Avatar */}
@@ -244,7 +244,7 @@ export default function Postbox({
                     <img 
                       src={p.senderPhoto} 
                       alt={p.senderName} 
-                      className={`w-12 h-12 rounded-full object-cover border-2 ${isActive ? 'border-accent-coral' : 'border-stone-200'}`}
+                      className={`w-12 h-12 rounded-full object-cover border-2 ${isActive ? 'border-accent-pink' : 'border-purple-500/40'}`}
                       referrerPolicy="no-referrer"
                     />
                     {p.status === 'accepted' && (
@@ -256,17 +256,17 @@ export default function Postbox({
 
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex justify-between items-baseline gap-2">
-                      <h4 className="text-sm font-black text-warm-charcoal truncate">{p.senderName}</h4>
+                      <h4 className={`text-sm font-black truncate ${isActive ? 'text-white' : 'text-stone-100'}`}>{p.senderName}</h4>
                       <span className="text-[10px] text-stone-400 shrink-0 font-mono">{formatDate(p.createdAt)}</span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-500">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-400">
                       <span>{p.senderAge} {txt('yrs', 'سنة', 'ساڵ')}</span>
                       <span>•</span>
                       <span>{p.senderDistrict}, {p.senderGovernorate}</span>
                     </div>
 
-                    <p className="text-[11px] text-stone-600 italic truncate mt-1">
+                    <p className="text-[11px] text-stone-300 italic truncate mt-1">
                       "{locale === 'en' ? p.messageEn : locale === 'ckb' ? p.messageCkb : p.messageAr}"
                     </p>
                   </div>
@@ -295,152 +295,153 @@ export default function Postbox({
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                {/* Visual Traditional Postcard Wrapper */}
-                <div 
-                  className="bg-[#FAF6EE] border-4 border-[#E6DEC9] rounded-[2.5rem] p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-8 justify-between text-start"
-                  style={{ backgroundImage: 'radial-gradient(#EFE9DB 1px, transparent 0)', backgroundSize: '24px 24px' }}
-                  id="expanded-postcard-card"
-                >
-                  {/* Authentic Vintage Borders */}
-                  <div className="absolute inset-2 border border-[#DFD8C4] rounded-[2rem] pointer-events-none" />
-                  
-                  {/* Left Column of Postcard: The Message */}
-                  <div className="flex-1 space-y-5 relative z-10">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold text-[#8A7E64] uppercase tracking-wider block">
-                        ✉️ {txt('HALAL MARRIAGE INTENTION GREETING', 'ميثاق طلب التعارف الشرعي', 'پەیامی هاوسەرگیری حەڵاڵ')}
-                      </span>
-                      <h3 className="text-2xl font-serif font-black text-warm-charcoal tracking-tight">
-                        {txt('Letter of Proposal', 'رسالة الخطوبة والمودة', 'نامەی داواکاری')}
-                      </h3>
-                      <p className="text-[10px] text-stone-400 font-mono">
-                        {txt('Received on', 'تاريخ الاستلام', 'وەرگیرا لە')}: {formatDate(selectedPostcard.createdAt)}
-                      </p>
-                    </div>
-
-                    {/* Handwriting style message text */}
-                    <div className="bg-white/50 backdrop-blur-xs border border-[#E9E1CD] p-5 rounded-2xl shadow-inner text-stone-800 text-[13.5px] leading-relaxed font-serif italic relative">
-                      <div className="absolute top-2 left-2 text-[#E2D9C5] text-4xl select-none font-serif">“</div>
-                      <p className="relative z-10 pl-3">
-                        {locale === 'en' 
-                          ? selectedPostcard.messageEn 
-                          : locale === 'ckb' 
-                            ? selectedPostcard.messageCkb 
-                            : selectedPostcard.messageAr}
-                      </p>
-                    </div>
-
-                    {/* SENDER GENERAL INFO SUMMARY */}
-                    <div className="bg-[#EDE6D7]/60 p-4 rounded-2xl border border-[#DFD8C4] space-y-3 text-xs">
-                      <h4 className="font-bold text-[#5B503A] uppercase tracking-wider text-[10px] font-mono border-b border-[#DFD8C4] pb-1.5">
-                        👤 {txt('About the Sender', 'تفاصيل عن مرسل البطاقة', 'دەربارەی ناردکار')}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3 font-medium text-stone-700">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-[#40798C] shrink-0" />
-                          <span><strong>{txt('Age', 'العمر', 'تەمەن')}:</strong> {selectedPostcard.senderAge} {txt('Years Old', 'سنة', 'ساڵ')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-[#40798C] shrink-0" />
-                          <span className="truncate"><strong>{txt('Profession', 'المهنة', 'پیشە')}:</strong> {selectedPostcard.senderProfession}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-[#40798C] shrink-0" />
-                          <span className="truncate"><strong>{txt('Lives in', 'مكان الإقامة', 'شوێنی ژیان')}:</strong> {selectedPostcard.senderDistrict}, {selectedPostcard.senderGovernorate}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <GraduationCap className="w-4 h-4 text-[#40798C] shrink-0" />
-                          <span className="truncate"><strong>{txt('Education', 'التعليم', 'خوێندن')}:</strong> {selectedPostcard.senderEducation}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vertical Postcard Split Line */}
-                  <div className="hidden md:block w-px bg-dashed bg-[#DFD8C4] h-auto my-4 self-stretch relative">
-                    <span className="absolute top-1/2 -translate-y-1/2 -left-1 text-[9px] text-[#A69C85] bg-[#FAF6EE] px-1 font-mono">POST</span>
-                  </div>
-
-                  {/* Right Column of Postcard: Stamp & Address */}
-                  <div className="w-full md:w-56 shrink-0 flex flex-col justify-between items-center md:items-end gap-6 relative z-10">
+                {/* Visual Futuristic Neon Postcard Wrapper */}
+                <div className="p-[2px] bg-gradient-to-tr from-accent-coral via-accent-pink to-purple-600 rounded-[2.5rem] shadow-[0_0_30px_rgba(255,20,147,0.35)]" id="expanded-postcard-card">
+                  <div 
+                    className="bg-slate-950/95 backdrop-blur-md rounded-[2.4rem] p-6 sm:p-8 relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-8 justify-between text-start"
+                    style={{ backgroundImage: 'radial-gradient(rgba(147, 51, 234, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}
+                  >
+                    {/* Authentic Cyber Borders */}
+                    <div className="absolute inset-2 border border-purple-500/20 rounded-[2rem] pointer-events-none" />
                     
-                    {/* Stamp & Postmark */}
-                    <div className="flex justify-between items-start w-full gap-4">
-                      {/* Postmark Circle */}
-                      <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#8A7E64]/40 flex items-center justify-center text-center text-[8px] font-mono font-bold text-[#8A7E64]/60 rotate-12">
-                        <div>
-                          <div>ZAWAJ</div>
-                          <div className="border-y border-[#8A7E64]/30 my-0.5">IRAQ</div>
-                          <div>POSTAL</div>
-                        </div>
-                      </div>
-
-                      {/* Vintage stamp image */}
-                      <div className="w-14 h-16 border-2 border-[#8A7E64] p-0.5 bg-white shadow-md rotate-[-6deg] relative overflow-hidden">
-                        <img 
-                          src={selectedPostcard.stampUrl} 
-                          alt="Stamp" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-0.5 right-0.5 bg-accent-coral/90 text-[6px] text-white font-mono px-1 font-black rounded-xs">
-                          250 f
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Sender Profile Photo & Official Seal */}
-                    <div className="text-center w-full space-y-2 mt-2">
-                      <div className="relative inline-block">
-                        <img 
-                          src={selectedPostcard.senderPhoto} 
-                          alt={selectedPostcard.senderName} 
-                          className="w-24 h-24 rounded-full object-cover mx-auto border-3 border-white shadow-lg"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span className="absolute bottom-1 right-2 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-md">
-                          <ShieldCheck className="w-4 h-4" />
+                    {/* Left Column of Postcard: The Message */}
+                    <div className="flex-1 space-y-5 relative z-10">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-mono font-bold text-accent-pink uppercase tracking-wider block">
+                          ✉️ {txt('HALAL MARRIAGE INTENTION GREETING', 'ميثاق طلب التعارف الشرعي', 'پەیامی هاوسەرگیری حەڵاڵ')}
                         </span>
-                      </div>
-                      <div>
-                        <h4 className="text-base font-serif font-black text-warm-charcoal">{selectedPostcard.senderName}</h4>
-                        <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">
-                          {selectedPostcard.senderGender === 'female' ? txt('Bride Prospect', 'عروسة محتملة', 'بووکی ئامادەکراو') : txt('Groom Prospect', 'عريس محتمل', 'زاوای ئامادەکراو')}
+                        <h3 className="text-2xl font-serif font-black text-white tracking-tight">
+                          {txt('Letter of Proposal', 'رسالة الخطوبة والمودة', 'نامەی داواکاری')}
+                        </h3>
+                        <p className="text-[10px] text-stone-400 font-mono">
+                          {txt('Received on', 'تاريخ الاستلام', 'وەرگیرا لە')}: {formatDate(selectedPostcard.createdAt)}
                         </p>
                       </div>
+
+                      {/* Cyber style message text */}
+                      <div className="bg-slate-900 border border-purple-500/30 p-5 rounded-2xl shadow-inner text-stone-100 text-[13.5px] leading-relaxed font-serif italic relative">
+                        <div className="absolute top-2 left-2 text-purple-900/40 text-4xl select-none font-serif">“</div>
+                        <p className="relative z-10 pl-3">
+                          {locale === 'en' 
+                            ? selectedPostcard.messageEn 
+                            : locale === 'ckb' 
+                              ? selectedPostcard.messageCkb 
+                              : selectedPostcard.messageAr}
+                        </p>
+                      </div>
+
+                      {/* SENDER GENERAL INFO SUMMARY */}
+                      <div className="bg-slate-900/60 p-4 rounded-2xl border border-purple-500/20 space-y-3 text-xs">
+                        <h4 className="font-bold text-accent-pink uppercase tracking-wider text-[10px] font-mono border-b border-purple-500/20 pb-1.5">
+                          👤 {txt('About the Sender', 'تفاصيل عن مرسل البطاقة', 'دەربارەی ناردکار')}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3 font-medium text-stone-300">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-accent-pink shrink-0" />
+                            <span><strong>{txt('Age', 'العمر', 'تەمەن')}:</strong> {selectedPostcard.senderAge} {txt('Years Old', 'سنة', 'ساڵ')}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="w-4 h-4 text-accent-pink shrink-0" />
+                            <span className="truncate"><strong>{txt('Profession', 'المهنة', 'پیشە')}:</strong> {selectedPostcard.senderProfession}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-accent-pink shrink-0" />
+                            <span className="truncate"><strong>{txt('Lives in', 'مكان الإقامة', 'شوێنی ژیان')}:</strong> {selectedPostcard.senderDistrict}, {selectedPostcard.senderGovernorate}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 text-accent-pink shrink-0" />
+                            <span className="truncate"><strong>{txt('Education', 'التعليم', 'خوێندن')}:</strong> {selectedPostcard.senderEducation}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* CONTACT INFORMATION PANEL - Reveals ONLY if accepted! */}
-                    <div className="w-full mt-4">
-                      {selectedPostcard.status === 'accepted' ? (
-                        <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-2xl text-xs space-y-2 text-[#1B5E20] animate-fade-in font-semibold">
-                          <p className="font-bold text-[9px] font-mono text-emerald-800 uppercase tracking-widest border-b border-emerald-500/20 pb-1">
-                            🔓 {txt('CONTACT UNLOCKED', 'بيانات الاتصال مكشوفة', 'پەیوەندی ئاشکرا بوو')}
-                          </p>
-                          <div className="flex items-center gap-2 truncate">
-                            <Mail className="w-3.5 h-3.5 text-[#1B5E20]" />
-                            <span>{selectedPostcard.senderEmail}</span>
-                          </div>
-                          <div className="flex items-center gap-2 truncate">
-                            <Phone className="w-3.5 h-3.5 text-[#1B5E20]" />
-                            <span>{selectedPostcard.senderPhone}</span>
-                          </div>
-                        </div>
-                      ) : selectedPostcard.status === 'declined' ? (
-                        <div className="bg-stone-100 border border-stone-200 p-3 rounded-2xl text-xs text-center text-stone-500 font-semibold font-mono">
-                          🚫 {txt('PROPOSAL DECLINED', 'تم الاعتذار عن الطلب', 'داواکاری ڕەتکرایەوە')}
-                        </div>
-                      ) : (
-                        <div className="bg-accent-coral/10 border border-accent-coral/20 p-3.5 rounded-2xl text-xs text-center text-[#9c301c] font-semibold space-y-1">
-                          <p className="font-bold text-[9px] font-mono uppercase tracking-wider">
-                            🔒 {txt('CONTACT LOCKED', 'بيانات الاتصال محمية', 'پەیوەندی پارێزراوە')}
-                          </p>
-                          <p className="text-[10px] leading-relaxed text-stone-500 font-medium">
-                            {txt('Accept proposal below to reveal the email and phone number.', 'اقبل هذا الطلب لكشف البريد الإلكتروني ورقم الهاتف.', 'ئەم داواکارییە قبوڵ بکە بۆ ئاشکراکردنی ئیمەیڵ و مۆبایل.')}
-                          </p>
-                        </div>
-                      )}
+                    {/* Vertical Postcard Split Line */}
+                    <div className="hidden md:block w-px bg-dashed bg-purple-500/20 h-auto my-4 self-stretch relative">
+                      <span className="absolute top-1/2 -translate-y-1/2 -left-1 text-[9px] text-accent-pink bg-slate-950 px-1 font-mono">POST</span>
                     </div>
 
+                    {/* Right Column of Postcard: Stamp & Address */}
+                    <div className="w-full md:w-56 shrink-0 flex flex-col justify-between items-center md:items-end gap-6 relative z-10">
+                      
+                      {/* Stamp & Postmark */}
+                      <div className="flex justify-between items-start w-full gap-4">
+                        {/* Postmark Circle */}
+                        <div className="w-16 h-16 rounded-full border-2 border-dashed border-accent-pink/40 flex items-center justify-center text-center text-[8px] font-mono font-bold text-accent-pink/60 rotate-12">
+                          <div>
+                            <div>ZAWAJ</div>
+                            <div className="border-y border-accent-pink/30 my-0.5">IRAQ</div>
+                            <div>POSTAL</div>
+                          </div>
+                        </div>
+
+                        {/* Stamp image with cyber border */}
+                        <div className="w-14 h-16 border-2 border-accent-pink p-0.5 bg-slate-900 shadow-md rotate-[-6deg] relative overflow-hidden">
+                          <img 
+                            src={selectedPostcard.stampUrl} 
+                            alt="Stamp" 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-0.5 right-0.5 bg-accent-pink text-[6px] text-white font-mono px-1 font-black rounded-xs">
+                            250 f
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sender Profile Photo & Official Seal */}
+                      <div className="text-center w-full space-y-2 mt-2">
+                        <div className="relative inline-block">
+                          <img 
+                            src={selectedPostcard.senderPhoto} 
+                            alt={selectedPostcard.senderName} 
+                            className="w-24 h-24 rounded-full object-cover mx-auto border-3 border-accent-pink shadow-[0_0_15px_rgba(255,20,147,0.4)]"
+                            referrerPolicy="no-referrer"
+                          />
+                          <span className="absolute bottom-1 right-2 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-md">
+                            <ShieldCheck className="w-4 h-4" />
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="text-base font-serif font-black text-white">{selectedPostcard.senderName}</h4>
+                          <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+                            {selectedPostcard.senderGender === 'female' ? txt('Bride Prospect', 'عروسة محتملة', 'بووکی ئامادەکراو') : txt('Groom Prospect', 'عريس محتمل', 'زاوای ئامادەکراو')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* CONTACT INFORMATION PANEL - Reveals ONLY if accepted! */}
+                      <div className="w-full mt-4">
+                        {selectedPostcard.status === 'accepted' ? (
+                          <div className="bg-emerald-950/50 border border-emerald-500/30 p-3 rounded-2xl text-xs space-y-2 text-emerald-300 animate-fade-in font-semibold">
+                            <p className="font-bold text-[9px] font-mono text-emerald-400 uppercase tracking-widest border-b border-emerald-500/20 pb-1">
+                              🔓 {txt('CONTACT UNLOCKED', 'بيانات الاتصال مكشوفة', 'پەیوەندی ئاشکرا بوو')}
+                            </p>
+                            <div className="flex items-center gap-2 truncate">
+                              <Mail className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>{selectedPostcard.senderEmail}</span>
+                            </div>
+                            <div className="flex items-center gap-2 truncate">
+                              <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>{selectedPostcard.senderPhone}</span>
+                            </div>
+                          </div>
+                        ) : selectedPostcard.status === 'declined' ? (
+                          <div className="bg-slate-900 border border-stone-800 p-3 rounded-2xl text-xs text-center text-stone-400 font-semibold font-mono">
+                            🚫 {txt('PROPOSAL DECLINED', 'تم الاعتذار عن الطلب', 'داواکاری ڕەتکرایەوە')}
+                          </div>
+                        ) : (
+                          <div className="bg-[#9333EA]/10 border border-[#9333EA]/20 p-3.5 rounded-2xl text-xs text-center text-fuchsia-300 font-semibold space-y-1">
+                            <p className="font-bold text-[9px] font-mono uppercase tracking-wider text-accent-pink">
+                              🔒 {txt('CONTACT LOCKED', 'بيانات الاتصال محمية', 'پەیوەندی پارێزراوە')}
+                            </p>
+                            <p className="text-[10px] leading-relaxed text-stone-400 font-medium">
+                              {txt('Accept proposal below to reveal the email and phone number.', 'اقبل هذا الطلب لكشف البريد الإلكتروني ورقم الهاتف.', 'ئەم داواکارییە قبوڵ بکە بۆ ئاشکراکردنی ئیمەیڵ و مۆبایل.')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
                   </div>
                 </div>
 

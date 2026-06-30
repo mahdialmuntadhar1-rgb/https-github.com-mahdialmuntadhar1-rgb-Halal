@@ -196,7 +196,7 @@ export default function Header({
                       title="Privacy Settings"
                       className={`p-1.5 rounded-lg transition-all ${
                         currentTab === 'privacy' 
-                          ? 'bg-[#FF7F50] text-white shadow-sm scale-102' 
+                          ? 'bg-[#9333EA] text-white shadow-sm scale-102' 
                           : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
                       }`}
                     >
@@ -218,9 +218,9 @@ export default function Header({
 
                 <button
                   onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
-                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#FF7F50]/10 text-accent-coral hover:bg-[#FF7F50]/20 flex items-center gap-1"
+                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#9333EA]/10 text-accent-coral hover:bg-[#9333EA]/20 flex items-center gap-1"
                 >
-                  <User className="w-3.5 h-3.5 text-[#FF7F50]" />
+                  <User className="w-3.5 h-3.5 text-[#9333EA]" />
                   <span className="hidden xs:inline">
                     {t.editDetails}
                   </span>
@@ -365,7 +365,7 @@ export default function Header({
               <button
                 onClick={() => setTab('privacy')}
                 className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'privacy' ? 'bg-[#FF7F50] text-white' : 'text-[#4A443F]/80'
+                  currentTab === 'privacy' ? 'bg-[#9333EA] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
                 {txt('Privacy', 'السرية', 'نهێنیپارێزی')}

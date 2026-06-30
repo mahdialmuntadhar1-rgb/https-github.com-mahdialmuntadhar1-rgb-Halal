@@ -90,7 +90,7 @@ export default function MatchExplorerScreen({
   const userGov = userGovernorate || 'Baghdad';
 
   const [filters, setFilters] = useState<SearchFilters>(() => {
-    const savedGov = localStorage.getItem('home_filter_governorate') || 'all';
+    // Bring all matches by default as requested to ensure navigation brings all matches
     const savedMinAge = localStorage.getItem('home_filter_minAge');
     const savedMaxAge = localStorage.getItem('home_filter_maxAge');
     const savedGender = localStorage.getItem('home_filter_gender');
@@ -101,14 +101,14 @@ export default function MatchExplorerScreen({
     localStorage.removeItem('home_filter_maxAge');
     localStorage.removeItem('home_filter_gender');
 
-    const mappedGov = savedGov === 'all' ? 'All Iraq' : savedGov;
+    const mappedGov = 'All Iraq'; // Force all matches across Iraq initially
     const initialGender = (savedGender as 'male' | 'female' | 'all') || (userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : 'all');
 
     return {
       gender: initialGender,
       minAge: savedMinAge ? Number(savedMinAge) : 18,
       maxAge: savedMaxAge ? Number(savedMaxAge) : 55,
-      locationSearchPreference: mappedGov === 'All Iraq' ? 'Across all Iraq' : 'Within governorate',
+      locationSearchPreference: 'Across all Iraq',
       governorate: mappedGov,
       city: 'All Cities',
       religion: 'all',
@@ -351,6 +351,40 @@ export default function MatchExplorerScreen({
           userProfile={userProfile}
           onUpdateProfile={onUpdateUserProfile}
         />
+      )}
+
+      {/* Governorate Selector Reminder Notice */}
+      {filters.governorate === 'All Iraq' && (
+        <div className="bg-gradient-to-r from-purple-500/10 via-accent-pink/5 to-transparent border border-purple-500/25 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-start shadow-[0_0_15px_rgba(147,51,234,0.1)] animate-fade-in" id="governorate-narrow-reminder">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0 border border-purple-500/20 text-accent-pink text-lg">
+              📍
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
+                {txt(
+                  "All Matches Loaded Across Iraq",
+                  "تم عرض كافة العروض في جميع محافظات العراق",
+                  "هەموو هاوتاکان لە سەرتاسەری عێراق نیشاندراون"
+                )}
+              </p>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                {txt(
+                  "Showing all 19 governorates. We recommend using the governorate selector dropdown in the filters panel to find candidates closest to you.",
+                  "يتم حالياً عرض كافة المحافظات الـ 19. ننصحك باستخدام منتقي المحافظات في لوحة التصفية بالأعلى لتضييق البحث حسب منطقتك.",
+                  "ئێستا هەموو ١٩ پارێزگاکە پیشان دەدرێن. پێشنیار دەکەین فلتەری پارێزگاکان لە سەرەوە بەکاربهێنیت بۆ دیاریکردنی ناوچەکەت."
+                )}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowAdvancedFilters(true)}
+            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-purple-600 to-accent-pink hover:opacity-95 text-white font-black text-xs rounded-xl transition shrink-0 shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <span>⚙️</span>
+            <span>{txt("Select Governorate", "تحديد المحافظة", "دیاریکردنی پارێزگا")}</span>
+          </button>
+        </div>
       )}
 
 
