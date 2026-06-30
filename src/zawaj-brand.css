@@ -6,45 +6,51 @@
   --zawaj-bg: #FFFFFF;
   --zawaj-bg-soft: #F8F5FF;
   --zawaj-text: #1E1E2F;
-  --zawaj-muted: #6B6478;
-  --zawaj-gradient: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 60%, #C77DFF 100%);
-  --zawaj-glow: 0 0 22px rgba(255, 79, 216, 0.35), 0 0 38px rgba(157, 77, 255, 0.28);
-  --zawaj-shadow: 0 18px 45px rgba(157, 77, 255, 0.16);
+  --zawaj-muted: #5F5870;
+  --zawaj-gradient: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 58%, #C77DFF 100%);
+  --zawaj-gradient-strong: linear-gradient(135deg, #FF2ED1 0%, #8B2DFF 55%, #B95CFF 100%);
+  --zawaj-glow: 0 0 28px rgba(255, 79, 216, 0.55), 0 0 52px rgba(157, 77, 255, 0.44);
+  --zawaj-shadow: 0 18px 48px rgba(157, 77, 255, 0.22);
 }
 
+/* Background */
 html,
 body,
 #root {
   background:
-    radial-gradient(circle at top left, rgba(255, 79, 216, 0.14), transparent 34%),
-    radial-gradient(circle at top right, rgba(157, 77, 255, 0.14), transparent 36%),
-    var(--zawaj-bg) !important;
+    radial-gradient(circle at top left, rgba(255, 79, 216, 0.22), transparent 34%),
+    radial-gradient(circle at top right, rgba(157, 77, 255, 0.22), transparent 36%),
+    linear-gradient(180deg, #FFFFFF 0%, #F8F5FF 100%) !important;
   color: var(--zawaj-text) !important;
 }
 
+/* Header */
 header,
 nav,
 .app-header,
 .site-header,
 .navbar {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-bottom: 1px solid rgba(157, 77, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid rgba(157, 77, 255, 0.22) !important;
   backdrop-filter: blur(16px);
 }
 
+/* Hero and main sections */
 .hero,
 .hero-section,
 .home-hero,
 .banner,
 .landing-hero {
   background:
-    radial-gradient(circle at 20% 20%, rgba(255, 79, 216, 0.24), transparent 36%),
-    radial-gradient(circle at 80% 15%, rgba(157, 77, 255, 0.24), transparent 38%),
+    radial-gradient(circle at 20% 20%, rgba(255, 79, 216, 0.32), transparent 36%),
+    radial-gradient(circle at 80% 15%, rgba(157, 77, 255, 0.34), transparent 38%),
     linear-gradient(135deg, #FFFFFF, #F8F5FF) !important;
+  border: 1px solid rgba(157, 77, 255, 0.20) !important;
   border-radius: 28px !important;
   box-shadow: var(--zawaj-shadow) !important;
 }
 
+/* Text */
 h1,
 h2,
 h3,
@@ -57,20 +63,22 @@ h3,
 .gradient-text,
 .brand-gradient,
 .highlight-text {
-  background: var(--zawaj-gradient) !important;
+  background: var(--zawaj-gradient-strong) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   color: transparent !important;
 }
 
+/* Normal buttons: rounded, not circle */
 button,
 .btn,
 .button,
 a[class*="btn"],
 a[class*="button"] {
-  border-radius: 999px !important;
+  border-radius: 16px !important;
 }
 
+/* Main CTA buttons */
 button[type="submit"],
 .btn-primary,
 .primary-button,
@@ -83,13 +91,14 @@ a[href*="signup"],
 a[href*="profile"],
 a[href*="match"],
 a[href*="start"] {
-  background: var(--zawaj-gradient) !important;
+  background: var(--zawaj-gradient-strong) !important;
   color: #FFFFFF !important;
   border: none !important;
   box-shadow: var(--zawaj-glow) !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
 }
 
+/* Cards */
 .card,
 .profile-card,
 .match-card,
@@ -98,20 +107,83 @@ a[href*="start"] {
 .listing-card {
   background:
     linear-gradient(#FFFFFF, #FFFFFF) padding-box,
-    var(--zawaj-gradient) border-box !important;
+    var(--zawaj-gradient-strong) border-box !important;
   border: 1px solid transparent !important;
-  border-radius: 24px !important;
-  box-shadow: 0 14px 38px rgba(157, 77, 255, 0.13) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 16px 42px rgba(157, 77, 255, 0.18) !important;
 }
 
+/* IMPORTANT: restore man/woman/groom/bride selection to square cards */
+.gender-card,
+.role-card,
+.persona-card,
+.selection-card,
+.select-card,
+.option-card,
+.choice-card,
+[class*="gender"],
+[class*="Gender"],
+[class*="role"],
+[class*="Role"],
+[class*="bride"],
+[class*="Bride"],
+[class*="groom"],
+[class*="Groom"],
+[class*="woman"],
+[class*="Woman"],
+[class*="man"],
+[class*="Man"] {
+  border-radius: 18px !important;
+}
+
+/* If the man/woman cards are buttons, keep them square style */
+button[class*="gender"],
+button[class*="Gender"],
+button[class*="role"],
+button[class*="Role"],
+button[class*="bride"],
+button[class*="Bride"],
+button[class*="groom"],
+button[class*="Groom"],
+button[class*="woman"],
+button[class*="Woman"],
+button[class*="man"],
+button[class*="Man"] {
+  border-radius: 18px !important;
+  aspect-ratio: 1 / 1;
+  min-height: 130px;
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    var(--zawaj-gradient-strong) border-box !important;
+  border: 2px solid transparent !important;
+  box-shadow: 0 14px 36px rgba(157, 77, 255, 0.20) !important;
+}
+
+/* Selected gender/role card */
+.gender-card.active,
+.role-card.active,
+.selection-card.active,
+.option-card.active,
+.choice-card.active,
+[class*="selected"],
+[class*="Selected"],
+[aria-pressed="true"] {
+  background:
+    linear-gradient(135deg, rgba(255, 79, 216, 0.18), rgba(157, 77, 255, 0.18)) padding-box,
+    var(--zawaj-gradient-strong) border-box !important;
+  border: 2px solid transparent !important;
+  box-shadow: var(--zawaj-glow) !important;
+}
+
+/* Search/filter/forms */
 .search-box,
 .search-panel,
 .filters,
 .filter-panel {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(157, 77, 255, 0.18) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 12px 34px rgba(255, 79, 216, 0.10) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(157, 77, 255, 0.22) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 14px 36px rgba(255, 79, 216, 0.14) !important;
   backdrop-filter: blur(14px);
 }
 
@@ -120,8 +192,8 @@ select,
 textarea {
   background: #FFFFFF !important;
   color: var(--zawaj-text) !important;
-  border: 1px solid rgba(157, 77, 255, 0.28) !important;
-  border-radius: 16px !important;
+  border: 1px solid rgba(157, 77, 255, 0.34) !important;
+  border-radius: 14px !important;
 }
 
 input:focus,
@@ -129,20 +201,22 @@ select:focus,
 textarea:focus {
   outline: none !important;
   border-color: var(--zawaj-purple) !important;
-  box-shadow: 0 0 0 4px rgba(157, 77, 255, 0.15) !important;
+  box-shadow: 0 0 0 4px rgba(157, 77, 255, 0.18) !important;
 }
 
+/* Badges */
 .badge,
 .tag,
 .chip,
 .status-badge {
-  background: linear-gradient(135deg, rgba(255, 79, 216, 0.15), rgba(157, 77, 255, 0.15)) !important;
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.20), rgba(157, 77, 255, 0.20)) !important;
   color: var(--zawaj-purple) !important;
-  border: 1px solid rgba(157, 77, 255, 0.24) !important;
+  border: 1px solid rgba(157, 77, 255, 0.32) !important;
   border-radius: 999px !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
 }
 
+/* Links */
 a {
   color: var(--zawaj-purple);
 }
@@ -151,21 +225,24 @@ a:hover {
   color: var(--zawaj-pink);
 }
 
+/* Bottom nav */
 .bottom-nav,
 .mobile-nav,
 .tabbar {
-  background: rgba(255, 255, 255, 0.94) !important;
-  border-top: 1px solid rgba(157, 77, 255, 0.18) !important;
-  box-shadow: 0 -10px 28px rgba(157, 77, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-top: 1px solid rgba(157, 77, 255, 0.22) !important;
+  box-shadow: 0 -10px 28px rgba(157, 77, 255, 0.13) !important;
 }
 
+/* Empty states */
 .empty-state,
 .no-results {
-  background: linear-gradient(135deg, rgba(255, 79, 216, 0.12), rgba(157, 77, 255, 0.12)) !important;
-  border: 1px dashed rgba(157, 77, 255, 0.32) !important;
-  border-radius: 24px !important;
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.16), rgba(157, 77, 255, 0.16)) !important;
+  border: 1px dashed rgba(157, 77, 255, 0.38) !important;
+  border-radius: 22px !important;
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   .hero,
   .hero-section,
@@ -182,5 +259,21 @@ a:hover {
   .btn,
   .button {
     min-height: 44px;
+  }
+
+  button[class*="gender"],
+  button[class*="Gender"],
+  button[class*="role"],
+  button[class*="Role"],
+  button[class*="bride"],
+  button[class*="Bride"],
+  button[class*="groom"],
+  button[class*="Groom"],
+  button[class*="woman"],
+  button[class*="Woman"],
+  button[class*="man"],
+  button[class*="Man"] {
+    min-height: 115px;
+    border-radius: 16px !important;
   }
 }
