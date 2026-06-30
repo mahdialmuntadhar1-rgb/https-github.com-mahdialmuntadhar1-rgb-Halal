@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -213,7 +213,7 @@ export default function App() {
 
       triggerToast(
         locale === 'en'
-          ? `✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`
+          ? `✨ Congratulations! Your respectful introduction is confirmed. Compatibility pool updated!`
           : `✨ مبارك! تم توثيق حسابك وربطه ببيانات الشركاء المتوافقين في العراق!`
       );
       setTab('explore');
@@ -534,7 +534,7 @@ export default function App() {
             <div className="md:col-span-4 space-y-3">
               <h5 className="text-white text-xs font-bold uppercase tracking-widest font-mono">App Mission</h5>
               <p className="text-xs text-[#C3BFB9]/80 leading-relaxed font-normal">
-                HALAL is designed for serious people seeking marriage with privacy, dignity, and mutual respect.
+                Zawaj Al Araqi is designed for serious people seeking marriage with privacy, dignity, and mutual respect.
               </p>
             </div>
 
@@ -656,3 +656,5 @@ export default function App() {
     </div>
   );
 }
+
+

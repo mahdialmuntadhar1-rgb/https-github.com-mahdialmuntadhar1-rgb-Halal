@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { AppLanguage, UserProfile } from '../types';
 import ProfileCard from '../components/ProfileCard';
 import ProfileEditor from '../components/ProfileEditor';
@@ -97,7 +97,7 @@ export default function ProfilePreviewScreen({
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <p className="text-xs font-bold uppercase tracking-wider font-mono">
-            {locale === 'en' ? 'Halal Privacy Seal Active' : 'ميثاق الخصوصية الشرعي مفعّل'}
+            {locale === 'en' ? 'Privacy Seal Active' : 'ميثاق الخصوصية الشرعي مفعّل'}
           </p>
           <p className="text-xs font-medium leading-relaxed">
             {locale === 'en'
@@ -110,3 +110,4 @@ export default function ProfilePreviewScreen({
     </div>
   );
 }
+

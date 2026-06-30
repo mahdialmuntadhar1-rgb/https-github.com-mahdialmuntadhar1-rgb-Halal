@@ -6,6 +6,7 @@ import HowItWorks from '../components/HowItWorks';
 import PhotoPrivacyModule from '../components/PhotoPrivacyModule';
 import TrustSafety from '../components/TrustSafety';
 import MarriageCafe from '../components/MarriageCafe';
+import MainTabs from '../components/MainTabs';
 import { INITIAL_MATCHES } from '../data/matches';
 import { 
   Check, 
@@ -95,6 +96,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
   const [selectedGov, setSelectedGov] = useState<string>('Baghdad');
   const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
   const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
+  const [mainTab, setMainTab] = useState<'explore' | 'cafe'>('explore');
   
   // Local toast notification system
   const [localToast, setLocalToast] = useState<string | null>(null);
@@ -196,17 +198,27 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         userProfileName={userProfileName}
       />
 
-      {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
+      {/* MAIN TABS - Explore Partners / Marriage Cafe */}
+      <MainTabs 
+        activeTab={mainTab}
+        onTabChange={setMainTab}
+        locale={locale}
+      />
+
+      {/* TAB CONTENT */}
+      {mainTab === 'explore' ? (
+        <>
+          {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
       <section className="py-4" id="governorate-matrimonial-portal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-neon-pink/10 text-neon-pink px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
               <MapPin className="w-3.5 h-3.5" />
               <span>{txt("Governorate Matrimonial Portal", "بوابة المحافظات العراقية للزواج الحلال", "دەروازەی هاوسەرگیری پارێزگاکان")}</span>
             </span>
-            <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-warm-charcoal tracking-tight">
+            <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-deep-charcoal tracking-tight">
               {txt("Find Serious Candidates by Governorate", "ابحث عن شريك العمر حسب المحافظة", "هاوبەشی گونجاو بەپێی پارێزگا بدۆزەوە")}
             </h3>
             <p className="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">
@@ -219,14 +231,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
           </div>
 
           {/* PORTAL INTERACTION BOX */}
-          <div className="bg-white/60 backdrop-blur-md border border-[#E8DCC4] rounded-[2.5rem] p-6 sm:p-8 shadow-xl space-y-6 text-start">
-            
+          <div className="bg-white/60 backdrop-blur-md border border-cool-gray rounded-[2.5rem] p-6 sm:p-8 shadow-xl space-y-6 text-start">
+
             {/* Controls row */}
-            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-stone-100 pb-6">
-              
+            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-cool-gray pb-6">
+
               {/* Dropdown column */}
               <div className="space-y-2 flex-grow max-w-md">
-                <label className="block text-[11px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                <label className="block text-[11px] font-mono font-extrabold text-neon-purple uppercase tracking-wider">
                   📍 {txt("Select Governorate", "المحافظة المطلوبة", "پارێزگا دیاری بکە")}
                 </label>
                 <div className="relative">
@@ -236,7 +248,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       setSelectedGov(e.target.value);
                       showToast(txt(`Displaying candidates from ${e.target.value}`, `عرض المقبلين على الزواج من محافظة ${getGovDisplayName(e.target.value)}`, `پیشاندانی کاندیدەکانی پارێزگای ${getGovDisplayName(e.target.value)}`));
                     }}
-                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E6DCC3] focus:border-[#40798C] focus:ring-1 focus:ring-[#40798C] text-sm font-black text-warm-charcoal outline-none cursor-pointer shadow-xs transition"
+                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-soft-mist border border-cool-gray focus:border-neon-purple focus:ring-1 focus:ring-neon-purple text-sm font-black text-deep-charcoal outline-none cursor-pointer shadow-xs transition"
                   >
                     {GOVERNORATE_OPTIONS.map((gov) => (
                       <option key={gov.id} value={gov.id}>
@@ -244,13 +256,13 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       </option>
                     ))}
                   </select>
-                  <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#40798C]" />
+                  <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neon-purple" />
                 </div>
               </div>
 
               {/* Category Pills */}
               <div className="space-y-2 flex-grow-0">
-                <label className="block text-[11px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                <label className="block text-[11px] font-mono font-extrabold text-neon-purple uppercase tracking-wider">
                   🎯 {txt("Category alignment", "الفئة والتصنيف", "پۆلێنکردن")}
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -265,8 +277,8 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       onClick={() => setActiveCategory(cat.id as any)}
                       className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                         activeCategory === cat.id
-                          ? 'bg-[#40798C] border-[#40798C] text-white shadow-md shadow-[#40798C]/20'
-                          : 'bg-[#FAF8F5] border-[#E6DCC3] hover:bg-stone-50 text-stone-500'
+                          ? 'bg-gradient-to-r from-neon-pink to-neon-purple border-neon-pink text-white shadow-md shadow-neon-pink/20'
+                          : 'bg-soft-mist border-cool-gray hover:bg-soft-lavender text-dark-gray'
                       }`}
                     >
                       {txt(cat.labelEn, cat.labelAr, cat.labelCkb)}
@@ -295,14 +307,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 </div>
                 
                 {/* System-selected Landmark badge */}
-                <div className="flex items-center gap-2 bg-[#FAF8F5] border border-[#E6DCC3]/80 px-3 py-1.5 rounded-xl shadow-xs self-stretch sm:self-auto justify-between sm:justify-start">
+                <div className="flex items-center gap-2 bg-soft-mist border border-cool-gray/80 px-3 py-1.5 rounded-xl shadow-xs self-stretch sm:self-auto justify-between sm:justify-start">
                   <div className="flex items-center gap-1.5 text-start">
                     <span className="text-sm shrink-0">{GOVERNORATE_LANDMARKS[selectedGov]?.icon || '📍'}</span>
                     <div>
-                      <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider leading-none mb-0.5">
+                      <span className="block text-[8px] font-mono font-extrabold text-neon-purple uppercase tracking-wider leading-none mb-0.5">
                         📍 {txt("System Location Spotlight", "معلم المحافظة المختار", "شوێنەواری پارێزگا")}
                       </span>
-                      <span className="text-[10.5px] font-black text-[#40798C] leading-none">
+                      <span className="text-[10.5px] font-black text-electric-violet leading-none">
                         {GOVERNORATE_LANDMARKS[selectedGov]?.[locale] || GOVERNORATE_LANDMARKS[selectedGov]?.ar || GOVERNORATE_LANDMARKS[selectedGov]?.en}
                       </span>
                     </div>
@@ -315,33 +327,33 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent snap-x">
                   {INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase()).map((m) => {
                     const isFemale = m.gender === 'female';
-                    
+
                     // Get a custom quick intention summary based on their database text
                     const briefQuote = m.intention ? (m.intention.length > 55 ? m.intention.substring(0, 52) + '...' : m.intention) : txt("Seeking serious marriage built on trust.", "البحث عن زواج مستقر مبني على التفاهم والمحبة.", "هیواداری دروستکردنی خێزانێکی بەختەوەر.");
 
                     return (
-                      <div 
+                      <div
                         key={`story-${m.id}`}
                         onClick={() => setSelectedStory(m)}
-                        className="flex-shrink-0 w-32 h-44 bg-[#FCFBF9] border border-[#E6DCC3] hover:border-accent-coral rounded-2xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md hover:shadow-accent-coral/5 transition-all duration-300 transform hover:-translate-y-0.5 snap-start text-start relative overflow-hidden group select-none"
+                        className="flex-shrink-0 w-32 h-44 bg-pure-white border border-cool-gray hover:border-neon-pink rounded-2xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md hover:shadow-neon-pink/10 transition-all duration-300 transform hover:-translate-y-0.5 snap-start text-start relative overflow-hidden group select-none"
                       >
                         {/* Story progress indicator bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-coral to-accent-pink opacity-90 group-hover:h-1.5 transition-all" />
-                        
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-neon-pink to-neon-purple opacity-90 group-hover:h-1.5 transition-all" />
+
                         {/* Profile ring & Age */}
                         <div className="flex items-center justify-between mt-1">
                           <div className="relative">
-                            <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-accent-coral via-accent-pink to-[#40798C]">
+                            <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-neon-pink via-neon-purple to-electric-violet">
                               <div className="w-full h-full rounded-full overflow-hidden border border-white bg-stone-100 flex items-center justify-center">
                                 {isFemale ? (
-                                  <div className="w-full h-full flex items-center justify-center bg-accent-pink/10">
-                                    <span className="text-accent-pink font-serif font-black text-xs">{m.name.charAt(0)}</span>
+                                  <div className="w-full h-full flex items-center justify-center bg-light-pink">
+                                    <span className="text-neon-pink font-serif font-black text-xs">{m.name.charAt(0)}</span>
                                   </div>
                                 ) : (
-                                  <img 
-                                    src={m.avatarUrl} 
-                                    alt={m.name} 
-                                    className="w-full h-full object-cover grayscale-[10%]" 
+                                  <img
+                                    src={m.avatarUrl}
+                                    alt={m.name}
+                                    className="w-full h-full object-cover grayscale-[10%]"
                                     referrerPolicy="no-referrer"
                                   />
                                 )}
@@ -349,24 +361,24 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                             </div>
                             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
                           </div>
-                          
-                          <span className="text-[9px] font-mono font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-md">
+
+                          <span className="text-[9px] font-mono font-bold text-medium-gray bg-soft-mist px-1.5 py-0.5 rounded-md">
                             {m.age}
                           </span>
                         </div>
 
                         {/* Content excerpt & Name */}
                         <div className="space-y-1">
-                          <p className="text-[11px] font-black text-warm-charcoal truncate">
+                          <p className="text-[11px] font-black text-deep-charcoal truncate">
                             {m.name}
                           </p>
-                          <p className="text-[9px] text-stone-500 font-semibold leading-tight line-clamp-3 group-hover:text-accent-coral transition-colors">
+                          <p className="text-[9px] text-dark-gray font-semibold leading-tight line-clamp-3 group-hover:text-neon-pink transition-colors">
                             "{briefQuote}"
                           </p>
                         </div>
 
                         {/* Small badge representing local identity */}
-                        <span className="text-[8.5px] font-black text-accent-coral bg-accent-coral/5 px-2 py-0.5 rounded-md inline-block truncate max-w-full">
+                        <span className="text-[8.5px] font-black text-neon-pink bg-neon-pink/5 px-2 py-0.5 rounded-md inline-block truncate max-w-full">
                           📍 {isEn ? selectedGov : isCkb ? getGovDisplayName(selectedGov) : getGovDisplayName(selectedGov)}
                         </span>
                       </div>
@@ -374,7 +386,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   })}
                 </div>
               ) : (
-                <div className="py-6 text-center text-xs font-semibold text-stone-400 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#E6DCC3]/80">
+                <div className="py-6 text-center text-xs font-semibold text-medium-gray bg-soft-mist rounded-2xl border border-dashed border-cool-gray/80">
                   {txt("No stories in this governorate yet.", "لا توجد قصص في هذه المحافظة حالياً.", "هیچ چیرۆکێک لەم پارێزگایەدا نییە تا ئێستا.")}
                 </div>
               )}
@@ -421,11 +433,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     <div
                       key={candidate.id}
                       onClick={() => handleProfileClick(candidate)}
-                      className="group cursor-pointer bg-[#FCFBF9] hover:bg-white border border-[#E6DCC3]/80 hover:border-accent-coral/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
+                      className="group cursor-pointer bg-pure-white hover:bg-warm-white border border-cool-gray hover:border-neon-pink/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:shadow-neon-pink/10 hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
                     >
                       <div className="space-y-3">
                         {/* Avatar photo with forced privacy constraint */}
-                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
+                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-soft-mist flex items-center justify-center">
                           {isFemale ? (
                             <>
                               {/* FROSTED BLUR FEMALE PORTRAIT - strictly private constraint */}
@@ -436,10 +448,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                                 referrerPolicy="no-referrer"
                               />
                               <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[6px] flex flex-col items-center justify-center text-center p-3">
-                                <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-accent-pink/30 shadow-md flex items-center justify-center text-accent-pink font-serif font-black text-sm">
+                                <div className="w-12 h-12 rounded-full bg-light-pink border border-neon-pink/30 shadow-md flex items-center justify-center text-neon-pink font-serif font-black text-sm">
                                   {candidate.name.charAt(0)}
                                 </div>
-                                <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
+                                <span className="mt-2.5 text-[9px] font-bold text-deep-charcoal bg-light-pink/90 border border-cool-gray px-2 py-1 rounded-full shadow-inner tracking-tight">
                                   🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
                                 </span>
                               </div>
@@ -459,7 +471,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                               </span>
                             </>
                           )}
-                          
+
                           {/* Top floating badges */}
                           <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
                             {candidate.verified && (
@@ -473,33 +485,33 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                         {/* Name & Basic details */}
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal group-hover:text-[#40798C] transition-colors flex items-center gap-1">
+                            <h4 className="font-serif font-black text-sm sm:text-base text-deep-charcoal group-hover:text-neon-purple transition-colors flex items-center gap-1">
                               <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
-                              <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
+                              <span className="text-xs text-dark-gray font-medium font-mono">({candidate.age})</span>
                             </h4>
-                            <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
+                            <span className="text-[10px] font-mono font-black text-electric-violet bg-electric-violet/10 px-2 py-0.5 rounded-md">
                               💖 {candidate.compatibilityScore}%
                             </span>
                           </div>
-                          
+
                           {/* Profession & Education */}
-                          <p className="text-[10.5px] font-extrabold text-stone-500 flex items-center gap-1 truncate">
-                            <GraduationCap className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
+                          <p className="text-[10.5px] font-extrabold text-dark-gray flex items-center gap-1 truncate">
+                            <GraduationCap className="w-3.5 h-3.5 text-electric-violet shrink-0" />
                             <span className="truncate">{candidate.profession}</span>
                           </p>
-                          <p className="text-[9.5px] text-stone-400 font-semibold truncate">
+                          <p className="text-[9.5px] text-medium-gray font-semibold truncate">
                             {candidate.education}
                           </p>
                         </div>
                       </div>
 
                       {/* Card Footer tags */}
-                      <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
+                      <div className="pt-2 border-t border-cool-gray flex items-center justify-between">
+                        <span className="text-[8.5px] font-bold text-medium-gray font-mono tracking-wider">
                           📍 {txt(candidate.city, candidate.city, candidate.city)}
                         </span>
-                        
-                        <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
+
+                        <span className="text-[9.5px] font-bold text-electric-violet group-hover:text-neon-pink flex items-center gap-0.5 font-sans">
                           <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
                           <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
                         </span>
@@ -510,16 +522,16 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 })}
               </div>
             ) : (
-              <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
-                <Users className="w-10 h-10 text-stone-300 mx-auto" />
-                <p className="text-xs font-bold text-stone-400">
+              <div className="py-12 text-center space-y-3 bg-soft-mist rounded-3xl border border-dashed border-cool-gray/80">
+                <Users className="w-10 h-10 text-medium-gray mx-auto" />
+                <p className="text-xs font-bold text-medium-gray">
                   {txt("No serious candidates match these categories in this governorate yet.", "لا يوجد عرسان أو عرائس يطابقون هذا التصنيف في هذه المحافظة حالياً.", "کاندیدێک بۆ ئەم جۆرە پۆلێنکردنە لەم پارێزگایەدا نەدۆزرایەوە.")}
                 </p>
               </div>
             )}
 
             {/* CTAs banner to enter search */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-100 text-xs text-stone-500 font-semibold">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-cool-gray text-xs text-dark-gray font-semibold">
               <p className="text-start leading-snug">
                 💍 {txt(
                   "To protect photos and prevent casual swipe culture, only mutual, serious matches with completed profiles can initiate chaperoned discussion.",
@@ -529,7 +541,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               </p>
               <button
                 onClick={onExploreMatches}
-                className="w-full sm:w-auto px-6 py-3 bg-[#40798C] hover:bg-[#316070] text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-[#40798C]/10 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-neon-pink/10 cursor-pointer"
               >
                 {txt("Explore Compatibility Pool", "استكشاف مصفوفة التوافق الكاملة", "گەڕان بەدوای هاوشێوەکاندا")}
               </button>
@@ -539,18 +551,27 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
+        </>
+      ) : (
+        <MarriageCafe 
+          locale={locale} 
+          triggerToast={showToast} 
+          onNavigateToTab={setTab}
+        />
+      )}
 
-      {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) */}
-      <section className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2.5rem] py-10" id="featured-active-candidates">
+      {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) - Only show in explore tab */}
+      {mainTab === 'explore' && (
+      <section className="bg-ultra-light-lavender border border-cool-gray rounded-[2.5rem] py-10" id="featured-active-candidates">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-start">
             <div>
-              <h4 className="text-base sm:text-xl font-serif font-black text-warm-charcoal flex items-center gap-1.5">
-                <UserCheck className="w-5 h-5 text-accent-coral" />
+              <h4 className="text-base sm:text-xl font-serif font-black text-deep-charcoal flex items-center gap-1.5">
+                <UserCheck className="w-5 h-5 text-neon-pink" />
                 <span>{txt("Featured Active Candidates", "أعضاء متميزون ونشطون اليوم", "کاندیدە چالاکە دیارەکان")}</span>
               </h4>
-              <p className="text-[11px] sm:text-xs text-stone-500 font-medium leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-dark-gray font-medium leading-relaxed">
                 {txt(
                   "These active members are looking for lifelong marriage right now. Women's photos are automatically blurred, and men are authentic Iraqi applicants.",
                   "هؤلاء الأعضاء متصلون ويبحثون بنية جادة عن شريك الحياة حالياً. صور النساء محمية بالتمويه تلقائياً، والرجال متقدمون عراقيون أصيلون.",
@@ -558,7 +579,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 )}
               </p>
             </div>
-            <span className="text-[10px] bg-accent-coral/10 text-accent-coral px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
+            <span className="text-[10px] bg-neon-pink/10 text-neon-pink px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
               ⚡ {txt("Active Today", "نشطون اليوم", "ئەمڕۆ چالاک بوون")}
             </span>
           </div>
@@ -568,52 +589,52 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               const isFemale = candidate.gender === 'female';
 
               return (
-                <div 
+                <div
                   key={candidate.id}
                   onClick={() => handleProfileClick(candidate)}
-                  className="bg-white border border-stone-150 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 cursor-pointer hover:shadow-lg transition duration-200 relative group"
+                  className="bg-pure-white border border-cool-gray rounded-2xl p-4 flex flex-col items-center text-center space-y-3 cursor-pointer hover:shadow-lg hover:shadow-neon-pink/10 transition duration-200 relative group"
                 >
                   {/* Photo area */}
-                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-stone-100 shadow-md">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-soft-mist shadow-md">
                     {isFemale ? (
                       <>
-                        <img 
-                          src={candidate.avatarUrl} 
-                          alt={candidate.name} 
-                          className="w-full h-full object-cover blur-md scale-110 select-none pointer-events-none" 
+                        <img
+                          src={candidate.avatarUrl}
+                          alt={candidate.name}
+                          className="w-full h-full object-cover blur-md scale-110 select-none pointer-events-none"
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[4px] flex items-center justify-center">
-                          <span className="text-accent-pink font-serif font-black text-xs">{candidate.name.charAt(0)}</span>
+                          <span className="text-neon-pink font-serif font-black text-xs">{candidate.name.charAt(0)}</span>
                         </div>
                       </>
                     ) : (
-                      <img 
-                        src={candidate.avatarUrl} 
-                        alt={candidate.name} 
-                        className="w-full h-full object-cover grayscale-[10%]" 
+                      <img
+                        src={candidate.avatarUrl}
+                        alt={candidate.name}
+                        className="w-full h-full object-cover grayscale-[10%]"
                         referrerPolicy="no-referrer"
                       />
                     )}
-                    
+
                     {/* Live status dot */}
                     <span className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" title="Online now" />
                   </div>
 
                   <div className="space-y-1">
-                    <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal group-hover:text-accent-coral transition-colors flex items-center justify-center gap-1">
+                    <h5 className="font-serif font-black text-xs sm:text-sm text-deep-charcoal group-hover:text-neon-pink transition-colors flex items-center justify-center gap-1">
                       <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
-                      <span className="text-[10px] text-stone-400">({candidate.age})</span>
+                      <span className="text-[10px] text-medium-gray">({candidate.age})</span>
                     </h5>
-                    <p className="text-[9px] font-mono text-stone-500 bg-[#FAF7F2] border border-[#E8DCC4]/50 px-2 py-0.5 rounded-md inline-block">
+                    <p className="text-[9px] font-mono text-dark-gray bg-soft-mist border border-cool-gray/50 px-2 py-0.5 rounded-md inline-block">
                       📍 {txt(candidate.governorate, candidate.governorateAr, candidate.governorateCkb)}
                     </p>
-                    <p className="text-[10px] font-extrabold text-stone-400 truncate max-w-[140px] mx-auto">
+                    <p className="text-[10px] font-extrabold text-medium-gray truncate max-w-[140px] mx-auto">
                       {candidate.profession}
                     </p>
                   </div>
 
-                  <span className="text-[8.5px] uppercase font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[8.5px] uppercase font-mono font-extrabold text-electric-violet bg-electric-violet/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
                     ✨ {txt("Compatible", "متوافق", "هاوتا")}
                   </span>
                 </div>
@@ -623,13 +644,8 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
+      )}
 
-      {/* MARRIAGE CAFE & DAILY ENGAGEMENT POLL */}
-      <MarriageCafe 
-        locale={locale} 
-        triggerToast={showToast} 
-        onNavigateToTab={setTab}
-      />
 
       {/* HOW IT WORKS */}
       <HowItWorks locale={locale} />

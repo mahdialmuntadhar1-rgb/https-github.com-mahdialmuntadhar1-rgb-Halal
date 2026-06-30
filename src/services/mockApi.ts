@@ -1,4 +1,4 @@
-import { UserProfile, MatchProfile, Conversation, Message, PrivacySettings, PartnerPreferences, IntroductionRequest, HeroImage, CommunityPost, PostComment } from '../types';
+﻿import { UserProfile, MatchProfile, Conversation, Message, PrivacySettings, PartnerPreferences, IntroductionRequest, HeroImage, CommunityPost, PostComment } from '../types';
 import { INITIAL_MATCHES } from '../data/matches';
 
 // Default Admin Hero Images of elegant, clear wedding & marriage theme (no text overlays)
@@ -119,7 +119,7 @@ let mockCommunityPosts: CommunityPost[] = [
     category: 'daily',
     title: 'Daily Marriage Question',
     content: 'What is the most important quality in a future spouse? Compassion, reliability, religiosity, or family background?',
-    userName: 'HALAL Moderator',
+    userName: 'Zawaj Al Araqi Moderator',
     userGender: 'male',
     createdAt: '2026-06-23T00:00:00Z',
     likesCount: 45,
@@ -494,3 +494,4 @@ export const mockApi = {
     return deleted;
   }
 };
+

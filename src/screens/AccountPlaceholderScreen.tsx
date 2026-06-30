@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { AppLanguage } from '../types';
 import { 
   Shield, 
@@ -71,7 +71,7 @@ export default function AccountPlaceholderScreen({
 
   const handleUpgrade = () => {
     setTier('premium');
-    triggerToast(locale === 'en' ? '✨ Upgraded to Halal Premium successfully!' : '✨ تم الترقية إلى الحساب الممتاز بنجاح!');
+    triggerToast(locale === 'en' ? '✨ Upgraded to Zawaj Al Araqi Premium successfully!' : '✨ تم الترقية إلى الحساب الممتاز بنجاح!');
   };
 
   const pledges = [
@@ -368,7 +368,7 @@ export default function AccountPlaceholderScreen({
                   {locale === 'en' ? 'ACTIVE TIER LEVEL' : 'مستوى العضوية الحالي'}
                 </p>
                 <p className="text-lg font-black capitalize">
-                  {tier === 'premium' ? '👑 Halal Premium' : '😊 Standard Member'}
+                  {tier === 'premium' ? '👑 Zawaj Al Araqi Premium' : '😊 Standard Member'}
                 </p>
                 <p className="text-[10px] text-gray-300 font-semibold leading-relaxed">
                   {tier === 'premium' 
@@ -418,3 +418,4 @@ export default function AccountPlaceholderScreen({
     </div>
   );
 }
+

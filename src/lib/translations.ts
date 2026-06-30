@@ -1,5 +1,5 @@
-/**
- * Translation Dictionary for HALAL Matchmaking
+﻿/**
+ * Translation Dictionary for Zawaj Al Araqi
  * Languages: English (en), Arabic (ar), Kurdish Sorani (ckb)
  */
 
@@ -198,7 +198,7 @@ export interface Translations {
 export const TRANSLATIONS: Record<Language, Translations> = {
   en: {
     dir: 'ltr',
-    brand: 'زواج العراق',
+    brand: 'الزواج العراقي',
     slogan: 'Serious intentions • Respectful connections',
     tagline: 'MARRIAGE ONLY',
     marriageOnly: 'MARRIAGE ONLY',
@@ -225,7 +225,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     exploreMatchesBtn: 'Explore Sincere Matches Direct',
 
     howItWorksTitle: 'A Structured, Honorable Journey',
-    howItWorksSub: 'We avoid modern swiping loops. HALAL guides you through a clear, values-aligned marital process.',
+    howItWorksSub: 'We avoid modern swiping loops. Zawaj Al Araqi guides you through a clear, values-aligned marital process.',
     step1Title: '1. Establish Sincere Parameters',
     step1Desc: 'Formulate an authentic, detailed profile centering your lifecycle goals, family style, timeline, and photo privacy settings.',
     step2Title: '2. Values-Based Matching',
@@ -253,7 +253,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
 
     philTitle: 'Where Serious Intentions Find Dignified Partners',
     philSub: 'Our Philosophy',
-    philDesc: 'We developed HALAL because modern courtship apps treat humans like endless catalog items to be swiped. By starting with private expectations, respecting women\'s photo comfort default, and providing guided spiritual parameters, we pave a dignified route to stable family foundation.',
+    philDesc: 'We developed Zawaj Al Araqi because modern courtship apps treat humans like endless catalog items to be swiped. By starting with private expectations, respecting women\'s photo comfort default, and providing guided spiritual parameters, we pave a dignified route to stable family foundation.',
     philPoint1: 'Designed with cultural respect and local context',
     philPoint2: 'Zero Swiping. Matching strictly on values',
     philPoint3: 'Women completely command profile views',
@@ -331,8 +331,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
 
     footerDesc: 'Modern matchmaking designed for serious individuals who respect traditional principles, mutual growth, and lifelong marital commitment.',
     footerPledgeTitle: 'Dignity Pledge',
-    footerPledgeDesc: 'By interacting on HALAL, you agree to always be authentic, clear about your marriage timelines, polite in decline decisions, and committed to honorable dialogue.',
-    copyright: '© 2026 HALAL Matchmaking Inc. Designed for serious intentions.',
+    footerPledgeDesc: 'By interacting on Zawaj Al Araqi, you agree to always be authentic, clear about your marriage timelines, polite in decline decisions, and committed to honorable dialogue.',
+    copyright: '© 2026 Zawaj Al Araqi. Designed for serious marriage.',
     privacyPolicy: 'Privacy Policy',
     terms: 'Terms of Service',
     idVerify: 'ID Verification Guide',
@@ -377,7 +377,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ar: {
     dir: 'rtl',
-    brand: 'زواج العراق',
+    brand: 'الزواج العراقي',
     slogan: 'نوايا جادة • تواصل محترم',
     tagline: 'للزواج فقط',
     marriageOnly: 'للزواج فقط',
@@ -517,7 +517,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     idVerify: 'دليل توثيق الهوية والبطاقات',
 
     // Arabic additions
-    loginTitle: 'تسجيل الدخول إلى حساب زواج العراق',
+    loginTitle: 'تسجيل الدخول إلى حساب الزواج العراقي',
     loginSub: 'ضمان النوايا الصادقة والجدية وبناء بيت كريم ووقور.',
     emailLabel: 'البريد الإلكتروني',
     passwordLabel: 'كلمة المرور',
@@ -525,7 +525,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     signUpBtn: 'إنشاء حساب جاد وجديد',
     noAccount: 'ليس لديك حساب مسبق؟',
     haveAccount: 'لديك حساب بالفعل؟',
-    registerTitle: 'إنشاء حسابك في زواج العراق',
+    registerTitle: 'إنشاء حسابك في الزواج العراقي',
     registerSub: 'أنشئ حساباً لبدء البحث عن شركاء التوافق بخصوصية تامة وحماية معززة.',
     forgotPasswordLabel: 'نسيت كلمة المرور؟',
     forgotPasswordSub: 'أدخل بريدك الإلكتروني للحصول على رابط استعادة كلمة المرور.',
@@ -556,7 +556,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ckb: {
     dir: 'rtl',
-    brand: 'زواج العراق',
+    brand: 'الزواج العراقي',
     slogan: 'نیاز و مەبەستی جدی • پەیوەندی بەڕێزەوە',
     tagline: 'تەنها بۆ هاوسەرگیری',
     marriageOnly: 'تەنها بۆ هاوسەرگیری',
@@ -734,3 +734,11 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     browseMatchesBtn: 'گەڕان بەدوای هاوسەردا'
   }
 };
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AppLanguage } from '../types';
 import { 
   ShieldCheck, 
@@ -152,7 +152,7 @@ export default function TrustPrivacyScreen({ locale, onBackToOverview }: TrustPr
           </p>
           <p className="text-[11px] text-[#6B635B] font-medium leading-relaxed">
             {isEn && (
-              "This interface demonstrates the modular security and privacy design of the HALAL Matchmaking app. In compliance with high standards, we do not claim that users are verified for real, completely secure, screenshot-blocked, or that we prevent all abuse. All operations in the current version run as realistic frontend simulations awaiting server backends. Choose partner interactions with family consultation, coordination and safe traditional guidance."
+              "This interface demonstrates the modular security and privacy design of the Zawaj Al Araqi app. In compliance with high standards, we do not claim that users are verified for real, completely secure, screenshot-blocked, or that we prevent all abuse. All operations in the current version run as realistic frontend simulations awaiting server backends. Choose partner interactions with family consultation, coordination and safe traditional guidance."
             )}
             {isAr && (
               "هذه الواجهة تستعرض بناء الخصوصية والأمان في منصة حلال. نحن لا ندعي بأن الأعضاء موثقين بشكل نهائي أو حقيقي، أو أن النظام يمنع كافة التجاوزات أو لقطات الشاشة بنسبة كاملة. جميع الضوابط والتحققات الحالية مدمجة كبناء تفاعلي محلي وتجريبي قبل تفعيل قواعد البيانات الخارجية. تواصل دائماً مع شريكك بوجود الأهل والتنسيق المباشر مع عائلاتكم."
@@ -239,3 +239,4 @@ export default function TrustPrivacyScreen({ locale, onBackToOverview }: TrustPr
     </div>
   );
 }
+

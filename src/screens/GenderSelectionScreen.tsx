@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AppLanguage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import GenderSelectionCards from '../components/GenderSelectionCards';
@@ -23,7 +23,7 @@ export default function GenderSelectionScreen({ locale, onSelectGender }: Gender
         </div>
         
         <h2 className="text-3xl sm:text-4xl font-serif font-black text-warm-charcoal tracking-tight font-display">
-          {txt('Begin Your Halal Journey', 'ابدأ رحلتك المباركة', 'دەستپێکردنی گەشتی پیرۆزت')}
+          {txt('Begin Your Marriage Journey', 'ابدأ رحلتك المباركة', 'دەستپێکردنی گەشتی پیرۆزت')}
         </h2>
         
         <p className="text-sm sm:text-base text-[#6B635B] font-medium leading-relaxed max-w-2xl mx-auto">
@@ -39,3 +39,4 @@ export default function GenderSelectionScreen({ locale, onSelectGender }: Gender
     </div>
   );
 }
+

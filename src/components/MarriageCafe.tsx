@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { AppLanguage } from '../types';
 import { Coffee, Check, Sparkles, BarChart3, ThumbsUp, Heart, Clock, MessageSquare, ChevronRight } from 'lucide-react';
 
@@ -223,7 +223,7 @@ export default function MarriageCafe({ locale, triggerToast, onNavigateToTab }: 
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-[#40798C]/10 text-[#40798C] px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
             <Coffee className="w-4 h-4 text-[#40798C] animate-pulse" />
-            <span>{txt("Halal Zawaj Innovative Lounge", "مجلس زواج الحلال الابتكاري التفاعلي", "کۆڕی گفتوگۆی پیرۆزی هاوسەرگیری")}</span>
+            <span>{txt("Marriage Cafe", "مقهى الزواج", "کۆڕی گفتوگۆی پیرۆزی هاوسەرگیری")}</span>
           </span>
           <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-warm-charcoal tracking-tight">
             {txt("Marriage Café", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}
@@ -301,7 +301,7 @@ export default function MarriageCafe({ locale, triggerToast, onNavigateToTab }: 
                     {/* Halal Intent label */}
                     <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
                       <Heart className="w-2.5 h-2.5 fill-emerald-700" />
-                      <span>{txt("Halal Match Intent", "نية زواج حلال", "خواستی هاوسەرگیری")}</span>
+                      <span>{txt("Marriage Intent", "نية زواج حلال", "خواستی هاوسەرگیری")}</span>
                     </span>
                   </div>
 
@@ -349,7 +349,7 @@ export default function MarriageCafe({ locale, triggerToast, onNavigateToTab }: 
           <div className="w-full lg:w-5/12 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
-                <span>{txt("Halal Zawaj Daily Engagement", "التفاعل اليومي لمنصة زواج", "تێکەڵبوونی ڕۆژانەی زەواج")}</span>
+                <span>{txt("Zawaj Al Araqi Daily Engagement", "التفاعل اليومي لمنصة الزواج العراقي", "تێکەڵبوونی ڕۆژانەی زەواج")}</span>
               </span>
               <h3 className="text-xl sm:text-3xl font-serif font-black text-warm-charcoal leading-snug">
                 {txt("Share Your Thoughts on the Daily Poll", "شارك رأيك الوقور في الاستطلاع اليومي", "ڕای خۆت لە ڕاپرسی ڕۆژانەدا دەرببڕە")}
@@ -508,3 +508,8 @@ export default function MarriageCafe({ locale, triggerToast, onNavigateToTab }: 
     </div>
   );
 }
+
+
+
+
+

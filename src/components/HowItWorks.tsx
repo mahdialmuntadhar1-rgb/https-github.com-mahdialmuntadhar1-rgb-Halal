@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { UserPlus, Settings2, ShieldCheck, Heart, MessagesSquare, CheckCircle } from 'lucide-react';
 import { Language } from '../lib/translations';
 
@@ -17,7 +17,7 @@ export default function HowItWorks({ locale }: HowItWorksProps) {
     : 'ڕێڕەوێکی شایستە بۆ هاوسەرگیری';
 
   const sectionSub = isEn
-    ? 'We avoid modern swiping loops. HALAL guides you through 5 clear, values-aligned steps.'
+    ? 'We avoid modern swiping loops. Zawaj Al Araqi guides you through 5 clear, values-aligned steps.'
     : isAr
     ? 'نبتعد تماماً عن العبث والتمرير العشوائي. نوجهك بوضوح وأمان عبر ٥ خطوات راقية معتمدة.'
     : 'دوورین لە هەڵسوکەوتی عەشوایی. لە حەڵاڵ لەڕێی ٥ هەنگاوەوە بە شێوازێکی تەندروست ڕێنموویت دەکەین.';
@@ -148,3 +148,4 @@ export default function HowItWorks({ locale }: HowItWorksProps) {
     </section>
   );
 }
+

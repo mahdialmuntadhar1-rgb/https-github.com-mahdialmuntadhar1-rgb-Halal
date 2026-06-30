@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { SearchFilters, AppLanguage } from '../types';
 import { GOVERNORATES, EDUCATION_LEVELS, PROFESSION_CATEGORIES } from '../constants';
 import { INITIAL_MATCHES } from '../data/matches';
@@ -89,7 +89,7 @@ export default function FilterPanel({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div className="space-y-1">
           <span className="text-[10px] tracking-[0.2em] font-extrabold text-[#9c9389] uppercase block font-sans">
-            {txt("HALAL ZAWAJ HALAL MATCHING", "زواج حلال توافق حلال", "هاوسەرگیری حەڵاڵ گونجانی حەڵاڵ")}
+            {txt("ZAWAJ AL ARAQI SERIOUS MARRIAGE", "زواج حلال توافق حلال", "هاوسەرگیری حەڵاڵ گونجانی حەڵاڵ")}
           </span>
           <h2 className="text-2xl sm:text-3.5xl font-black text-[#22201E] font-serif tracking-tight">
             {txt("Recommended Partners", "الشركاء الموصى بهم", "هاوبەشە پێشنیارکراوەکان")}
@@ -299,3 +299,4 @@ export default function FilterPanel({
     </div>
   );
 }
+

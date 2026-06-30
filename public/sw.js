@@ -1,4 +1,4 @@
-// Simple offline service worker for HALAL ZAWAJ PWA install compliance
+﻿// Simple offline service worker for Zawaj Al Araqi PWA install compliance
 const CACHE_NAME = 'halal-zawaj-v1';
 const ASSETS_TO_CACHE = [
   '/',
@@ -61,3 +61,4 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+

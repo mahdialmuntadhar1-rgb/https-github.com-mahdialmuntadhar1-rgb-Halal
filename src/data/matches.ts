@@ -1,4 +1,4 @@
-import { MatchProfile } from '../types';
+﻿import { MatchProfile } from '../types';
 
 // Helper lists of culturally relevant names for Iraqi regions
 const FEMALE_ARABIC_NAMES = [
@@ -611,7 +611,7 @@ export const MOCK_CHATS_RESPONSES: Record<string, string[]> = {
   'f4': [
     'Assalamu Alaikum. Sincerity is the bedrock of partnership. Understanding each other’s life priorities, financial plans, and how we handle stress is what truly builds trust.',
     'I believe in keeping our personal goals aligned with our faith. It keeps us anchored through all of life’s high and low seasons.',
-    'Thank you for your very respectful, serious query. This matches the true purpose of HALAL completely.'
+    'Thank you for your very respectful, serious query. This matches the true purpose of Zawaj Al Araqi completely.'
   ],
   'f5': [
     'Assalamu Alaikum. Trust is the baseline of law and life. If there is complete honesty and dedication, any relocation or life change becomes a peaceful breeze.',
@@ -626,7 +626,7 @@ export const MOCK_CHATS_RESPONSES: Record<string, string[]> = {
   'm2': [
     'Assalamu Alaikum. In clinical cardiology, we listen deeply. I practice that exact patience in my personal life. Building a serene, stable, and highly caring home is my highest goal.',
     'Our family gatherings are central to Erbil life, and I look forward to hosting them often with rich hospitality.',
-    'I appreciate your serious parameters. HALAL creates a beautiful standard of dignity that other casual platforms completely lack.'
+    'I appreciate your serious parameters. Zawaj Al Araqi creates a beautiful standard of dignity that other casual platforms completely lack.'
   ],
   'm3': [
     'Assalamu Alaikum. Patience and direct honesty are the values I respect most. I believe in speaking clearly and building secure, stable agricultural foundations.',
@@ -634,3 +634,5 @@ export const MOCK_CHATS_RESPONSES: Record<string, string[]> = {
     'Let’s review each other’s dealbreakers completely first to make sure there is absolute alignment before making further decisions.'
   ]
 };
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ShieldCheck, Heart, Lock, Filter, UserX, Camera, CheckCircle2 } from 'lucide-react';
 import { Language } from '../lib/translations';
 
@@ -11,7 +11,7 @@ export default function TrustSafety({ locale }: TrustProps) {
   const isAr = locale === 'ar';
 
   const sectionTitle = isEn
-    ? 'Why HALAL Matchmaking?'
+    ? 'Why Zawaj Al Araqi?'
     : isAr
     ? 'لماذا منصة حلال للزواج؟'
     : 'بۆچی پلاتفۆرمی حەڵاڵ؟';
@@ -151,3 +151,4 @@ export default function TrustSafety({ locale }: TrustProps) {
     </section>
   );
 }
+

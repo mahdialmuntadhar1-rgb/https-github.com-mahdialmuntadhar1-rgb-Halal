@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ShieldAlert, Info, Heart } from 'lucide-react';
 
 interface SafetyNoticeProps {
@@ -32,7 +32,7 @@ export default function SafetyNotice({ type = 'info', message }: SafetyNoticePro
       </div>
       <div className="space-y-1">
         <p className="text-xs font-bold uppercase tracking-wider font-mono">
-          {isPledge ? 'Halal Dignity Assurance' : isWarning ? 'Strict Safety Notice' : 'Respect Standard Info'}
+          {isPledge ? 'Marriage Dignity Assurance' : isWarning ? 'Strict Safety Notice' : 'Respect Standard Info'}
         </p>
         <p className="text-xs font-medium leading-relaxed opacity-95">
           {message}
@@ -41,3 +41,4 @@ export default function SafetyNotice({ type = 'info', message }: SafetyNoticePro
     </div>
   );
 }
+

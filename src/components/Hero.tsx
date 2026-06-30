@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Heart, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight, Sparkles, LogIn, Compass, User } from 'lucide-react';
 import { Language, TRANSLATIONS } from '../lib/translations';
 import { AppTab } from '../types';
@@ -74,7 +74,7 @@ const CAROUSEL_SLIDES = [
     localUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
     fallbackUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
     title: {
-      en: 'Blessed Halal Union',
+      en: 'Blessed Marriage Journey',
       ar: 'عقود مباركة وبيوت مطمئنة',
       ckb: 'هاوسەرگیری حەڵاڵ و ژیانی پڕ خێر'
     },
@@ -177,9 +177,9 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           <div className="absolute inset-x-0 bottom-0 z-20 p-6 sm:p-12 md:p-16 text-center flex flex-col items-center justify-end h-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
             
             {/* Decent badge */}
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/20 border border-accent-coral/40 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold text-white tracking-widest uppercase shadow-inner">
-              <Heart className="w-3.5 h-3.5 text-accent-pink fill-accent-pink animate-pulse" />
-              <span>{locale === 'en' ? 'Halal Matchmaking' : locale === 'ar' ? 'منصة الزواج الحلال' : 'هاوسەرگیری حەڵاڵ'}</span>
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-neon-pink/20 border border-neon-pink/40 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold text-white tracking-widest uppercase shadow-inner shadow-neon-pink/30">
+              <Heart className="w-3.5 h-3.5 text-neon-pink fill-neon-pink animate-pulse" />
+              <span>{locale === 'en' ? 'Zawaj Al Araqi' : locale === 'ar' ? 'منصة الزواج العراقي' : 'هاوسەریری حەڵاڵ'}</span>
             </span>
 
             {/* Title */}
@@ -199,7 +199,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                   {/* Authenticated State CTAs */}
                   <button
                     onClick={onExploreMatches}
-                    className="flex-1 min-w-[140px] px-6 py-3 rounded-xl sm:rounded-2xl bg-accent-coral hover:bg-[#ff8f66] border border-accent-coral hover:border-[#ff8f66] text-white font-black text-xs sm:text-sm shadow-xl shadow-accent-coral/10 hover:shadow-accent-coral/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 min-w-[140px] px-6 py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 border border-neon-pink/30 text-white font-black text-xs sm:text-sm shadow-xl shadow-neon-pink/20 hover:shadow-neon-pink/30 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     id="carousel-cta-browse"
                   >
                     <Compass className="w-4 h-4" />
@@ -219,7 +219,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                   {/* Unauthenticated State CTAs */}
                   <button
                     onClick={() => setTab('onboarding')}
-                    className="flex-1 min-w-[130px] sm:min-w-[150px] px-5 py-3 rounded-xl sm:rounded-2xl bg-accent-coral hover:bg-[#ff8f66] border border-accent-coral hover:border-[#ff8f66] text-white font-black text-xs sm:text-sm shadow-xl shadow-accent-coral/10 hover:shadow-accent-coral/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 min-w-[130px] sm:min-w-[150px] px-5 py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 border border-neon-pink/30 text-white font-black text-xs sm:text-sm shadow-xl shadow-neon-pink/20 hover:shadow-neon-pink/30 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     id="carousel-cta-create"
                   >
                     <Sparkles className="w-4 h-4 animate-pulse" />
@@ -252,7 +252,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                   key={idx}
                   onClick={() => handleDotClick(idx)}
                   className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? 'w-6 bg-accent-coral shadow-sm shadow-accent-coral/50' : 'w-2 bg-white/40 hover:bg-white/60'
+                    idx === currentIndex ? 'w-6 bg-neon-pink shadow-sm shadow-neon-pink/50' : 'w-2 bg-white/40 hover:bg-white/60'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                   id={`carousel-dot-${idx}`}
@@ -263,86 +263,10 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           </div>
         </div>
 
-        {/* MARRIAGE SCROLLING TICKER */}
-        <div className="w-full bg-[#FAF7F2] border border-[#E8DCC4]/60 rounded-2xl sm:rounded-3xl py-3.5 sm:py-5 overflow-hidden shadow-xs relative" id="marriage-scrolling-marquee">
-          <div className="absolute top-0 bottom-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
-          <div className="absolute top-0 bottom-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-[#FAF7F2] to-transparent z-10 pointer-events-none" />
-          
-          <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-6 mb-2 border-b border-[#EADFC9]/50 pb-1.5 sm:pb-2">
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-            <span className="text-[10px] sm:text-xs font-black text-[#40798C] uppercase tracking-widest font-mono">
-              {locale === 'en' ? 'Today in Zawaj: Live Success Marquees & Blessed Activity' : locale === 'ar' ? 'اليوم في زواج: قصص مباركة وأنشطة الخطوبة الحية' : 'ئەمڕۆ لە زەواج: چیرۆکی پیرۆز و دەستپێشخەرییەکان'}
-            </span>
-          </div>
-
-          <div className="overflow-hidden w-full relative">
-            <div className={`flex gap-4 sm:gap-8 ${locale === 'ar' ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-              {/* Combine twice for infinite seamless scroll */}
-              {[...Array(2)].map((_, repeatIdx) => (
-                <div key={repeatIdx} className="flex gap-4 sm:gap-8 items-center shrink-0">
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">💍</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Blessed Union: Groom (31, Baghdad) & Bride (27, Erbil) successfully engaged!' 
-                        : locale === 'ar' 
-                          ? 'عقد مبارك: تم بحمد الله خطوبة عريس (٣١، بغداد) وعروسة (٢٧، أربيل)!' 
-                          : 'مارەبڕینی پیرۆز: زاوا (٣١، بەغداد) و بووک (٢٧، هەولێر) مارەبڕان!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">✨</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Sincere Match: Groom (29, Basra) & Bride (25, Baghdad) chatting under Chaperon!' 
-                        : locale === 'ar' 
-                          ? 'توافق جاد: عريس (٢٩، البصرة) وعروسة (٢٥، بغداد) في حوار محمي!' 
-                          : 'هاوتایی جدی: زاوا (٢٩، بەسرە) و بووک (٢٥، بەغداد) لە گفتوگۆدان!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">❤️</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Sacred Covenant: Groom (34, Kirkuk) & Bride (30, Sulaymaniyah) matched!' 
-                        : locale === 'ar' 
-                          ? 'ميثاق غليظ: توافق مبارك بين عريس (٣٤، كركوك) وعروسة (٣٠، السليمانية)!' 
-                          : 'پەیمانی پیرۆز: هاوتایی لە نێوان زاوا (٣٤، کەرکوک) و بووک (٣٠، سلێمانی)!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">💍</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Mubarak Marriage: Groom (28, Duhok) & Bride (26, Nineveh) happily married!' 
-                        : locale === 'ar' 
-                          ? 'زواج مبارك: تم بحمد الله زواج عريس (٢٨، دهوك) وعروسة (٢٦، نينوى)!' 
-                          : 'هاوسەرگیری بەختەوەر: زاوا (٢٨، دهۆک) و بووک (٢٦، نەینەوا) هاوسەرگیریان کرد!'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 bg-white/75 border border-[#EADFC9]/40 px-4 py-2 rounded-xl sm:rounded-2xl shadow-xs">
-                    <span className="text-base sm:text-lg">✨</span>
-                    <span className="text-[11px] sm:text-xs text-warm-charcoal font-semibold">
-                      {locale === 'en' 
-                        ? 'Respectful Connection: Groom (33, Najaf) & Bride (29, Karbala) approved!' 
-                        : locale === 'ar' 
-                          ? 'تواصل كريم: قبول متبادل بين عريس (٣٣، النجف) وعروسة (٢٩، كربلاء)!' 
-                          : 'پەیوەندی بەڕێز: ڕەزامەندی دوولایەنە لە نێوان زاوا (٣٣، نەجەف) و بووک (٢٩، کەربەلا)!'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Short & Single-Line Header */}
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-[15px] min-[360px]:text-[17px] xs:text-[22px] sm:text-[32px] md:text-[40px] font-serif text-warm-charcoal tracking-tight font-display font-black leading-tight selection:bg-[#40798C]/15">
-            {locale === 'en' ? 'Halal Matchmaking for Serious Intentions' : locale === 'ar' ? 'زواج حلال لأصحاب النوايا الجادة' : 'هاوسەرگیری حەڵاڵ بۆ کەسانی جدی'}
+            {locale === 'en' ? 'Zawaj Al Araqi for Serious Intentions' : locale === 'ar' ? 'الزواج العراقي للزواج الجاد' : 'هاوسەرگیری حەڵاڵ بۆ کەسانی جدی'}
           </h2>
         </div>
 
@@ -352,11 +276,11 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           {/* Card 1: I am a man */}
           <div 
             onClick={() => onSelectGender('male')}
-            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-accent-coral/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-coral/5 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
+            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-neon-purple/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-neon-purple/10 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
             id="select-gender-male"
           >
             {/* Background texture */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#40798C]/5 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-neon-purple/10 rounded-full blur-xl pointer-events-none" />
             
             <div className="space-y-2 sm:space-y-3">
               <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
@@ -371,16 +295,16 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                   {t.respectPortrayal}
                 </span>
               </div>
-              <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
+              <h3 className="text-xs sm:text-xl font-serif font-black text-deep-charcoal text-center leading-tight">
                 {t.iamMan}
               </h3>
-              <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
+              <p className="hidden xs:block text-[9px] sm:text-xs text-dark-gray max-w-sm mx-auto leading-relaxed font-semibold">
                 {t.iamManDesc}
               </p>
             </div>
             
             <div className="pt-1 sm:pt-3">
-              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-accent-coral text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-accent-coral/15 group-hover:bg-[#316070] transition-all">
+              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-neon-purple text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-neon-purple/20 group-hover:opacity-90 transition-all">
                 <span>{t.startBtn}</span>
                 <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
               </span>
@@ -390,11 +314,11 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
           {/* Card 2: I am a woman */}
           <div 
             onClick={() => onSelectGender('female')}
-            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-accent-pink/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-accent-pink/5 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
+            className="group cursor-pointer bg-white/40 backdrop-blur-md border border-white/20 hover:border-neon-pink/40 rounded-2xl sm:rounded-[2rem] p-2 sm:p-5 text-center space-y-2 sm:space-y-4 transition-all duration-300 hover:shadow-2xl hover:shadow-neon-pink/10 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden"
             id="select-gender-female"
           >
             {/* Background texture */}
-            <div className="absolute top-0 left-0 w-24 h-24 bg-accent-pink/5 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute top-0 left-0 w-24 h-24 bg-neon-pink/10 rounded-full blur-xl pointer-events-none" />
 
             <div className="space-y-2 sm:space-y-3">
               <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
@@ -409,16 +333,16 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                   {t.protectedOptions}
                 </span>
               </div>
-              <h3 className="text-xs sm:text-xl font-serif font-black text-warm-charcoal text-center leading-tight">
+              <h3 className="text-xs sm:text-xl font-serif font-black text-deep-charcoal text-center leading-tight">
                 {t.iamWoman}
               </h3>
-              <p className="hidden xs:block text-[9px] sm:text-xs text-[#6B635B] max-w-sm mx-auto leading-relaxed font-semibold">
+              <p className="hidden xs:block text-[9px] sm:text-xs text-dark-gray max-w-sm mx-auto leading-relaxed font-semibold">
                 {t.iamWomanDesc}
               </p>
             </div>
             
             <div className="pt-1 sm:pt-3">
-              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-accent-pink text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-accent-pink/15 group-hover:opacity-95 transition-all">
+              <span className="inline-flex items-center space-x-1 sm:space-x-1.5 rtl:space-x-reverse bg-neon-pink text-white text-[7.5px] sm:text-xs font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-full shadow-md shadow-neon-pink/20 group-hover:opacity-90 transition-all">
                 <span>{t.startBtn}</span>
                 <ArrowRight className="w-2 h-2 sm:w-3.5 sm:h-3.5 transform rtl:rotate-180" />
               </span>
@@ -446,3 +370,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
     </section>
   );
 }
+
+
+
+

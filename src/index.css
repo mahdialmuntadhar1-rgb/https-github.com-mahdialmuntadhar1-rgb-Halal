@@ -6,11 +6,48 @@
   --font-display: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
+  /* Primary Brand Colors */
+  --color-neon-pink: #FF2E96;
+  --color-neon-purple: #B829DD;
+  --color-electric-violet: #8B5CF6;
+  
+  /* Secondary/Supporting Colors */
+  --color-soft-lavender: #F3E8FF;
+  --color-light-pink: #FDF2F8;
+  --color-cool-gray: #E5E7EB;
+  --color-warm-white: #FFFBFE;
+  
+  /* Background Colors */
+  --color-pure-white: #FFFFFF;
+  --color-ultra-light-lavender: #FAF5FF;
+  --color-soft-mist: #F8FAFC;
+  
+  /* Text Colors */
+  --color-deep-charcoal: #1F2937;
+  --color-dark-gray: #4B5563;
+  --color-medium-gray: #9CA3AF;
+  
+  /* Accent/Highlight Colors */
+  --color-glowing-pink: #FF6BB3;
+  --color-bright-purple: #C084FC;
+  --color-soft-cyan: #67E8F9;
+  --color-warm-gold: #FBBF24;
+  
+  /* Legacy colors kept for compatibility */
   --color-warm-ivory: #FAF9F6;
   --color-warm-charcoal: #2D2A26;
   --color-accent-coral: #FF7F50;
   --color-accent-pink: #F4A7B9;
   --color-accent-blue: #40798C;
+}
+
+/* Neon glow effects */
+.shadow-neon-glow {
+  box-shadow: 0 0 20px rgba(255, 46, 150, 0.3), 0 0 40px rgba(184, 41, 221, 0.2);
+}
+
+.shadow-card-soft {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Glassmorphism helpers */

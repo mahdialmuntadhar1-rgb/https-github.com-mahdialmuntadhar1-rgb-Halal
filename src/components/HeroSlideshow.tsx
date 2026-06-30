@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { HeroImage } from '../types';
 
 interface HeroSlideshowProps {
@@ -46,7 +46,7 @@ export default function HeroSlideshow({ images, intervalMs = 4500 }: HeroSlidesh
     >
       <img
         src={currentImage?.url}
-        alt={currentImage?.title || 'Halal Matchmaking Slideshow'}
+        alt={currentImage?.title || 'Zawaj Al Araqi Slideshow'}
         className={`w-full h-full object-cover select-none transition-opacity duration-700 ease-in-out ${
           fadeState === 'in' ? 'opacity-100' : 'opacity-0'
         }`}
@@ -70,3 +70,4 @@ export default function HeroSlideshow({ images, intervalMs = 4500 }: HeroSlidesh
     </div>
   );
 }
+

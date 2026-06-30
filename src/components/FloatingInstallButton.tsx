@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { AppLanguage } from '../types';
 import { Download, Share2, PlusSquare, X, Monitor, Smartphone } from 'lucide-react';
 
@@ -169,7 +169,7 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
               </div>
 
               <h3 className="text-lg sm:text-xl font-serif font-black text-warm-charcoal">
-                {txt('Download HALAL App', 'تنزيل تطبيق زواج', 'دابەزاندنی ئەپی زەواج')}
+                {txt('Download Zawaj Al Araqi App', 'تنزيل تطبيق الزواج العراقي', 'دابەزاندنی ئەپی زەواج')}
               </h3>
               
               <p className="text-xs text-[#6B635B] font-medium leading-relaxed">
@@ -325,4 +325,6 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
     </>
   );
 }
+
+
 
