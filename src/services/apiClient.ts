@@ -509,15 +509,15 @@ export const apiClient = {
     });
   },
 
-  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false): Promise<CommunityPost> {
+  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false, image?: string, status?: 'pending' | 'approved' | 'hidden' | 'rejected'): Promise<CommunityPost> {
     if (getIsDemoMode()) {
-      return mockApi.createCommunityPost(title, content, category, isDaily);
+      return mockApi.createCommunityPost(title, content, category, isDaily, image, status);
     }
 
     return safeFetch<CommunityPost>(`${API_BASE}/community/posts`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ title, content, category, isDaily }),
+      body: JSON.stringify({ title, content, category, isDaily, image, status }),
     });
   },
 
@@ -588,6 +588,31 @@ export const apiClient = {
 
     const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return !!data.success;
+  },
+
+  async updatePostStatus(postId: string, status: 'approved' | 'hidden' | 'rejected' | 'pending'): Promise<boolean> {
+    if (getIsDemoMode()) {
+      return mockApi.updatePostStatus(postId, status);
+    }
+
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/status`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    return !!data.success;
+  },
+
+  async toggleFeaturePost(postId: string): Promise<boolean> {
+    if (getIsDemoMode()) {
+      return mockApi.toggleFeaturePost(postId);
+    }
+
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/feature`, {
+      method: 'PUT',
       headers: getHeaders(),
     });
     return !!data.success;

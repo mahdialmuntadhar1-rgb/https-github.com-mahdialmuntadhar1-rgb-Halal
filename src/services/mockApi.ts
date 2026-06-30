@@ -59,92 +59,111 @@ let mockConversations: Conversation[] = [];
 let mockIntroductionRequests: IntroductionRequest[] = [];
 
 // Starter respectful community posts grouped by topic categories
-let mockCommunityPosts: CommunityPost[] = [
-  {
-    id: 'post_1',
-    category: 'religion',
-    title: 'Assalamu Alaikum. Traditional family meeting etiquette?',
-    content: 'My family and I are preparing for our first face-to-face meeting with a potential spouse and his father next week in Erbil. What are the best practices to keep everything respectful, traditional, and matching Islamic expectations? Any advice is highly appreciated.',
-    userName: 'Layla S.',
-    userGender: 'female',
-    createdAt: '2026-06-21T10:30:00Z',
-    likesCount: 14,
-    likedBy: [],
-    comments: [
-      {
-        id: 'comm_1_1',
-        postId: 'post_1',
-        userName: 'Ahmad M.',
-        userGender: 'male',
-        text: 'Keep it open and light! Let the parents talk, and make sure to meet in the family salon with complete respect.',
-        createdAt: '2026-06-21T11:15:00Z'
-      }
-    ]
-  },
-  {
-    id: 'post_2',
-    category: 'advice',
-    title: 'Essential questions to ask before engagement?',
-    content: 'What are the main dealbreakers or questions we must clear before signing the official engagement contract (Nikkah)? I want to focus on prayer habits, career support, and family residency.',
-    userName: 'Mustafa K.',
-    userGender: 'male',
-    createdAt: '2026-06-22T08:00:00Z',
-    likesCount: 22,
-    likedBy: [],
-    comments: [
-      {
-        id: 'comm_2_1',
-        postId: 'post_2',
-        userName: 'Fatima Z.',
-        userGender: 'female',
-        text: 'Salary, career boundaries, and expectation of living arrangements should be decided with total clarity.',
-        createdAt: '2026-06-22T08:45:00Z'
-      }
-    ]
-  },
-  {
-    id: 'post_3',
-    category: 'family',
-    title: 'Balancing careers with a peaceful Islamic home',
-    content: 'To my brothers and sisters: How do you achieve balance between demanding professional careers (e.g. engineering, medicine) and dedication to your family? Any beautiful success stories are welcome.',
-    userName: 'Dr. Yasmin A.',
-    userGender: 'female',
-    createdAt: '2026-06-22T14:20:00Z',
-    likesCount: 19,
-    likedBy: [],
-    comments: []
-  },
-  {
-    id: 'post_daily_active',
-    category: 'daily',
-    title: 'Daily Marriage Question',
-    content: 'What is the most important quality in a future spouse? Compassion, reliability, religiosity, or family background?',
-    userName: 'HALAL Moderator',
-    userGender: 'male',
-    createdAt: '2026-06-23T00:00:00Z',
-    likesCount: 45,
-    likedBy: [],
-    isDailyQuestion: true,
-    comments: [
-      {
-        id: 'comm_d_1',
-        postId: 'post_daily_active',
-        userName: 'Youssef H.',
-        userGender: 'male',
-        text: 'Sincere religious commitment and a calm respectful temper are the pillars of a successful marriage.',
-        createdAt: '2026-06-23T04:15:00Z'
-      },
-      {
-        id: 'comm_d_2',
-        postId: 'post_daily_active',
-        userName: 'Amina F.',
-        userGender: 'female',
-        text: 'I agree. Mutual respect and involvement of both families from day one makes everything blessed.',
-        createdAt: '2026-06-23T05:30:00Z'
-      }
-    ]
+const LOCAL_STORAGE_POSTS_KEY = 'zawaj_marriage_cafe_posts';
+let mockCommunityPosts: CommunityPost[] = (() => {
+  const saved = localStorage.getItem(LOCAL_STORAGE_POSTS_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse community posts', e);
+    }
   }
-];
+  return [
+    {
+      id: 'post_1',
+      category: 'religion',
+      title: 'Assalamu Alaikum. Traditional family meeting etiquette?',
+      content: 'My family and I are preparing for our first face-to-face meeting with a potential spouse and his father next week in Erbil. What are the best practices to keep everything respectful, traditional, and matching Islamic expectations? Any advice is highly appreciated.',
+      userName: 'Layla S.',
+      userGender: 'female',
+      createdAt: '2026-06-21T10:30:00Z',
+      likesCount: 14,
+      likedBy: [],
+      status: 'approved',
+      comments: [
+        {
+          id: 'comm_1_1',
+          postId: 'post_1',
+          userName: 'Ahmad M.',
+          userGender: 'male',
+          text: 'Keep it open and light! Let the parents talk, and make sure to meet in the family salon with complete respect.',
+          createdAt: '2026-06-21T11:15:00Z'
+        }
+      ]
+    },
+    {
+      id: 'post_2',
+      category: 'advice',
+      title: 'Essential questions to ask before engagement?',
+      content: 'What are the main dealbreakers or questions we must clear before signing the official engagement contract (Nikkah)? I want to focus on prayer habits, career support, and family residency.',
+      userName: 'Mustafa K.',
+      userGender: 'male',
+      createdAt: '2026-06-22T08:00:00Z',
+      likesCount: 22,
+      likedBy: [],
+      status: 'approved',
+      comments: [
+        {
+          id: 'comm_2_1',
+          postId: 'post_2',
+          userName: 'Fatima Z.',
+          userGender: 'female',
+          text: 'Salary, career boundaries, and expectation of living arrangements should be decided with total clarity.',
+          createdAt: '2026-06-22T08:45:00Z'
+        }
+      ]
+    },
+    {
+      id: 'post_3',
+      category: 'family',
+      title: 'Balancing careers with a peaceful Islamic home',
+      content: 'To my brothers and sisters: How do you achieve balance between demanding professional careers (e.g. engineering, medicine) and dedication to your family? Any beautiful success stories are welcome.',
+      userName: 'Dr. Yasmin A.',
+      userGender: 'female',
+      createdAt: '2026-06-22T14:20:00Z',
+      likesCount: 19,
+      likedBy: [],
+      status: 'approved',
+      comments: []
+    },
+    {
+      id: 'post_daily_active',
+      category: 'daily',
+      title: 'Daily Marriage Question',
+      content: 'What is the most important quality in a future spouse? Compassion, reliability, religiosity, or family background?',
+      userName: 'HALAL Moderator',
+      userGender: 'male',
+      createdAt: '2026-06-23T00:00:00Z',
+      likesCount: 45,
+      likedBy: [],
+      isDailyQuestion: true,
+      status: 'approved',
+      comments: [
+        {
+          id: 'comm_d_1',
+          postId: 'post_daily_active',
+          userName: 'Youssef H.',
+          userGender: 'male',
+          text: 'Sincere religious commitment and a calm respectful temper are the pillars of a successful marriage.',
+          createdAt: '2026-06-23T04:15:00Z'
+        },
+        {
+          id: 'comm_d_2',
+          postId: 'post_daily_active',
+          userName: 'Amina F.',
+          userGender: 'female',
+          text: 'I agree. Mutual respect and involvement of both families from day one makes everything blessed.',
+          createdAt: '2026-06-23T05:30:00Z'
+        }
+      ]
+    }
+  ];
+})();
+
+const savePosts = () => {
+  localStorage.setItem(LOCAL_STORAGE_POSTS_KEY, JSON.stringify(mockCommunityPosts));
+};
 
 // Helper utility to simulate network delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -396,12 +415,22 @@ export const mockApi = {
    * ------------------------------------------------------------- */
   async getCommunityPosts(): Promise<CommunityPost[]> {
     await delay(100);
-    // Hide reported content for standard view, but let administrative flags run
     return [...mockCommunityPosts];
   },
 
-  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false): Promise<CommunityPost> {
+  async createCommunityPost(
+    title: string,
+    content: string,
+    category: CommunityPost['category'],
+    isDaily: boolean = false,
+    image?: string,
+    status?: 'pending' | 'approved' | 'hidden' | 'rejected'
+  ): Promise<CommunityPost> {
     await delay(100);
+    
+    // Auto-approve if user is admin, otherwise default to pending
+    const defaultStatus = (mockUserProfile.role === 'admin' || mockUserProfile.email === 'shkar9441@gmail.com') ? 'approved' : 'pending';
+
     const newPost: CommunityPost = {
       id: `post_${Date.now()}`,
       category,
@@ -413,9 +442,13 @@ export const mockApi = {
       likesCount: 0,
       likedBy: [],
       comments: [],
-      isDailyQuestion: isDaily
+      isDailyQuestion: isDaily,
+      image,
+      status: status || defaultStatus,
+      isFeatured: false
     };
     mockCommunityPosts.unshift(newPost); // Add to top
+    savePosts();
     return newPost;
   },
 
@@ -440,6 +473,7 @@ export const mockApi = {
       return post;
     });
     if (!updated) throw new Error(`Post not found: ${postId}`);
+    savePosts();
     return updated;
   },
 
@@ -464,6 +498,7 @@ export const mockApi = {
       return post;
     });
 
+    savePosts();
     return newComment;
   },
 
@@ -475,6 +510,7 @@ export const mockApi = {
       }
       return post;
     });
+    savePosts();
     return true;
   },
 
@@ -489,14 +525,16 @@ export const mockApi = {
       }
       return post;
     });
+    savePosts();
     return true;
   },
 
-  /* Admin exclusive deletes */
+  /* Admin exclusive deletes & status controls */
   async deletePost(postId: string): Promise<boolean> {
     await delay(100);
     const lengthBefore = mockCommunityPosts.length;
     mockCommunityPosts = mockCommunityPosts.filter(post => post.id !== postId);
+    savePosts();
     return mockCommunityPosts.length < lengthBefore;
   },
 
@@ -517,6 +555,35 @@ export const mockApi = {
       }
       return post;
     });
+    savePosts();
     return deleted;
+  },
+
+  async updatePostStatus(postId: string, status: 'approved' | 'hidden' | 'rejected' | 'pending'): Promise<boolean> {
+    await delay(50);
+    let updated = false;
+    mockCommunityPosts = mockCommunityPosts.map(post => {
+      if (post.id === postId) {
+        updated = true;
+        return { ...post, status };
+      }
+      return post;
+    });
+    savePosts();
+    return updated;
+  },
+
+  async toggleFeaturePost(postId: string): Promise<boolean> {
+    await delay(50);
+    let updated = false;
+    mockCommunityPosts = mockCommunityPosts.map(post => {
+      if (post.id === postId) {
+        updated = true;
+        return { ...post, isFeatured: !post.isFeatured };
+      }
+      return post;
+    });
+    savePosts();
+    return updated;
   }
 };

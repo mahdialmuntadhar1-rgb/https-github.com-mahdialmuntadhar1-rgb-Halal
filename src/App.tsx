@@ -14,7 +14,7 @@ import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
 import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
-import CommunityFeed from './components/CommunityFeed';
+import MarriageCafeFeed from './components/MarriageCafeFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
 import Postbox from './components/Postbox';
@@ -526,10 +526,9 @@ export default function App() {
             )}
 
             {currentTab === 'community' && userProfile && (
-              <CommunityFeed
+              <MarriageCafeFeed
                 locale={locale}
-                currentEmail={userProfile.email}
-                currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
+                userProfile={userProfile}
                 triggerToast={triggerToast}
               />
             )}

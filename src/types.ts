@@ -141,6 +141,8 @@ export interface MatchProfile {
   relocation?: string;
   familyValues?: string;
   lifestyle?: string;
+  preferredAgeRange?: string;
+  privacyLevel?: string;
   isDemoProfile?: boolean;
   phone?: string;
   district?: string;
@@ -177,6 +179,9 @@ export interface CommunityPost {
   comments: PostComment[];
   isReported?: boolean;
   isDailyQuestion?: boolean;
+  image?: string; // Client-side compressed image base64
+  status?: 'pending' | 'approved' | 'hidden' | 'rejected';
+  isFeatured?: boolean;
 }
 
 export interface IntroductionRequest {

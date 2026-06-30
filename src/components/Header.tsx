@@ -82,19 +82,19 @@ export default function Header({
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
               }`}
             >
-              {t.explore}
+              {txt('Members', 'الأعضاء', 'ئەندامان')}
             </button>
             
             {/* Community tab */}
             <button
               onClick={() => setTab('community')}
-              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1 ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1.5 ${
                 currentTab === 'community'
                   ? 'bg-[#40798C] text-white shadow-md'
                   : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
               }`}
             >
-              <span>{txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}</span>
+              <span>☕ {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}</span>
             </button>
 
             <button
@@ -324,7 +324,7 @@ export default function Header({
               currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {txt('Matches', 'البحث', 'گەڕان')}
+            {txt('Members', 'الأعضاء', 'ئەندامان')}
           </button>
           <button
             onClick={() => setTab('community')}
@@ -332,7 +332,7 @@ export default function Header({
               currentTab === 'community' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80 bg-[#40798C]/5 border border-[#40798C]/10'
             }`}
           >
-            {txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}
+            {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}
           </button>
           <button
             onClick={() => setTab('chat')}

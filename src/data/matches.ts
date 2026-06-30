@@ -573,10 +573,12 @@ function generateMatches(): MatchProfile[] {
 
       // 1. If a custom override exists, prioritize its custom values but add demo labels
       if (customMatches[id] && customMatches[id].gender === gender && customMatches[id].governorate === gov.name) {
+        const customAge = customMatches[id].age!;
+        const customPhotoStatus = (customMatches[id].photoStatus as any) || 'blurred';
         return {
           id,
           name: customMatches[id].name!,
-          age: customMatches[id].age!,
+          age: customAge,
           gender: customMatches[id].gender!,
           governorate: gov.name,
           city: customMatches[id].city || (gov.name === "Baghdad" ? "Karkh" : gov.name === "Erbil" ? "Soran" : gov.name),
@@ -589,11 +591,13 @@ function generateMatches(): MatchProfile[] {
           intention: customMatches[id].intention,
           timeline: 'Within 6 months',
           wantsChildren: 'Yes, definitely',
-          communicationPreference: 'Prefers quiet respectful correspondence',
+          communicationPreference: customPhotoStatus === 'hidden' || customPhotoStatus === 'initials'
+            ? "Safeguards family privacy; communicates via polite direct inquiries"
+            : "Direct platform introductions; values respectful and highly serious boundaries",
           valuesSummary: customMatches[id].valuesSummary!,
           verified: true,
           isOnline: indexInGov % 2 === 0,
-          photoStatus: customMatches[id].photoStatus as any,
+          photoStatus: customPhotoStatus,
           avatarSeed: `${id}_photo`,
           avatarUrl: customMatches[id].avatarUrl!,
           compatibilityScore: customMatches[id].compatibilityScore!,
@@ -602,10 +606,24 @@ function generateMatches(): MatchProfile[] {
           dealbreakers: customMatches[id].dealbreakers || ['Smoking', 'Irresponsibility'],
           requestStatus: (id === 'f2' ? 'sent' : id === 'm2' ? 'accepted' : id === 'm3' ? 'declined' : 'none') as any,
           badges: ['Demo Verified', 'Sincere Intention', 'Demo Match'],
-          maritalStatus: 'Single',
-          relocation: 'Open to discuss',
-          familyValues: 'Traditional values based on mutual respect and consultation',
-          lifestyle: 'Moderate and spiritual',
+          maritalStatus: indexInGov === 3 ? 'Divorced (no children)' : 'Single',
+          relocation: gender === 'female' ? 'Prefer to stay in the same governorate' : 'Open to relocate within Iraq',
+          familyValues: gender === 'female' 
+            ? 'Deeply values family consultation, parental blessing, and mutual support in Islamic marital steps.'
+            : 'Values supportive environment for spouse, joint decision-making (Shura), and active participation in family ties.',
+          lifestyle: gender === 'female'
+            ? 'Quiet, balanced, focused on continuous growth, family harmony, and moderate religious practices.'
+            : 'Sincere, career-oriented yet highly family-centric, values respectful dialogue and stable home environment.',
+          preferredAgeRange: gender === 'female' 
+            ? `${customAge - 1} to ${customAge + 6} years` 
+            : `${Math.max(20, customAge - 6)} to ${customAge + 2} years`,
+          privacyLevel: customPhotoStatus === 'hidden'
+            ? 'High (Full image privacy, avatar silhouette only)'
+            : customPhotoStatus === 'initials'
+              ? 'Strict (Name initials only, no face photo)'
+              : customPhotoStatus === 'blurred'
+                ? 'Protected (Blurred image, only shared upon families request)'
+                : 'Standard (Visible to verified members only)',
           isDemoProfile: true // Clearly marked internally as demo data
         };
       }
@@ -793,6 +811,36 @@ function generateMatches(): MatchProfile[] {
           ? ['Arabic', 'Kurdish', 'Turkish'] 
           : ['Arabic', 'English'];
 
+      const maritalStatus = indexInGov === 4 
+        ? (gender === 'female' ? 'Widowed' : 'Divorced (one child)') 
+        : indexInGov === 7 
+          ? 'Divorced (no children)' 
+          : 'Single';
+
+      const relocation = gender === 'female' 
+        ? ((govIdx + indexInGov) % 2 === 0 ? 'Prefer to stay in same governorate' : 'Open to relocate within same region')
+        : ((govIdx + indexInGov) % 2 === 0 ? 'Open to relocate within Iraq' : 'Prefer to live near family roots');
+
+      const familyValues = gender === 'female'
+        ? 'Values a family structure based on respect, conservative values, and joint decisions (Shura).'
+        : 'Sincere dedication to supporting spouse, maintaining close bonds with parents, and providing a safe home.';
+
+      const lifestyle = gender === 'female'
+        ? 'Spiritual, quiet lifestyle, loves home decoration, calligraphy, and helping siblings.'
+        : 'Active career life, values Islamic religious rituals, quiet evenings, and traditional social circles.';
+
+      const preferredAgeRange = gender === 'female' 
+        ? `${age - 1} to ${age + 6} years` 
+        : `${Math.max(20, age - 6)} to ${age + 2} years`;
+
+      const privacyLevel = photoStatus === 'hidden'
+        ? 'High (Full image privacy, avatar silhouette only)'
+        : photoStatus === 'initials'
+          ? 'Strict (Name initials only, no face photo)'
+          : photoStatus === 'blurred'
+            ? 'Protected (Blurred image, only shared upon families request)'
+            : 'Standard (Visible to verified members only)';
+
       return {
         id,
         name,
@@ -824,10 +872,12 @@ function generateMatches(): MatchProfile[] {
         dealbreakers: ['Smoking', 'Irresponsibility', 'Unseriousness'],
         requestStatus: 'none',
         badges: ['Demo Verified', 'Sincere Intention', 'Demo Match'],
-        maritalStatus: 'Single',
-        relocation: 'Open to discuss',
-        familyValues: 'Traditional values based on mutual respect and consultation',
-        lifestyle: 'Moderate and spiritual',
+        maritalStatus,
+        relocation,
+        familyValues,
+        lifestyle,
+        preferredAgeRange,
+        privacyLevel,
         isDemoProfile: true // Flagged internally as demo profile
       };
     };
