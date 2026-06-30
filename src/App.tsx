@@ -299,6 +299,7 @@ export default function App() {
   }
 
   const profileStrength = calculateProfileStrength();
+  const isHeroAdmin = userProfile?.email?.toLowerCase() === 'safaribosafar@gmail.com';
   const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
   const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin', 'onboarding', 'gender-selection'].includes(currentTab);
 
@@ -332,7 +333,7 @@ export default function App() {
         userProfileName={userProfile ? userProfile.name : undefined}
         locale={locale}
         setLocale={setLocale}
-        isAdmin={userProfile?.role === 'admin'}
+        isAdmin={isHeroAdmin}
         heroImages={heroImages}
         onLogout={isAuthenticated ? handleLogout : undefined}
       />
@@ -656,5 +657,6 @@ export default function App() {
     </div>
   );
 }
+
 
 

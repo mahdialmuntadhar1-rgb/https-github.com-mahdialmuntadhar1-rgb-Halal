@@ -381,7 +381,7 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
 
               {selectedImage && (
                 <div className="relative overflow-hidden rounded-2xl border border-[#F2D7FF] bg-white">
-                  <img src={selectedImage} alt="Selected post preview" className="max-h-[360px] w-full object-cover" />
+                  <img src={selectedImage} alt="Selected post preview" className="h-auto w-full object-contain" />
                   <button
                     type="button"
                     onClick={() => setSelectedImage('')}
@@ -421,7 +421,7 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-7">
         {posts.map((post) => {
           const liked = likedPostIds.includes(post.id);
 
@@ -453,8 +453,8 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
                 )}
               </header>
 
-              <div className="bg-[#F8F5FF]">
-                <img src={post.imageUrl} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+              <div className="flex w-full items-center justify-center bg-[#F8F5FF]">
+                <img src={post.imageUrl} alt={post.caption} className="h-auto w-full object-contain" />
               </div>
 
               <div className="space-y-4 p-4">
@@ -510,4 +510,5 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     </section>
   );
 }
+
 
