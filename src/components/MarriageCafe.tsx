@@ -1,4 +1,4 @@
-﻿import React, { ChangeEvent, useMemo, useState } from 'react';
+﻿import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { AppLanguage } from '../types';
 import {
   BadgeCheck,
@@ -218,6 +218,7 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
   );
 
   const [posts, setPosts] = useState<CafePost[]>(initialPosts);
+  const [isSavingPost, setIsSavingPost] = useState(false);
   const [caption, setCaption] = useState('');
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [isCompressing, setIsCompressing] = useState(false);
@@ -246,7 +247,31 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     }
   };
 
-  const handleCreatePost = () => {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSavedPosts() {
+      try {
+        const response = await fetch('/api/marriage-cafe/posts', { cache: 'no-store' });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (isMounted && Array.isArray(data.posts)) {
+          setPosts([...data.posts, ...initialPosts]);
+        }
+      } catch (error) {
+        console.warn('Marriage Cafe saved posts could not be loaded yet.', error);
+      }
+    }
+
+    loadSavedPosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialPosts]);
+
+  const handleCreatePost = async () => {
     const cleanCaption = caption.trim();
 
     if (!cleanCaption && !selectedImage) {
@@ -262,28 +287,44 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
         '#B829DD'
       );
 
-    const newPost: CafePost = {
-      id: `post-${Date.now()}`,
-      author: txt('You', 'أنت', 'تۆ'),
-      role: txt('New post', 'منشور جديد', 'بابەتی نوێ'),
-      avatar: txt('Y', 'أ', 'ت'),
-      time: txt('Just now', 'الآن', 'ئێستا'),
-      imageUrl: imageForPost,
-      caption:
-        cleanCaption ||
-        txt(
-          'A respectful visual post shared with the community.',
-          'منشور مرئي محترم تمت مشاركته مع المجتمع.',
-          'بابەتێکی وێنەیی ڕێزلێگیراو هاوبەشکرا.'
-        ),
-      likes: 0,
-      comments: []
-    };
+    try {
+      setIsSavingPost(true);
 
-    setPosts((current) => [newPost, ...current]);
-    setCaption('');
-    setSelectedImage('');
-    triggerToast(txt('Post added to Marriage Cafe.', 'تمت إضافة المنشور إلى مقهى الزواج.', 'بابەتەکە زیادکرا بۆ چایخانەی هاوسەرگیری.'));
+      const response = await fetch('/api/marriage-cafe/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          caption: cleanCaption,
+          imageDataUrl: imageForPost,
+          author: txt('You', 'أنت', 'تۆ'),
+          avatar: txt('Y', 'أ', 'ت'),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success || !data.post) {
+        throw new Error(data.message || 'Could not save post.');
+      }
+
+      setPosts((current) => [data.post, ...current]);
+      setCaption('');
+      setSelectedImage('');
+      triggerToast(txt('Post saved to Marriage Cafe.', 'تم حفظ المنشور في مقهى الزواج.', 'بابەتەکە پاشەکەوت کرا.'));
+    } catch (error: any) {
+      console.error(error);
+      triggerToast(
+        txt(
+          'Could not save the post yet. Please check the Cloudflare API deployment.',
+          'لم يتم حفظ المنشور بعد. يرجى التحقق من نشر واجهة Cloudflare.',
+          'هێشتا بابەتەکە پاشەکەوت نەکرا. تکایە API ـی Cloudflare بپشکنە.'
+        )
+      );
+    } finally {
+      setIsSavingPost(false);
+    }
   };
 
   const handleLike = (postId: string) => {
@@ -368,11 +409,11 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
                 <button
                   type="button"
                   onClick={handleCreatePost}
-                  disabled={isCompressing}
+                  disabled={isCompressing || isSavingPost}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FF2E96] via-[#B829DD] to-[#8B5CF6] px-6 py-3 text-sm font-black text-white shadow-lg shadow-[#B829DD]/25 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" />
-                  <span>{txt('Post', 'نشر', 'بڵاوکردنەوە')}</span>
+                  <span>{isSavingPost ? txt('Saving…', 'جاري الحفظ...', 'پاشەکەوت دەکرێت...') : txt('Post', 'نشر', 'بڵاوکردنەوە')}</span>
                 </button>
               </div>
             </div>
@@ -469,3 +510,4 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     </section>
   );
 }
+
