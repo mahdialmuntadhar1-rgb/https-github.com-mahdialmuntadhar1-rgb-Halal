@@ -185,6 +185,100 @@ body {
   border: 1px solid rgba(157, 77, 255, 0.20);
 }
 
+/* Homepage postcard overrides for the existing Zawaj landing UI */
+#romantic-carousel-container {
+  background:
+    linear-gradient(#1E1E2F, #1E1E2F) padding-box,
+    linear-gradient(135deg, #FF4FD8, #C77DFF, #9D4DFF) border-box !important;
+  border: 2px solid transparent !important;
+  box-shadow:
+    0 24px 70px rgba(30, 30, 47, 0.18),
+    0 18px 42px rgba(157, 77, 255, 0.26),
+    0 8px 24px rgba(255, 79, 216, 0.20) !important;
+}
+
+#carousel-cta-create,
+#carousel-cta-browse,
+#homepage-explore-cta-btn {
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #FF4FD8 0%, #9D4DFF 100%) !important;
+  border-color: rgba(255, 255, 255, 0.34) !important;
+  box-shadow:
+    0 14px 32px rgba(157, 77, 255, 0.32),
+    0 8px 22px rgba(255, 79, 216, 0.28) !important;
+}
+
+#carousel-cta-login,
+#carousel-cta-profile,
+#carousel-cta-explore {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.34) !important;
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.08) !important;
+}
+
+#select-gender-male,
+#select-gender-female,
+#homepage-search-card,
+#gender-matching-guidance-banner > div {
+  color: #1E1E2F !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)) padding-box,
+    linear-gradient(135deg, rgba(255, 79, 216, 0.74), rgba(157, 77, 255, 0.74)) border-box !important;
+  border: 1px solid transparent !important;
+  box-shadow:
+    0 18px 46px rgba(30, 30, 47, 0.08),
+    0 10px 28px rgba(157, 77, 255, 0.13),
+    0 6px 18px rgba(255, 79, 216, 0.10) !important;
+}
+
+#select-gender-male,
+#select-gender-female,
+#governorate-horizontal-scroll-row .snap-start {
+  position: relative;
+}
+
+#select-gender-male::before,
+#select-gender-female::before,
+#governorate-horizontal-scroll-row .snap-start::before,
+#homepage-search-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FF4FD8, #C77DFF, #9D4DFF);
+  pointer-events: none;
+}
+
+#homepage-search-card select {
+  color: #1E1E2F !important;
+  background: #FFFFFF !important;
+  border-color: rgba(157, 77, 255, 0.28) !important;
+}
+
+#homepage-search-card select:focus {
+  border-color: #9D4DFF !important;
+  box-shadow: 0 0 0 4px rgba(157, 77, 255, 0.12) !important;
+}
+
+#governorate-horizontal-scroll-row .snap-start {
+  color: #1E1E2F !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)) padding-box,
+    linear-gradient(135deg, rgba(255, 79, 216, 0.52), rgba(157, 77, 255, 0.52)) border-box !important;
+  border: 1px solid transparent !important;
+  box-shadow:
+    0 14px 34px rgba(30, 30, 47, 0.07),
+    0 8px 20px rgba(157, 77, 255, 0.10) !important;
+}
+
+#governorate-horizontal-scroll-row .snap-start:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 42px rgba(30, 30, 47, 0.09),
+    0 12px 28px rgba(255, 79, 216, 0.14),
+    0 10px 24px rgba(157, 77, 255, 0.14) !important;
+}
+
 /* Scrollbar styling */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
