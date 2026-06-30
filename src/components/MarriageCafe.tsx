@@ -3,12 +3,15 @@ import { AppLanguage } from '../types';
 import {
   BadgeCheck,
   Camera,
+  Edit3,
   Heart,
   ImagePlus,
   MessageCircle,
+  Save,
   Send,
   Share2,
   Sparkles,
+  Trash2,
   X
 } from 'lucide-react';
 
@@ -31,10 +34,13 @@ interface CafePost {
   avatar: string;
   time: string;
   imageUrl: string;
+  imageKey?: string;
   caption: string;
   likes: number;
   comments: CafeComment[];
   isOfficial?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const makeVisualCard = (title: string, subtitle: string, accent = '#FF2E96') => {
@@ -191,27 +197,6 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
         comments: [
           { id: 'c3', name: txt('Noor', 'نور', 'نوور'), text: txt('Very important reminder.', 'تذكير مهم جدًا.', 'بیرخستنەوەیەکی گرنگە.') }
         ]
-      },
-      {
-        id: 'user-1',
-        author: txt('Ahmed from Baghdad', 'أحمد من بغداد', 'ئەحمەد لە بەغداد'),
-        role: txt('Member post', 'منشور عضو', 'بابەتی ئەندام'),
-        avatar: 'أ',
-        time: txt('4 hours ago', 'قبل ٤ ساعات', '٤ کاتژمێر پێش ئێستا'),
-        imageUrl: makeVisualCard(
-          'Family Values',
-          'Respect, patience, and honesty are the foundation of a stable home.',
-          '#FF2E96'
-        ),
-        caption: txt(
-          'Respect and patience are more important than perfect words.',
-          'الاحترام والصبر أهم من الكلام المثالي.',
-          'ڕێز و ئارامگرتن گرنگترن لە قسەی تەواو.'
-        ),
-        likes: 89,
-        comments: [
-          { id: 'c4', name: txt('Mina', 'مينا', 'مینا'), text: txt('True words.', 'كلام صحيح.', 'قسەی ڕاستە.') }
-        ]
       }
     ],
     [locale]
@@ -224,28 +209,11 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
   const [isCompressing, setIsCompressing] = useState(false);
   const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
 
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      triggerToast(txt('Please choose an image file.', 'يرجى اختيار ملف صورة.', 'تکایە فایلی وێنە هەڵبژێرە.'));
-      return;
-    }
-
-    try {
-      setIsCompressing(true);
-      const compressed = await compressImage(file);
-      setSelectedImage(compressed);
-      triggerToast(txt('Image compressed and ready.', 'تم ضغط الصورة وهي جاهزة.', 'وێنەکە بچووک کرایەوە و ئامادەیە.'));
-    } catch (error) {
-      console.error(error);
-      triggerToast(txt('Image compression failed. Please try another image.', 'فشل ضغط الصورة. جرّب صورة أخرى.', 'کەمکردنەوەی قەبارەی وێنە سەرکەوتوو نەبوو.'));
-    } finally {
-      setIsCompressing(false);
-      event.target.value = '';
-    }
-  };
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editCaption, setEditCaption] = useState('');
+  const [editSelectedImage, setEditSelectedImage] = useState<string>('');
+  const [isEditCompressing, setIsEditCompressing] = useState(false);
+  const [isUpdatingPost, setIsUpdatingPost] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -270,6 +238,52 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
       isMounted = false;
     };
   }, [initialPosts]);
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      triggerToast(txt('Please choose an image file.', 'يرجى اختيار ملف صورة.', 'تکایە فایلی وێنە هەڵبژێرە.'));
+      return;
+    }
+
+    try {
+      setIsCompressing(true);
+      const compressed = await compressImage(file);
+      setSelectedImage(compressed);
+      triggerToast(txt('Image compressed and ready.', 'تم ضغط الصورة وهي جاهزة.', 'وێنەکە بچووک کرایەوە و ئامادەیە.'));
+    } catch (error) {
+      console.error(error);
+      triggerToast(txt('Image compression failed. Please try another image.', 'فشل ضغط الصورة. جرّب صورة أخرى.', 'کەمکردنەوەی قەبارەی وێنە سەرکەوتوو نەبوو.'));
+    } finally {
+      setIsCompressing(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleEditImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      triggerToast(txt('Please choose an image file.', 'يرجى اختيار ملف صورة.', 'تکایە فایلی وێنە هەڵبژێرە.'));
+      return;
+    }
+
+    try {
+      setIsEditCompressing(true);
+      const compressed = await compressImage(file);
+      setEditSelectedImage(compressed);
+      triggerToast(txt('Replacement image compressed.', 'تم ضغط الصورة البديلة.', 'وێنەی جێگرەوە بچووک کرایەوە.'));
+    } catch (error) {
+      console.error(error);
+      triggerToast(txt('Image compression failed.', 'فشل ضغط الصورة.', 'کەمکردنەوەی قەبارەی وێنە سەرکەوتوو نەبوو.'));
+    } finally {
+      setIsEditCompressing(false);
+      event.target.value = '';
+    }
+  };
 
   const handleCreatePost = async () => {
     const cleanCaption = caption.trim();
@@ -327,8 +341,100 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     }
   };
 
-  const handleLike = (postId: string) => {
+  const startEditing = (post: CafePost) => {
+    if (!post.id.startsWith('cafe_')) {
+      triggerToast(txt('Only saved member posts can be edited.', 'يمكن تعديل منشورات الأعضاء المحفوظة فقط.', 'تەنها بابەتە پاشەکەوتکراوەکان دەکرێت دەستکاری بکرێن.'));
+      return;
+    }
+
+    setEditingPostId(post.id);
+    setEditCaption(post.caption || '');
+    setEditSelectedImage('');
+  };
+
+  const cancelEditing = () => {
+    setEditingPostId(null);
+    setEditCaption('');
+    setEditSelectedImage('');
+  };
+
+  const savePostEdit = async (post: CafePost) => {
+    const cleanCaption = editCaption.trim();
+
+    if (!cleanCaption && !editSelectedImage) {
+      triggerToast(txt('Caption or replacement image is required.', 'النص أو الصورة البديلة مطلوب.', 'دەق یان وێنەی جێگرەوە پێویستە.'));
+      return;
+    }
+
+    try {
+      setIsUpdatingPost(true);
+
+      const response = await fetch(`/api/marriage-cafe/posts/${encodeURIComponent(post.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          caption: cleanCaption,
+          imageDataUrl: editSelectedImage || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success || !data.post) {
+        throw new Error(data.message || 'Could not update post.');
+      }
+
+      setPosts((current) => current.map((item) => (item.id === post.id ? data.post : item)));
+      cancelEditing();
+      triggerToast(txt('Post updated successfully.', 'تم تحديث المنشور بنجاح.', 'بابەتەکە بە سەرکەوتوویی نوێکرایەوە.'));
+    } catch (error: any) {
+      console.error(error);
+      triggerToast(txt('Could not update this post.', 'تعذر تحديث هذا المنشور.', 'نەتوانرا ئەم بابەتە نوێ بکرێتەوە.'));
+    } finally {
+      setIsUpdatingPost(false);
+    }
+  };
+
+  const deleteSavedPost = async (post: CafePost) => {
+    if (!post.id.startsWith('cafe_')) return;
+
+    const confirmed = confirm(
+      txt(
+        'Delete this Marriage Cafe post?',
+        'هل تريد حذف هذا المنشور من مقهى الزواج؟',
+        'ئەم بابەتە بسڕدرێتەوە؟'
+      )
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/marriage-cafe/posts/${encodeURIComponent(post.id)}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Could not delete post.');
+      }
+
+      setPosts((current) => current.filter((item) => item.id !== post.id));
+      triggerToast(txt('Post deleted.', 'تم حذف المنشور.', 'بابەتەکە سڕایەوە.'));
+    } catch (error) {
+      console.error(error);
+      triggerToast(txt('Could not delete this post.', 'تعذر حذف هذا المنشور.', 'نەتوانرا بابەتەکە بسڕدرێتەوە.'));
+    }
+  };
+
+  const handleLike = async (postId: string) => {
     const alreadyLiked = likedPostIds.includes(postId);
+    const nextLiked = !alreadyLiked;
+
+    const targetPost = posts.find((post) => post.id === postId);
+    const nextLikes = Math.max(0, (targetPost?.likes || 0) + (nextLiked ? 1 : -1));
 
     setLikedPostIds((current) =>
       alreadyLiked ? current.filter((id) => id !== postId) : [...current, postId]
@@ -337,10 +443,24 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     setPosts((current) =>
       current.map((post) =>
         post.id === postId
-          ? { ...post, likes: alreadyLiked ? Math.max(0, post.likes - 1) : post.likes + 1 }
+          ? { ...post, likes: nextLikes }
           : post
       )
     );
+
+    if (postId.startsWith('cafe_')) {
+      try {
+        await fetch(`/api/marriage-cafe/posts/${encodeURIComponent(postId)}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ likes: nextLikes }),
+        });
+      } catch (error) {
+        console.warn('Could not persist like yet.', error);
+      }
+    }
   };
 
   return (
@@ -424,11 +544,13 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
       <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-7">
         {posts.map((post) => {
           const liked = likedPostIds.includes(post.id);
+          const isEditing = editingPostId === post.id;
+          const canEdit = post.id.startsWith('cafe_') && !post.isOfficial;
 
           return (
             <article
               key={post.id}
-              className="overflow-hidden rounded-[2rem] border border-[#F2D7FF] bg-white shadow-xl shadow-[#B829DD]/10 transition hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#FF2E96]/15"
+              className="overflow-hidden rounded-[2rem] border border-[#F2D7FF] bg-white shadow-xl shadow-[#B829DD]/10 transition hover:shadow-2xl hover:shadow-[#FF2E96]/15"
             >
               <header className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
@@ -458,8 +580,8 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
               </div>
 
               <div className="space-y-4 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-4">
                     <button
                       type="button"
                       onClick={() => handleLike(post.id)}
@@ -486,12 +608,88 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
                     </button>
                   </div>
 
+                  {canEdit && !isEditing && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => startEditing(post)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-[#B829DD]/10 px-3 py-1.5 text-xs font-black text-[#B829DD] transition hover:bg-[#B829DD]/15"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        <span>{txt('Edit', 'تعديل', 'دەستکاری')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteSavedPost(post)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600 transition hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>{txt('Delete', 'حذف', 'سڕینەوە')}</span>
+                      </button>
+                    </div>
+                  )}
+
                   <Sparkles className="h-5 w-5 text-[#B829DD]" />
                 </div>
 
-                <p className="text-sm font-semibold leading-relaxed text-[#1E1E2F]">
-                  <span className="font-black">{post.author}</span> {post.caption}
-                </p>
+                {isEditing ? (
+                  <div className="space-y-3 rounded-2xl border border-[#F2D7FF] bg-[#FBF7FF] p-4">
+                    <textarea
+                      value={editCaption}
+                      onChange={(event) => setEditCaption(event.target.value)}
+                      rows={3}
+                      className="w-full resize-none rounded-2xl border border-[#E9CCFF] bg-white px-4 py-3 text-sm font-semibold text-[#1E1E2F] outline-none transition focus:border-[#FF2E96] focus:ring-4 focus:ring-[#FF2E96]/10"
+                      placeholder={txt('Edit caption…', 'عدّل النص...', 'دەقەکە دەستکاری بکە...')}
+                    />
+
+                    {editSelectedImage && (
+                      <div className="relative overflow-hidden rounded-2xl border border-[#F2D7FF] bg-white">
+                        <img src={editSelectedImage} alt="Replacement preview" className="h-auto w-full object-contain" />
+                        <button
+                          type="button"
+                          onClick={() => setEditSelectedImage('')}
+                          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#1E1E2F] shadow-lg transition hover:scale-105"
+                          aria-label="Remove replacement image"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#E9CCFF] bg-white px-4 py-2 text-xs font-black text-[#B829DD] shadow-sm transition hover:border-[#FF2E96] hover:text-[#FF2E96]">
+                        <ImagePlus className="h-4 w-4" />
+                        <span>{isEditCompressing ? txt('Compressing…', 'جاري الضغط...', 'بچووک دەکرێتەوە...') : txt('Replace image', 'استبدال الصورة', 'وێنە بگۆڕە')}</span>
+                        <input type="file" accept="image/*" onChange={handleEditImageChange} className="hidden" />
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={cancelEditing}
+                          className="rounded-full border border-[#E9CCFF] bg-white px-5 py-2 text-xs font-black text-[#6F6A7A] transition hover:bg-[#F8F5FF]"
+                        >
+                          {txt('Cancel', 'إلغاء', 'هەڵوەشاندنەوە')}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => savePostEdit(post)}
+                          disabled={isUpdatingPost || isEditCompressing}
+                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FF2E96] via-[#B829DD] to-[#8B5CF6] px-5 py-2 text-xs font-black text-white shadow-lg shadow-[#B829DD]/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Save className="h-4 w-4" />
+                          <span>{isUpdatingPost ? txt('Saving…', 'جاري الحفظ...', 'پاشەکەوت دەکرێت...') : txt('Save changes', 'حفظ التغييرات', 'گۆڕانکاری پاشەکەوت بکە')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm font-semibold leading-relaxed text-[#1E1E2F]">
+                    <span className="font-black">{post.author}</span> {post.caption}
+                  </p>
+                )}
 
                 {post.comments.length > 0 && (
                   <div className="rounded-2xl bg-[#F8F5FF] p-3">
@@ -510,5 +708,3 @@ export default function MarriageCafe({ locale, triggerToast }: MarriageCafeProps
     </section>
   );
 }
-
-
