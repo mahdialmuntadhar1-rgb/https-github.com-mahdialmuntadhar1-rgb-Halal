@@ -45,6 +45,11 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
   const [isCompressing, setIsCompressing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // New social media form states (Instagram/Facebook style)
+  const [postType, setPostType] = useState<'standard' | 'photo' | 'opinion' | 'poll'>('standard');
+  const [opinionColor, setOpinionColor] = useState<string>('from-rose-500 to-orange-500');
+  const [pollOptionsInputs, setPollOptionsInputs] = useState<string[]>(['', '']);
+
   // Feed control states
   const [adminViewFilter, setAdminViewFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -138,28 +143,55 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim() || !newContent.trim()) {
-      triggerToast(txt("⚠️ Please add a title and write your post content.", "⚠️ يُرجى ملء عنوان ونص المنشور بالكامل.", "⚠️ تکایە ناونیشان و ناوەڕۆک بنووسە."));
-      return;
+
+    let finalTitle = newTitle.trim();
+    let finalContent = newContent.trim();
+
+    if (postType === 'opinion') {
+      if (!finalContent) {
+        triggerToast(txt("⚠️ Please write your opinion text.", "⚠️ يُرجى كتابة رأيك أو فكرتك أولاً.", "⚠️ تکایە دەقی بۆچوونەکەت بنووسە."));
+        return;
+      }
+      finalTitle = finalContent.slice(0, 45) + (finalContent.length > 45 ? '...' : '');
+    } else if (postType === 'poll') {
+      if (!finalTitle) {
+        triggerToast(txt("⚠️ Please write your poll question in the Headline field.", "⚠️ يُرجى كتابة سؤال الاستطلاع في حقل العنوان.", "⚠️ تکایە پرسیاری ڕاپرسییەکە لە حەقڵی سەردێڕ بنووسە."));
+        return;
+      }
+      const validOptions = pollOptionsInputs.filter(opt => opt.trim() !== '');
+      if (validOptions.length < 2) {
+        triggerToast(txt("⚠️ Please add at least 2 options for your poll.", "⚠️ يُرجى إضافة خيارين على الأقل للاستطلاع.", "⚠️ تکایە لانی کەم ٢ بژاردە بنووسە."));
+        return;
+      }
+    } else {
+      if (!finalTitle || !finalContent) {
+        triggerToast(txt("⚠️ Please add a title and write your post content.", "⚠️ يُرجى ملء عنوان ونص المنشور بالكامل.", "⚠️ تکایە ناونیشان و ناوەڕۆک بنووسە."));
+        return;
+      }
     }
 
     setSubmitting(true);
     try {
-      // Create post. If admin, it will be automatically approved; if normal user, pending.
       const status = isAdmin ? 'approved' : 'pending';
+      const validPollOptions = postType === 'poll' ? pollOptionsInputs.filter(opt => opt.trim() !== '') : undefined;
+
       await apiClient.createCommunityPost(
-        newTitle.trim(),
-        newContent.trim(),
+        finalTitle,
+        finalContent,
         newCategory,
         false, // not a daily question
-        attachedImage || undefined,
-        status
+        postType === 'photo' ? (attachedImage || undefined) : undefined,
+        status,
+        postType,
+        postType === 'opinion' ? opinionColor : undefined,
+        validPollOptions
       );
 
       setNewTitle('');
       setNewContent('');
       setNewCategory('advice');
       setAttachedImage(null);
+      setPollOptionsInputs(['', '']);
       if (fileInputRef.current) fileInputRef.current.value = '';
 
       if (isAdmin) {
@@ -174,6 +206,17 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
       triggerToast("❌ Failed to submit post.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVote = async (postId: string, optionText: string) => {
+    const userName = userProfile.name || 'Sincere Member';
+    try {
+      const updatedPost = await apiClient.voteInPoll(postId, optionText, userName);
+      setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));
+      triggerToast(txt("📊 Vote registered!", "📊 تم تسجيل تصويتك العائلي بنجاح!", "📊 دەنگەکەت تۆمارکرا!"));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -379,11 +422,64 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
       )}
 
       {/* 3. POST COMPOSER */}
-      <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div className="bg-[#FAF9F5] border border-[#E6DCC3] rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
         <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal flex items-center gap-2 border-b border-stone-100 pb-2.5">
           <Sparkles className="w-4.5 h-4.5 text-[#40798C]" />
-          <span>{txt("Share a Respectful Thought", "اطرح فكرة أو استفساراً وقوراً", "بۆچوونێکی گونجاو بڵاوبکەوە")}</span>
+          <span>{txt("Share to Marriage Café", "انشر في مقهى الزواج الوقور", "لە کافێی هاوسەرگیری بڵاوی بکەرەوە")}</span>
         </h4>
+
+        {/* Dynamic Post Type Tab Selector */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => {
+              setPostType('standard');
+              removeAttachedImage();
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              postType === 'standard' ? 'bg-[#40798C] text-white shadow-xs' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+            }`}
+          >
+            <span>💬</span>
+            <span>{txt("Standard", "موضوع للنقاش", "گفتوگۆ")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPostType('photo')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              postType === 'photo' ? 'bg-[#40798C] text-white shadow-xs' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5" />
+            <span>{txt("Photo & Caption", "صورة وتعليق", "وێنە و نووسین")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPostType('opinion');
+              removeAttachedImage();
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              postType === 'opinion' ? 'bg-[#40798C] text-white shadow-xs' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+            }`}
+          >
+            <span>✍️</span>
+            <span>{txt("Write Opinion", "طرح رأي/فكرة", "بۆچوون")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPostType('poll');
+              removeAttachedImage();
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              postType === 'poll' ? 'bg-[#40798C] text-white shadow-xs' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+            }`}
+          >
+            <span>📊</span>
+            <span>{txt("Create Poll", "استطلاع رأي", "ڕاپرسی")}</span>
+          </button>
+        </div>
 
         <form onSubmit={handleCreatePost} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -396,7 +492,7 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as CommunityPost['category'])}
-                className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#40798C]"
+                className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#40798C]"
               >
                 {categories.filter(c => c.value !== 'all').map(c => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -404,74 +500,193 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
               </select>
             </div>
 
-            {/* Title */}
-            <div className="md:col-span-8 space-y-1.5">
-              <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500">
-                {txt("Post Headline", "عنوان الاستفسار / المشاركة", "سەردێڕی بابەتەکە")}
+            {/* Title / Question Field */}
+            {postType !== 'opinion' && (
+              <div className="md:col-span-8 space-y-1.5">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500">
+                  {postType === 'poll' 
+                    ? txt("Poll Question", "سؤال الاستطلاع", "پرسیاری ڕاپرسی")
+                    : txt("Post Headline", "عنوان المشاركة", "سەردێڕی بابەتەکە")}
+                </label>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder={postType === 'poll' 
+                    ? txt("What's your stance on...?", "ما هو رأيكم الشرعي والعائلي في...؟", "بۆچوونتان چییە لەسەر...؟")
+                    : txt("e.g., Traditional family salon meeting etiquette?", "مثال: آداب النظرة الشرعية في صالون العائلة؟", "بۆ نموونە، ئادابەکانی بینینی شەرعی؟")}
+                  className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#40798C]"
+                  maxLength={90}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Type-Specific Content Areas */}
+          {postType === 'opinion' ? (
+            /* OPINION WRITER (Facebook-Style with Gradient presets) */
+            <div className="space-y-3">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block">
+                {txt("Your opinion in beautiful visual", "اكتب رأيك بقالب ملون جذاب", "بۆچوونەکەت بنووسە بە شێوازێکی جوان")}
               </label>
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder={txt("e.g., Traditional family salon meeting etiquette?", "مثال: آداب النظرة الشرعية في صالون العائلة؟", "بۆ نموونە، ئادابەکانی بینینی شەرعی؟")}
-                className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#40798C]"
-                maxLength={90}
+              <div className={`rounded-2xl p-6 bg-gradient-to-br ${opinionColor} text-white flex flex-col justify-center min-h-[140px] shadow-inner relative transition-all duration-300`}>
+                <textarea
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  placeholder={txt("Write your sincere personal opinion here...", "اكتب رأيك الصادق أو نصيحتك للشباب هنا ليظهر كبطاقة ملونة جميلة...", "بۆچوونی ڕاستگۆیانەی خۆت لێرە بنووسە...")}
+                  className="w-full bg-transparent text-white placeholder-white/70 text-center font-serif font-black text-sm sm:text-base focus:outline-none resize-none h-24 border-none"
+                  maxLength={250}
+                />
+              </div>
+              
+              {/* Preset Selector */}
+              <div className="flex items-center gap-2.5 pt-1.5">
+                <span className="text-[10px] text-stone-500 font-bold">{txt("Theme:", "القالب:", "بابەت:")}</span>
+                <div className="flex gap-2">
+                  {[
+                    'from-rose-500 to-orange-500',
+                    'from-cyan-500 to-blue-500',
+                    'from-emerald-500 to-teal-600',
+                    'from-indigo-500 to-purple-600',
+                    'from-amber-400 to-rose-600',
+                    'from-stone-700 to-stone-900'
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setOpinionColor(preset)}
+                      className={`w-6 h-6 rounded-full bg-gradient-to-br ${preset} border-2 ${
+                        opinionColor === preset ? 'border-warm-charcoal scale-110' : 'border-transparent'
+                      } cursor-pointer transition`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : postType === 'poll' ? (
+            /* POLL WRITER (Dynamic option lists) */
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block">
+                  {txt("Optional Poll Description", "شرح تفصيلي اختياري للاستطلاع", "نووسینی ڕوونکردنەوەی ناچاری")}
+                </label>
+                <textarea
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  placeholder={txt("Provide additional context for this poll (optional)...", "اكتب سياقاً أو خلفية عائلية ميسرة لهذا الاستبيان...", "ڕوونکردنەوە بنووسە بۆ ئەم ڕاپرسییە (ئارەزوومەندانە)...")}
+                  className="w-full bg-white border border-stone-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-[#40798C] h-16 resize-none"
+                  maxLength={500}
+                />
+              </div>
+
+              {/* Dynamic Option Inputs */}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500 block">
+                  {txt("Poll Choices (Min 2, Max 4)", "خيارات التصويت (2 على الأقل، 4 كحد أقصى)", "بۆژاردەکانی دەنگدان (لانی کەم ٢، زۆرترین ٤)")}
+                </label>
+                {pollOptionsInputs.map((option, index) => (
+                  <div key={`input-${index}`} className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-[#40798C] w-4">{index + 1}.</span>
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => {
+                        const next = [...pollOptionsInputs];
+                        next[index] = e.target.value;
+                        setPollOptionsInputs(next);
+                      }}
+                      placeholder={txt(`Choice ${index + 1}`, `الخيار ${index + 1}`, `بژاردەی ${index + 1}`)}
+                      className="flex-1 bg-white border border-stone-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-[#40798C]"
+                      maxLength={40}
+                    />
+                    {pollOptionsInputs.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPollOptionsInputs(pollOptionsInputs.filter((_, i) => i !== index));
+                        }}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                {pollOptionsInputs.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setPollOptionsInputs([...pollOptionsInputs, ''])}
+                    className="mt-1 text-xs font-black text-[#40798C] hover:text-[#316070] flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>➕</span>
+                    <span>{txt("Add Option", "إضافة خيار آخر", "بژاردەیەکی تر زیاد بکە")}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* STANDARD OR PHOTO WRITER */
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500">
+                {postType === 'photo' 
+                  ? txt("Photo Caption", "التعليق المرفق مع الصورة", "ژێرنووسی وێنە")
+                  : txt("Detail description", "شرح التفاصيل والأسئلة", "ناوەڕۆکی بابەتەکە")}
+              </label>
+              <textarea
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                placeholder={postType === 'photo'
+                  ? txt("Write a short caption for your photo...", "اكتب شرحاً أو تعليقاً وقوراً ومناسباً للصورة المرفقة...", "شرحێکی کورت بنووسە بۆ وێنەکەت...")
+                  : txt("Write your thoughts with high dignity and respect...", "اكتب تفاصيل استفسارك بكل احترام ووقار ليجيبك الأعضاء...", "ناوەڕۆک بنووسە بەوپەڕی ڕێزەوە...")}
+                className="w-full bg-white border border-stone-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-[#40798C] h-24 resize-none"
+                maxLength={1000}
               />
             </div>
-          </div>
+          )}
 
-          {/* Core Content Box */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-stone-500">
-              {txt("Detail description", "شرح التفاصيل والأسئلة", "ناوەرۆکی بابەتەکە")}
-            </label>
-            <textarea
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
-              placeholder={txt("Write your thoughts with high dignity and respect...", "اكتب تفاصيل استفسارك بكل احترام ووقار ليجيبك الأعضاء...", "ناوەڕۆک بنووسە بەوپەڕی ڕێزەوە...")}
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-[#40798C] h-24 resize-none"
-              maxLength={1000}
-            />
-          </div>
-
-          {/* Client-side image upload and preview */}
+          {/* Client-side image upload/preview for photo posts */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-stone-100 pt-4">
             
-            {/* Image attachment button & compressed label */}
+            {/* Image attachment only for standard/photo types */}
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 border border-stone-200/60 rounded-xl text-stone-700 text-xs font-bold flex items-center gap-2 active:scale-95 transition cursor-pointer"
-                disabled={isCompressing}
-              >
-                <ImageIcon className="w-4 h-4 text-stone-600" />
-                <span>
-                  {isCompressing 
-                    ? txt("Compressing...", "جاري الضغط...", "کەمکردنەوەی قەبارە...") 
-                    : txt("Attach Image", "إرفاق صورة", "هاوپێچکردنی وێنە")}
-                </span>
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                accept="image/*"
-                className="hidden"
-              />
+              {(postType === 'photo' || postType === 'standard') && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 bg-white hover:bg-stone-50 border border-stone-200 rounded-xl text-stone-700 text-xs font-bold flex items-center gap-2 active:scale-95 transition cursor-pointer"
+                    disabled={isCompressing}
+                  >
+                    <ImageIcon className="w-4 h-4 text-stone-600" />
+                    <span>
+                      {isCompressing 
+                        ? txt("Compressing...", "جاري الضغط...", "کەمکردنەوەی قەبارە...") 
+                        : txt("Select Image", "اختيار صورة", "وێنە هەڵبژێرە")}
+                    </span>
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
 
-              {attachedImage && (
-                <span className="text-[10px] text-emerald-700 font-mono font-bold bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-md flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Compressed JPEG (60% scale)
-                </span>
+                  {attachedImage && (
+                    <span className="text-[10px] text-emerald-700 font-mono font-bold bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> JPEG (Compressed)
+                    </span>
+                  )}
+                </>
               )}
             </div>
 
             {/* Post button */}
             <button
               type="submit"
-              disabled={submitting || isCompressing}
-              className="w-full sm:w-auto px-6 py-2.5 bg-[#40798C] hover:bg-[#316070] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-[#40798C]/15 cursor-pointer disabled:opacity-50 disabled:pointer-events-none transition"
+              disabled={submitting || isCompressing || (postType === 'photo' && !attachedImage)}
+              className="w-full sm:w-auto px-6 py-2.5 bg-[#40798C] hover:bg-[#316070] text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-[#40798C]/15 cursor-pointer disabled:opacity-50 disabled:pointer-events-none transition"
             >
               <Send className="w-4 h-4" />
               <span>{submitting ? txt("Submitting...", "جاري الإرسال...", "دەنێردرێت...") : txt("Submit for Approval", "إرسال للتدقيق والنشر", "ناردن بۆ پەسەندکردن")}</span>
@@ -582,21 +797,101 @@ export default function MarriageCafeFeed({ locale, userProfile, triggerToast: ex
                   </span>
                 </div>
 
-                {/* POST CONTENT */}
-                <div className="space-y-3">
-                  <h4 className="text-base sm:text-lg font-serif font-black text-warm-charcoal leading-tight">
-                    {post.title}
-                  </h4>
-                  
-                  <p className="text-xs sm:text-[13px] text-stone-600 font-medium leading-relaxed whitespace-pre-line">
-                    {post.content}
-                  </p>
-
-                  {/* Attachment image */}
-                  {post.image && (
-                    <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-50 max-h-96 w-full sm:max-w-xl mt-3">
-                      <img src={post.image} alt="Attachment" className="w-full h-full object-contain" />
+                 {/* POST CONTENT */}
+                <div className="space-y-3 text-start">
+                  {post.postType === 'opinion' ? (
+                    /* OPINION BG GRAPHIC (Facebook/Instagram Style) */
+                    <div className={`rounded-2xl p-6 bg-gradient-to-br ${post.opinionColor || 'from-rose-500 to-orange-500'} text-white text-center font-serif font-black text-sm sm:text-base shadow-inner flex items-center justify-center min-h-[140px] relative overflow-hidden px-4 w-full`}>
+                      <div className="absolute top-[-20%] right-[-20%] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                      <p className="relative z-10 leading-relaxed whitespace-pre-line text-white">
+                        {post.content}
+                      </p>
                     </div>
+                  ) : post.postType === 'poll' ? (
+                    /* INTERACTIVE POLL POST (Instagram/Twitter Style) */
+                    <div className="space-y-3 w-full">
+                      <h4 className="text-base sm:text-lg font-serif font-black text-warm-charcoal leading-tight">
+                        {post.title}
+                      </h4>
+                      {post.content && (
+                        <p className="text-xs text-stone-600 leading-relaxed whitespace-pre-line mb-2">
+                          {post.content}
+                        </p>
+                      )}
+                      
+                      {/* Poll Options List with Vote Percentages */}
+                      <div className="space-y-2 max-w-md w-full">
+                        {(() => {
+                          const votes = (post.pollVotes || {}) as Record<string, string[]>;
+                          const totalVotes = Object.values(votes).reduce((sum, v) => sum + ((v as string[])?.length || 0), 0);
+                          const userVotedFor = Object.keys(votes).find(opt => votes[opt]?.includes(userProfile.name || ''));
+
+                          return (post.pollOptions || []).map((option) => {
+                            const optionVoters = votes[option] || [];
+                            const percent = totalVotes > 0 ? Math.round((optionVoters.length / totalVotes) * 100) : 0;
+                            const isMyVote = userVotedFor === option;
+
+                            return (
+                              <button
+                                key={`opt-${option}`}
+                                type="button"
+                                onClick={() => handleVote(post.id, option)}
+                                className={`w-full relative rounded-xl border p-3 text-xs font-black transition flex items-center justify-between overflow-hidden cursor-pointer ${
+                                  isMyVote
+                                    ? 'border-emerald-500 text-emerald-900 bg-emerald-50/20'
+                                    : 'border-stone-200 text-stone-700 hover:border-[#40798C] bg-stone-50/50 hover:bg-stone-50'
+                                }`}
+                              >
+                                {/* Animated background bar */}
+                                <div 
+                                  className={`absolute top-0 left-0 bottom-0 transition-all duration-500 ${
+                                    isMyVote ? 'bg-emerald-500/15' : 'bg-[#40798C]/10'
+                                  }`}
+                                  style={{ width: `${percent}%` }}
+                                />
+
+                                <span className="relative z-10 flex items-center gap-1.5 truncate">
+                                  {isMyVote && <span className="text-emerald-600">✓</span>}
+                                  <span>{option}</span>
+                                </span>
+
+                                <span className="relative z-10 text-[10px] text-stone-500 font-mono">
+                                  {optionVoters.length} {txt("votes", "صوت", "دەنگ")} ({percent}%)
+                                </span>
+                              </button>
+                            );
+                          });
+                        })()}
+                        
+                        {/* Total indicator */}
+                        {(() => {
+                          const votes = (post.pollVotes || {}) as Record<string, string[]>;
+                          const totalVotes = Object.values(votes).reduce((sum, v) => sum + ((v as string[])?.length || 0), 0);
+                          return (
+                            <p className="text-[10px] text-stone-400 font-bold font-mono">
+                              📊 {totalVotes} {txt("total anonymous votes", "إجمالي الأصوات العائلية", "کۆی گشتی دەنگەکان")}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  ) : (
+                    /* STANDARD OR PHOTO POST */
+                    <>
+                      <h4 className="text-base sm:text-lg font-serif font-black text-warm-charcoal leading-tight">
+                        {post.title}
+                      </h4>
+                      
+                      <p className="text-xs sm:text-[13px] text-stone-600 font-medium leading-relaxed whitespace-pre-line">
+                        {post.content}
+                      </p>
+
+                      {post.image && (
+                        <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-50 max-h-96 w-full sm:max-w-xl mt-3">
+                          <img src={post.image} alt="Attachment" className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 

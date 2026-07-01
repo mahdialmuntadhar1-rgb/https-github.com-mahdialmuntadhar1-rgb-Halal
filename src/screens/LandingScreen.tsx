@@ -21,7 +21,9 @@ import {
   ArrowRight,
   UserCheck,
   X,
-  Compass
+  Compass,
+  Award,
+  Coffee
 } from 'lucide-react';
 
 interface LandingScreenProps {
@@ -115,6 +117,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
   const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
+  const [homeTab, setHomeTab] = useState<'discover' | 'cafe'>('discover');
   
   // Local toast notification system
   const [localToast, setLocalToast] = useState<string | null>(null);
@@ -199,6 +202,28 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     return candidates;
   }, [userProfile, preSelectedGender]);
 
+  // Nearby location candidates based on selected governorate or user's own profile location
+  const nearbyMatches = useMemo(() => {
+    // Fallback to Baghdad or user's governorate if 'all' is chosen
+    const userGov = userProfile?.governorate || 'Baghdad';
+    const targetGov = (selectedGov && selectedGov !== 'all') ? selectedGov : userGov;
+
+    // Filter matches that reside in this governorate and respect gender preference
+    let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === targetGov.toLowerCase());
+    if (genderPref !== 'all') {
+      result = result.filter(m => m.gender === genderPref);
+    }
+    
+    // Sort by compatibility score
+    const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+    
+    // If empty in this specific governorate, fallback to adjacent governorates or overall matches in gender preference
+    if (sorted.length === 0) {
+      return INITIAL_MATCHES.filter(m => genderPref === 'all' || m.gender === genderPref).slice(0, 6);
+    }
+    return sorted;
+  }, [selectedGov, userProfile, genderPref]);
+
   const getGovDisplayName = (govId: string) => {
     const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
     if (!gov) return govId;
@@ -248,12 +273,242 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         preSelectedGender={preSelectedGender}
       />
 
-      {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
-      <section className="py-4" id="governorate-matrimonial-portal">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* BUSINESS HERO SECTION (Stunning professional sub-header representing authority, trust, and premium certified Iraqi matrimonial services) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2" id="business-hero-section">
+        <div className="bg-gradient-to-br from-[#1C2541] via-[#2F3E46] to-[#1C2541] border border-[#E8DCC4]/30 rounded-[2rem] p-6 sm:p-10 text-white relative overflow-hidden shadow-2xl">
+          {/* Subtle golden branding lines */}
+          <div className="absolute top-0 right-0 w-56 h-56 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
           
-          {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            {/* Business Hero Left Column */}
+            <div className="lg:col-span-8 text-start space-y-4">
+              <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider">
+                <Award className="w-3.5 h-3.5 text-amber-400" />
+                <span>{txt("OFFICIAL PREMIUM DIVISION", "البوابة المهنية الرسمية المعتمدة", "بەشی فەرمی و سەرەکی")}</span>
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-serif font-black tracking-tight leading-tight">
+                {txt("Licensed, Chaperoned Courtship Services", "الوساطة المهنية المعتمدة للزواج الوقور في العراق", "خزمەتگوزاری فەرمی هاوسەرگیری بەپێی بەها کۆمەڵایەتییەکان")}
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-300 font-medium leading-relaxed max-w-3xl">
+                {txt(
+                  "We bridge tradition and modernity. Each applicant undergoes rigorous ID validation and manual lifestyle assessment to guarantee the most sincere, family-supported match pool in all 19 Iraqi governorates.",
+                  "نجمع بين الأصالة والحداثة بأسلوب آمن. يخضع كل متقدم لعملية تدقيق وتوثيق شاملة لضمان جدية النوايا وحفظ كرامة وخصوصية العائلات الكريمة في عموم محافظات العراق.",
+                  "ئێمە مۆدێرنە و دابونەریت کۆدەکەینەوە بە شێوازێکی بێوەی. هەموو پڕۆفایلەکان پشتڕاست دەکرێنەوە بۆ دڵنیابوون لە ڕاستگۆیی کارەکان لە ١٩ پارێزگاکەی عێراق."
+                )}
+              </p>
+
+              {/* Core Features list with clean styling */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-semibold text-stone-100">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
+                  <span className="text-lg">💼</span>
+                  <div>
+                    <p className="font-extrabold text-amber-300">{txt("100% Manual Vetting", "تدقيق بشري كامل", "پداچوونەوەی دەستی ١٠٠٪")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Employment & ID checks", "توثيق الهوية والعمل", "پشتڕاستکردنەوەی کار")}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
+                  <span className="text-lg">🛡️</span>
+                  <div>
+                    <p className="font-extrabold text-amber-300">{txt("Privacy Secured", "خصوصية مصونة", "پاراستنی تەواوی نهێنی")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Blur portraits on demand", "تمويه الصور للعرائس", "لێڵکردنی وێنە بەپێی خواست")}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
+                  <span className="text-lg">🤝</span>
+                  <div>
+                    <p className="font-extrabold text-amber-300">{txt("Wali Involvement", "إشراك أولياء الأمور", "ئاگادارکردنەوەی سەرپەرشتیار")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Chaperoned introductions", "خطوبة وقورة وعائلية", "پڕۆسەی فەرمی و عائلی")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Business Hero Right Column: stats widget */}
+            <div className="lg:col-span-4 bg-white/10 border border-white/15 rounded-2xl p-5 text-center space-y-4 shadow-xl backdrop-blur-md">
+              <span className="text-[10px] font-mono font-black text-amber-400 uppercase tracking-widest block">
+                ⭐ {txt("IRAQ STATISTICS", "مؤشرات النجاح المبارك", "ئامارەکانی سەرکەوتن")}
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-start">
+                <div className="bg-black/20 p-3 rounded-xl">
+                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Verified Applicants", "الأعضاء الموثقون", "کاندیدەکان")}</span>
+                  <span className="text-lg font-serif font-black text-white">24,580+</span>
+                </div>
+                <div className="bg-black/20 p-3 rounded-xl">
+                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Blessed Marriages", "زيجات مباركة", "هاوسەرگیری سەرکەوتوو")}</span>
+                  <span className="text-lg font-serif font-black text-emerald-400">1,412+</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs text-amber-200 font-semibold leading-relaxed text-start flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+                <p>{txt(
+                  "Join our verified circle and discover candidates based on profound cultural, religious, and lifestyle alignment.",
+                  "انضم لصفوتنا المباركة واكتشف الشريك الأنسب المتوافق معك عقائدياً وثقافياً واجتماعياً.",
+                  "ببەرە ئەندام لە خێزانی پیرۆزمان بۆ دۆزینەوەی شیاوترین هاوسەر."
+                )}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------- HOME NAVIGATION TABS ----------------- */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2" id="home-navigation-tabs">
+        <div className="bg-[#FAF8F5] border border-[#E8DCC4] rounded-2xl sm:rounded-3xl p-2 sm:p-3 flex gap-2 shadow-inner">
+          
+          {/* Tab 1: Discover Member */}
+          <button
+            onClick={() => {
+              setHomeTab('discover');
+              showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
+            }}
+            className={`flex-1 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              homeTab === 'discover'
+                ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
+                : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50'
+            }`}
+          >
+            <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
+            <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
+          </button>
+
+          {/* Tab 2: Marriage Cafe */}
+          <button
+            onClick={() => {
+              setHomeTab('cafe');
+              showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
+            }}
+            className={`flex-1 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              homeTab === 'cafe'
+                ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-lg shadow-accent-coral/25'
+                : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50'
+            }`}
+          >
+            <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
+            <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
+            <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
+              LIVE FEED
+            </span>
+          </button>
+
+        </div>
+      </section>
+
+      {/* ----------------- DYNAMIC TAB RENDERING ----------------- */}
+      {homeTab === 'discover' ? (
+        <section className="py-2 space-y-8" id="governorate-matrimonial-portal">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            {/* NEARBY CANDIDATES SECTION (BY LOCATION) */}
+            <div className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2rem] p-5 sm:p-7 space-y-4 shadow-sm text-start">
+              <div className="flex justify-between items-center flex-wrap gap-2 text-start">
+                <div>
+                  <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-700 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-extrabold uppercase animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    {txt("Active Nearby Candidates", "نشطون بالقرب منك الآن", "کاندیدە چالاکەکانی نزیکت")}
+                  </span>
+                  <h4 className="text-sm sm:text-lg font-serif font-black text-warm-charcoal flex items-center gap-1 mt-1">
+                    <span>📍 {txt(`Candidates Nearby in ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `عروض مقيمة في ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `کاندیدە نزیکەکانی ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`)}</span>
+                  </h4>
+                </div>
+                <p className="text-[10px] text-stone-500 font-bold max-w-sm">
+                  📌 {txt("Based on selected governorate or your profile location.", "تلقائياً حسب موقعك الحالي أو خيار المحافظة المفعّل.", "بەپێی شوێنی دیاریکراو یان پڕۆفایلەکەت.")}
+                </p>
+              </div>
+
+              {nearbyMatches.length > 0 ? (
+                /* Swiper horizontal wrapper styled elegantly for mobile */
+                <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-thin snap-x scroll-smooth">
+                  {nearbyMatches.slice(0, 8).map((candidate) => {
+                    const isFemale = candidate.gender === 'female';
+                    return (
+                      <div
+                        key={`nearby-${candidate.id}`}
+                        onClick={() => handleProfileClick(candidate)}
+                        className="snap-start shrink-0 w-64 bg-white hover:bg-[#FCFBF9] border border-stone-200/80 hover:border-accent-coral/30 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between space-y-3 relative group shadow-xs hover:shadow-md cursor-pointer text-start"
+                      >
+                        <div className="space-y-2">
+                          {/* Compact portrait with privacy constraints */}
+                          <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center">
+                            {isFemale ? (
+                              <>
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover blur-md scale-110 opacity-90 select-none pointer-events-none"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[4px] flex flex-col items-center justify-center p-2 text-center">
+                                  <div className="w-10 h-10 rounded-full bg-[#FAF7F2] border border-accent-pink/30 flex items-center justify-center text-accent-pink font-serif font-black text-xs shadow-sm">
+                                    {candidate.name.charAt(0)}
+                                  </div>
+                                  <span className="mt-1 text-[8px] font-bold text-stone-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow-inner">
+                                    🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover grayscale-[10%] group-hover:scale-102 transition duration-300"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                                <span className="absolute bottom-1.5 left-1.5 text-[8px] font-mono font-extrabold text-white bg-black/45 px-1.5 py-0.5 rounded-md">
+                                  {txt("Verified", "حساب موثق", "پشتڕاستکراوە")}
+                                </span>
+                              </>
+                            )}
+
+                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+                          </div>
+
+                          {/* Candidate basic data */}
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal truncate">
+                                {isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}
+                                <span className="text-[10px] text-stone-400 font-mono"> ({candidate.age})</span>
+                              </h5>
+                              <span className="text-[8px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-1.5 py-0.5 rounded">
+                                {candidate.compatibilityScore}%
+                              </span>
+                            </div>
+                            <p className="text-[9.5px] font-semibold text-stone-500 truncate flex items-center gap-0.5 mt-0.5">
+                              💼 {candidate.profession}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-[9px] font-bold text-[#40798C]">
+                          <span>📍 {getGovDisplayName(candidate.governorate)}</span>
+                          <span className="text-accent-coral flex items-center gap-0.5">
+                            <span>{txt("View ➔", "تفاصيل ➔", "بینین ➔")}</span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center space-y-2 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#E6DCC3]/80">
+                  <Users className="w-8 h-8 text-stone-300 mx-auto" />
+                  <p className="text-xs font-bold text-stone-400">
+                    {txt(
+                      `No active profiles registered in ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)} yet. Try adjusting your gender filter.`,
+                      `لا يوجد عرسان أو عرائس مسجلون في ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)} حالياً.`,
+                      `هیچ کاندیدێک لەم شوێنە نییە.`
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
               <MapPin className="w-3.5 h-3.5" />
               <span>{txt("Governorate Matrimonial Portal", "بوابة المحافظات العراقية للزواج الحلال", "دەروازەی هاوسەرگیری پارێزگاکان")}</span>
@@ -589,6 +844,19 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
+      ) : (
+        /* Marriage Café Social Media Feed active tab */
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 animate-fade-in" id="marriage-cafe-social-hub">
+          <MarriageCafe
+            locale={locale}
+            triggerToast={showToast}
+            onNavigateToTab={setTab}
+            isAuthenticated={isAuthenticated}
+            userProfileName={userProfileName}
+            userProfileGovernorate={userProfile?.governorate || 'Baghdad'}
+          />
+        </section>
+      )}
 
       {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) */}
       <section className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2.5rem] py-10" id="featured-active-candidates">
@@ -673,13 +941,6 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
-
-      {/* MARRIAGE CAFE & DAILY ENGAGEMENT POLL */}
-      <MarriageCafe 
-        locale={locale} 
-        triggerToast={showToast} 
-        onNavigateToTab={setTab}
-      />
 
       {/* HOW IT WORKS */}
       <HowItWorks locale={locale} />

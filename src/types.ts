@@ -182,6 +182,10 @@ export interface CommunityPost {
   image?: string; // Client-side compressed image base64
   status?: 'pending' | 'approved' | 'hidden' | 'rejected';
   isFeatured?: boolean;
+  postType?: 'standard' | 'photo' | 'opinion' | 'poll';
+  opinionColor?: string;
+  pollOptions?: string[];
+  pollVotes?: Record<string, string[]>; // option text -> array of user names who voted
 }
 
 export interface IntroductionRequest {

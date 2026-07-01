@@ -214,6 +214,7 @@ export default function CommunityFeed({
       <MarriageCafe
         locale={locale}
         triggerToast={triggerToast}
+        isAuthenticated={false}
       />
 
       {/* DAILY MARRIAGE QUESTION SPOTLIGHT CARD */}

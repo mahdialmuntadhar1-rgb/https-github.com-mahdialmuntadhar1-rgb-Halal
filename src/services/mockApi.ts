@@ -424,7 +424,11 @@ export const mockApi = {
     category: CommunityPost['category'],
     isDaily: boolean = false,
     image?: string,
-    status?: 'pending' | 'approved' | 'hidden' | 'rejected'
+    status?: 'pending' | 'approved' | 'hidden' | 'rejected',
+    postType?: 'standard' | 'photo' | 'opinion' | 'poll',
+    opinionColor?: string,
+    pollOptions?: string[],
+    pollVotes?: Record<string, string[]>
   ): Promise<CommunityPost> {
     await delay(100);
     
@@ -445,7 +449,11 @@ export const mockApi = {
       isDailyQuestion: isDaily,
       image,
       status: status || defaultStatus,
-      isFeatured: false
+      isFeatured: false,
+      postType,
+      opinionColor,
+      pollOptions,
+      pollVotes: pollVotes || (pollOptions ? pollOptions.reduce((acc, opt) => ({ ...acc, [opt]: [] }), {}) : undefined)
     };
     mockCommunityPosts.unshift(newPost); // Add to top
     savePosts();
@@ -467,6 +475,31 @@ export const mockApi = {
           ...post,
           likesCount: newLikesCount,
           likedBy: newLikedBy
+        };
+        return updated;
+      }
+      return post;
+    });
+    if (!updated) throw new Error(`Post not found: ${postId}`);
+    savePosts();
+    return updated;
+  },
+
+  async voteInPoll(postId: string, optionText: string, userName: string): Promise<CommunityPost> {
+    await delay(60);
+    let updated: CommunityPost | null = null;
+    mockCommunityPosts = mockCommunityPosts.map(post => {
+      if (post.id === postId) {
+        const votes = post.pollVotes || {};
+        const newVotes: Record<string, string[]> = {};
+        Object.keys(votes).forEach(opt => {
+          const voters = votes[opt] || [];
+          newVotes[opt] = voters.filter(u => u !== userName);
+        });
+        newVotes[optionText] = [...(newVotes[optionText] || []), userName];
+        updated = {
+          ...post,
+          pollVotes: newVotes
         };
         return updated;
       }

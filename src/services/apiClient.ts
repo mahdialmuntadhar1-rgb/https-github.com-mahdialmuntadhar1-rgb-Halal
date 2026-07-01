@@ -509,15 +509,38 @@ export const apiClient = {
     });
   },
 
-  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false, image?: string, status?: 'pending' | 'approved' | 'hidden' | 'rejected'): Promise<CommunityPost> {
+  async createCommunityPost(
+    title: string, 
+    content: string, 
+    category: CommunityPost['category'], 
+    isDaily: boolean = false, 
+    image?: string, 
+    status?: 'pending' | 'approved' | 'hidden' | 'rejected',
+    postType?: 'standard' | 'photo' | 'opinion' | 'poll',
+    opinionColor?: string,
+    pollOptions?: string[],
+    pollVotes?: Record<string, string[]>
+  ): Promise<CommunityPost> {
     if (getIsDemoMode()) {
-      return mockApi.createCommunityPost(title, content, category, isDaily, image, status);
+      return mockApi.createCommunityPost(title, content, category, isDaily, image, status, postType, opinionColor, pollOptions, pollVotes);
     }
 
     return safeFetch<CommunityPost>(`${API_BASE}/community/posts`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ title, content, category, isDaily, image, status }),
+      body: JSON.stringify({ title, content, category, isDaily, image, status, postType, opinionColor, pollOptions, pollVotes }),
+    });
+  },
+
+  async voteInPoll(postId: string, optionText: string, userName: string): Promise<CommunityPost> {
+    if (getIsDemoMode()) {
+      return mockApi.voteInPoll(postId, optionText, userName);
+    }
+
+    return safeFetch<CommunityPost>(`${API_BASE}/community/posts/${postId}/vote`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ optionText, userName }),
     });
   },
 
