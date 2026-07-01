@@ -36,7 +36,7 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isRtl = t.dir === 'rtl';
 
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('register');
   
   // Login form state
   const [identifier, setIdentifier] = useState('');

@@ -204,25 +204,45 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   // Nearby location candidates based on selected governorate or user's own profile location
   const nearbyMatches = useMemo(() => {
-    // Fallback to Baghdad or user's governorate if 'all' is chosen
     const userGov = userProfile?.governorate || 'Baghdad';
-    const targetGov = (selectedGov && selectedGov !== 'all') ? selectedGov : userGov;
+    const hasFilter = selectedGov && selectedGov !== 'all';
 
-    // Filter matches that reside in this governorate and respect gender preference
-    let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === targetGov.toLowerCase());
-    if (genderPref !== 'all') {
-      result = result.filter(m => m.gender === genderPref);
+    if (hasFilter) {
+      // User explicitly filtered by governorate
+      let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
+      if (genderPref !== 'all') {
+        result = result.filter(m => m.gender === genderPref);
+      } else {
+        const activeG = userProfile?.gender || preSelectedGender;
+        if (activeG) {
+          result = result.filter(m => m.gender === (activeG === 'male' ? 'female' : 'male'));
+        }
+      }
+      return result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+    } else {
+      // No explicit governorate filter: show user's governorate first, then make public whoever is available in Iraq
+      let nearbyResult = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === userGov.toLowerCase());
+      let otherResult = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() !== userGov.toLowerCase());
+
+      let targetGender = genderPref;
+      if (targetGender === 'all') {
+        const activeG = userProfile?.gender || preSelectedGender;
+        if (activeG) {
+          targetGender = activeG === 'male' ? 'female' : 'male';
+        }
+      }
+
+      if (targetGender !== 'all') {
+        nearbyResult = nearbyResult.filter(m => m.gender === targetGender);
+        otherResult = otherResult.filter(m => m.gender === targetGender);
+      }
+
+      nearbyResult = nearbyResult.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+      otherResult = otherResult.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+
+      return [...nearbyResult, ...otherResult];
     }
-    
-    // Sort by compatibility score
-    const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
-    
-    // If empty in this specific governorate, fallback to adjacent governorates or overall matches in gender preference
-    if (sorted.length === 0) {
-      return INITIAL_MATCHES.filter(m => genderPref === 'all' || m.gender === genderPref).slice(0, 6);
-    }
-    return sorted;
-  }, [selectedGov, userProfile, genderPref]);
+  }, [selectedGov, userProfile, genderPref, preSelectedGender]);
 
   const getGovDisplayName = (govId: string) => {
     const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);

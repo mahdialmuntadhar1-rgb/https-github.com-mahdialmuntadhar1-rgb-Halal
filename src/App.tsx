@@ -76,8 +76,14 @@ export default function App() {
           setMatches(matchesResult.matches);
           setConversations(convs);
 
-          // Route initial loaded user appropriately - allow full explore access
-          setTab('explore');
+          // Route initial loaded user appropriately based on profile completeness
+          if (!profile.gender) {
+            setTab('gender-selection');
+          } else if (!profile.education || !profile.profession || !profile.values || profile.values.length === 0) {
+            setTab('onboarding');
+          } else {
+            setTab('explore');
+          }
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -124,8 +130,14 @@ export default function App() {
       setMatches(matchesResult.matches);
       setConversations(convs);
       
-      // Route user correctly: registration and login are separate from onboarding now
-      setTab('explore');
+      // Route user correctly: registration, login, and onboarding are united as a single flow
+      if (!currentProfile.gender) {
+        setTab('gender-selection');
+      } else if (!currentProfile.education || !currentProfile.profession || !currentProfile.values || currentProfile.values.length === 0) {
+        setTab('onboarding');
+      } else {
+        setTab('explore');
+      }
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
