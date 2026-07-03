@@ -1,0 +1,649 @@
+import { MatchProfile } from '../types';
+
+// Helper lists of culturally relevant names for Iraqi regions
+const FEMALE_ARABIC_NAMES = [
+  "Noor", "Zainab", "Fatima", "Sara", "Mariam", "Safa", "Reem", "Aya", "Huda", 
+  "Khadija", "Zahra", "Ruqayya", "Ghadir", "Ban", "Raghad", "Manar", "Duaa", "Kawthar",
+  "Bushra", "Alaa", "Hajar", "Haya", "Kholoud", "Shahad", "Dunya", "Amina", "Nabaa"
+];
+
+const MALE_ARABIC_NAMES = [
+  "Adam", "Zaid", "Mustafa", "Ali", "Hussein", "Ahmed", "Hassan", "Yassir", "Mahmoud", 
+  "Ibrahim", "Haidar", "Abbas", "Murtadha", "Sajad", "Ridha", "Amjad", "Karrar", "Muhannad",
+  "Jaafar", "Yahya", "Khalid", "Muntadher", "Mahdi", "Maytham", "Raed", "Mustafa"
+];
+
+const FEMALE_KURDISH_NAMES = [
+  "Lina", "Avan", "Dilan", "Shene", "Rojin", "Tara", "Choman", "Sheno", "Berivan", "Sazan", 
+  "Vian", "Naz", "Kani", "Nishtiman", "Pervin", "Renas", "Darya", "Soma"
+];
+
+const MALE_KURDISH_NAMES = [
+  "Omar", "Baran", "Karwan", "Hawar", "Ari", "Soran", "Hawkar", "Hejar", "Alan", "Zana", 
+  "Sherko", "Rebin", "Saman", "Aso", "Hezo", "Kardo"
+];
+
+const FEMALE_TURKMEN_NAMES = [
+  "Leyla", "Amira", "Selma", "Ayla", "Gunesh", "Sevda"
+];
+
+const MALE_TURKMEN_NAMES = [
+  "Bilal", "Adnan", "Yasin", "Murat", "Sinan", "Turgut"
+];
+
+// 19 Iraqi governorates
+const GOVERNORATES = [
+  { name: "Baghdad", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Basra", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Nineveh", isKurdish: false, isMixed: true, defaultSect: "sunni" },
+  { name: "Erbil", isKurdish: true, isMixed: false, defaultSect: "sunni" },
+  { name: "Sulaymaniyah", isKurdish: true, isMixed: false, defaultSect: "sunni" },
+  { name: "Duhok", isKurdish: true, isMixed: false, defaultSect: "sunni" },
+  { name: "Kirkuk", isKurdish: false, isMixed: true, defaultSect: "sunni" },
+  { name: "Diyala", isKurdish: false, isMixed: true, defaultSect: "shiaa" },
+  { name: "Anbar", isKurdish: false, isMixed: false, defaultSect: "sunni" },
+  { name: "Salah al-Din", isKurdish: false, isMixed: false, defaultSect: "sunni" },
+  { name: "Babil", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Karbala", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Najaf", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Wasit", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Qadisiyah", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Maysan", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Dhi Qar", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Muthanna", isKurdish: false, isMixed: false, defaultSect: "shiaa" },
+  { name: "Halabja", isKurdish: true, isMixed: false, defaultSect: "sunni" }
+];
+
+// Unsplash stock portraits appropriate for respectful demo match profiles
+const FEMALE_AVATARS = [
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=400"
+];
+
+const MALE_AVATARS = [
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&q=80&w=400",
+  "https://images.unsplash.com/photo-1500048993953-d23a436266cf?auto=format&fit=crop&q=80&w=400"
+];
+
+const PROFESSIONS_FEMALE = [
+  { title: "Clinical Pharmacist", edu: "Doctor of Pharmacy (PharmD)" },
+  { title: "Elementary School Teacher", edu: "Bachelor of Education, University level" },
+  { title: "Software Engineer", edu: "B.Sc. in Computer Science" },
+  { title: "Architectural Preservationist", edu: "Bachelor of Architecture" },
+  { title: "Pediatric Nurse Practitioner", edu: "B.Sc. in Nursing Science" },
+  { title: "Human Resources Officer", edu: "BBA in Business Administration" },
+  { title: "Speech & Language Therapist", edu: "B.Sc. in Speech Therapy" },
+  { title: "Graphic Arts Designer", edu: "Bachelor of Fine Arts" },
+  { title: "Agribusiness Supervisor", edu: "B.Sc. in Agriculture & Extension" },
+  { title: "Nutrition Coach & Dietitian", edu: "B.Sc. in Clinical Nutrition" }
+];
+
+const PROFESSIONS_MALE = [
+  { title: "Renewable Systems Engineer", edu: "B.Sc. in Electrical Engineering" },
+  { title: "Sustained Agriculture Lead", edu: "B.Sc. in Agribusiness & Soil" },
+  { title: "Cardiologist Fellow", edu: "MD & Board Certification in Medicine" },
+  { title: "Municipal Grid Planner", edu: "B.Sc. in Civil & Urban Engineering" },
+  { title: "High School History Teacher", edu: "Bachelor of Arts & History Studies" },
+  { title: "IT Solutions Developer", edu: "B.Sc. in Software Engineering" },
+  { title: "Maritime Logistics Specialist", edu: "B.Sc. in Supply Chain Management" },
+  { title: "Hydrology Engineer", edu: "B.Sc. in Water Resource Management" },
+  { title: "Corporate Legal Analyst", edu: "Bachelor of Laws (LL.B.)" },
+  { title: "Telecom Network Specialist", edu: "B.Sc. in Communications Engineering" }
+];
+
+// Generate structured data programmatically to guarantee 76 profiles with rich properties
+function generateMatches(): MatchProfile[] {
+  const list: MatchProfile[] = [];
+  
+  // Keep some precise handcrafted profile definitions to maintain app continuity
+  const customMatches: Record<string, Partial<MatchProfile>> = {
+    'f1': {
+      name: 'Lina',
+      age: 26,
+      gender: 'female',
+      governorate: 'Sulaymaniyah',
+      ethnicity: 'kurdish',
+      sect: 'sunni',
+      profession: 'Elementary Arabic Teacher',
+      education: 'Bachelor of Education, University of Sulaimani',
+      aboutMe: 'I teach primary school students and enjoy learning languages, reading classical literature, and caring for household flora. I prioritize a home with soft-spoken wisdom and structured parenting.',
+      intention: 'To establish a stable, respectful Arabic-Kurdish home built on quiet conversation, faith-driven principles, and supportive cooperation. Emotional safety and respect for our parents are vital.',
+      valuesSummary: ['Family First', 'Spiritual Devotion', 'Integrity', 'Soft-spoken'],
+      photoStatus: 'blurred',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 94,
+      dealbreakers: ['Smoking', 'Irresponsibility']
+    },
+    'm1': {
+      name: 'Adam',
+      age: 29,
+      gender: 'male',
+      governorate: 'Baghdad',
+      ethnicity: 'arab',
+      sect: 'shiaa',
+      profession: 'Renewable Systems Engineer',
+      education: 'B.Sc. in Electrical Engineering, Baghdad University',
+      aboutMe: 'I design green energy grids and dedicate free time to historical lectures, community welfare programs, and family gatherings. I approach all matters with quiet logic and respect.',
+      intention: 'I wish to find a family-oriented spouse to build a peaceful household. I value intellect, mutual consultation (shura), and respect for my partner\'s professional aspirations.',
+      valuesSummary: ['Intellectual Growth', 'Financial Prudence', 'Respectful Boundaries', 'Faith'],
+      photoStatus: 'visible',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 92,
+      dealbreakers: ['Smoking', 'Dishonesty']
+    },
+    'f2': {
+      name: 'Noor',
+      age: 27,
+      gender: 'female',
+      governorate: 'Baghdad',
+      ethnicity: 'arab',
+      sect: 'sunni',
+      profession: 'Clinical Pharmacist',
+      education: 'Doctor of Pharmacy (PharmD), College of Pharmacy',
+      aboutMe: 'I balance clinical practice at a state hospital with health coaching. I am organized, value quiet traditional respect, and enjoy baking and studying nutrition.',
+      intention: 'Seeking a kind, career-respecting companion to share a balanced lifestyle. I believe our home should be a calm, structured center of academic seeking and family harmony.',
+      valuesSummary: ['Professional Respect', 'Empathy', 'Structured Home', 'Social Sincerity'],
+      photoStatus: 'blurred',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 89,
+      dealbreakers: ['Smoking', 'Angry Temperament']
+    },
+    'm2': {
+      name: 'Omar',
+      age: 31,
+      gender: 'male',
+      governorate: 'Erbil',
+      ethnicity: 'kurdish',
+      sect: 'sunni',
+      profession: 'Cardiologist',
+      education: 'MD & Specialized Training in Internal Medicine',
+      aboutMe: 'My professional life involves surgical care. In my personal life, I read history memoirs, practice archery, and enjoy rural walks. Sincerity and keeping promises are important to me.',
+      intention: 'Ready to establish a stable, mature household in Erbil with a pious, structured partner. I want to fully support my wife\'s educational goals while nurturing our future children with traditional manners.',
+      valuesSummary: ['Family Anchors', 'Patience', 'Spiritual Clarity', 'Generosity'],
+      photoStatus: 'visible',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 96,
+      dealbreakers: ['Immaturity', 'Irresponsible behavior']
+    },
+    'f3': {
+      name: 'Sara',
+      age: 25,
+      gender: 'female',
+      governorate: 'Najaf',
+      ethnicity: 'arab',
+      sect: 'shiaa',
+      profession: 'Heritage Architect',
+      education: 'Bachelor of Architecture, Kufa University',
+      aboutMe: 'I design conservation blueprints for historical architectural sites. I value classical calligraphy, reading, and tea on heritage courtyards. I keep my boundaries highly private and serious.',
+      intention: 'Hoping to find an intellectual, patient spouse who shares a fondness for traditional culture, values quiet compromise, and appreciates structural integrity in both architecture and character.',
+      valuesSummary: ['Culture & Wisdom', 'Fidelity', 'Aesthetic Calm', 'High Boundaries'],
+      photoStatus: 'hidden',
+      avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 87,
+      dealbreakers: ['Smoking', 'No family values']
+    },
+    'm3': {
+      name: 'Zaid',
+      age: 28,
+      gender: 'male',
+      governorate: 'Basra',
+      ethnicity: 'arab',
+      sect: 'shiaa',
+      profession: 'Sustained Farming Startup Lead',
+      education: 'B.Sc. in Agribusiness, Basra University',
+      aboutMe: 'I work with regional farming collectives on water conservation techniques. I love boat trips along Shatt al-Arab, philosophy, and mentoring junior engineers. Balanced and hardworking.',
+      intention: 'Looking to partner with an empathetic, wise spouse who supports building traditional livelihoods. I want to build a household on active work ethic and spiritual commitment.',
+      valuesSummary: ['Sustainability', 'Patience', 'Empathy', 'Respectful Boundaries'],
+      photoStatus: 'visible',
+      avatarUrl: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 91,
+      dealbreakers: ['Vanity', 'Disrespectful language']
+    },
+    'f4': {
+      name: 'Tara',
+      age: 29,
+      gender: 'female',
+      governorate: 'Duhok',
+      ethnicity: 'kurdish',
+      sect: 'sunni',
+      profession: 'Software Developer & Technical Writer',
+      education: 'B.Sc. in Computer Science, Duhok University',
+      aboutMe: 'I code modern applications and compile technical tutorials. I appreciate quiet reading, climbing, and traditional Kurdish fabric painting. Highly valuing simple, direct honesty.',
+      intention: 'I wish to marry an insightful, balanced companion. I believe in establishing a happy home defined by mutual support, clear analytical discussions, and quiet faith.',
+      valuesSummary: ['Intellectual Honesty', 'Spiritual Anchoring', 'Humor', 'Supportive'],
+      photoStatus: 'initials',
+      avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 90,
+      dealbreakers: ['Angry temperament', 'No professional ambition']
+    },
+    'm4': {
+      name: 'Mustafa',
+      age: 32,
+      gender: 'male',
+      governorate: 'Nineveh',
+      ethnicity: 'arab',
+      sect: 'sunni',
+      profession: 'Municipal Grid Coordinator',
+      education: 'B.Sc. in Engineering, University of Mosul',
+      aboutMe: 'I coordinate infrastructure restoration and grid planning as public service. I host neighborhood gatherings, study history, and respect quiet, clear living goals.',
+      intention: 'Seeking a family-centric spouse to establish a tranquil family in Mosul. I value high moral standards, devotion to our elders, and mutual consideration.',
+      valuesSummary: ['Devotion to Elders', 'Quiet Dignity', 'Honesty', 'Reliability'],
+      photoStatus: 'visible',
+      avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 91,
+      dealbreakers: ['Smoking', 'Irresponsible behavior']
+    },
+    'm5': {
+      name: 'Baran',
+      age: 27,
+      gender: 'male',
+      governorate: 'Sulaymaniyah',
+      ethnicity: 'kurdish',
+      sect: 'sunni',
+      profession: 'Graphic Designer & Visualizer',
+      education: 'Bachelor of Fine Arts, Sulaimani University',
+      aboutMe: 'I manage layout design and brand art direction. I love photography, historic restoration walks, and mountain hiking. Gentle-mannered and sincere.',
+      intention: 'I wish to find a sincere, moral life companion. I hope to build a home of creativity, mutual peace, and support for classical marital values.',
+      valuesSummary: ['Artistic Appreciation', 'Serenity', 'Fidelity', 'Humility'],
+      photoStatus: 'initials',
+      avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 88,
+      dealbreakers: ['Inconsiderateness', 'Dishonesty']
+    },
+    'f5': {
+      name: 'Avan',
+      age: 31,
+      gender: 'female',
+      governorate: 'Kirkuk',
+      ethnicity: 'kurdish',
+      sect: 'sunni',
+      profession: 'Financial Inspector',
+      education: 'Bachelor of Audit and Accounts, Kirkuk University',
+      aboutMe: 'I manage contract compliance audits. I enjoy reading, hiking, and theological discussion. Highly structured, serious, and deeply devoted to my relatives.',
+      intention: 'Looking to meet a supportive partner who prioritizes logic and ethical standards. Mutual respect and supportive partnership are the pillars of the family I wish to establish.',
+      valuesSummary: ['Logical Clarity', 'Ethical Practice', 'Spiritual Stability', 'Commitment'],
+      photoStatus: 'hidden',
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
+      compatibilityScore: 85,
+      dealbreakers: ['Inconsistency', 'Smoking']
+    }
+  };
+
+  // Localized bio & intention templates for Kurdish profiles
+  const ABOUT_ME_FEMALE_KURDISH = [
+    "???????? ?????????? ???????? ?? [city]. ??? ?? ?????????? ????? ??????? ? ?????? ??? ?????. ????? ????? ? ???????? ???????? ??????? ???????? ????? ?????? ???? ? ??????.",
+    "????????? ??? ?????????? ?? ???? [city]. ???????? ??? ?? ???????? ???????? ? ??????????? ????????? ????? ?????. ????????? ?? ???? ???????????? ????? ?? ???????? ???????.",
+    "?????????? ?????????? ?? ?????? [city]. ????? ??? ? ??????? ????? ?? ????? ???? ????? ?????? ????. ???? ?? ????????? ? ?????? ??????? ? ????? ?? ????? ????.",
+    "?????????? ?????????? ?? [city]. ??? ?? ?????????? ? ???????? ????????? ?????. ?????? ??????? ? ??? ?? ????? ????? ???????????? ? ????? ?????????? ?????.",
+    "???????? ?? ????????????? ????? ?? [city]. ????????? ?????? ??????? ??????? ????. ?????? ???????????? ? ?????? ? ???? ?????? ????? ????????? ????? ?????."
+  ];
+
+  const INTENTION_FEMALE_KURDISH = [
+    "???????? ????????? ?????? ? ??? ? ?????? ???????? ?? ?????????? ?????? ?? ?? ?????? ? ?????? ????? ?????????? ????? ? ???? ????????.",
+    "??????? ???????? ????? ???????? ?? ????? ??? ? ??????? ???????? ?????? ? ???????????? ?? ???????????? ????? ? ???? ???????????? ????? ?????.",
+    "?????? ????????? ???????? ??????? ?? ??????? ?????? ? ????????? ????? ?????? ?????? ????? ? ?? ?? ????????? ????? ?????."
+  ];
+
+  const ABOUT_ME_MALE_KURDISH = [
+    "??? ?????????? ?????? ???????? ?? [city]. ?????? ?????? ? ???????? ??? ?? ???????? ?? ??? ????? ? ?????????? ????? ??????? ? ????? ???? ????? ?? ??????.",
+    "?????? ??? ?? ???? [city]. ????? ??????? ??? ????? ????? ?????? ?? ?????????? ?????????? ??? ????? ????????? ????? ? ??? ?? ?????? ?????????? ???? ????? ?????.",
+    "???????? ?????? ?? ?????????? ???????? ?? [city]. ?? ???? ?????? ??????? ????????? ? ?????????? ??????. ?????? ??????????? ? ???????.",
+    "?????????? ??????? ?? [city]. ??? ? ???? ?? ?????? ?????? ??? ?? ?????? ?????????? ? ????? ? ???????? ??????? ??? ?????? ????? ? ?? ????? ????? ?? ????? ????."
+  ];
+
+  const INTENTION_MALE_KURDISH = [
+    "??????? ?? ?????????? ???????? ????? ????? ?????? ??? ? ?????? ?????????. ??????? ????? ?? ??????? ????? ?? ?????????? ? ?????????? ???????????? ?? ???? ????????.",
+    "???????? ????????? ??????? ? ????? ???????? ?? ?????? ??????? ?????? ????? ? ???? ?? ???? ????? ????? ?? ????? ???? ???? ? ??????? ???? ???????.",
+    "??????? ????????? ????? ???? ? ?????? ???? ???????? ?? ?????? ????? ?????????? ??????? ????? ??? ?? ?????????? ???????????."
+  ];
+
+  // Localized bio & intention templates for Arabic profiles
+  const ABOUT_ME_FEMALE_ARABIC = [
+    "???? ?????? ???????? ?? [city]. ??????? ????? ??????? ????? ??? ????? ?? ????? ??? ??????? ?????? ????? ?????? ???? ?????? ?????? ????????? ????????.",
+    "????? ??? ????? ?? ????? ???????? ?? [city]. ??? ????? ??????? ???????? ??????? ?????? ???????? ????????. ????? ??? ?????? ?????? ????????? ???????? ???????.",
+    "?????? ??????? ?? [city]. ????? ???????? ?????????? ????????? ??????. ?????? ??????? ?????? ?????? ????????? ?????? ????? ??? ???? ??????? ??????.",
+    "??????? ???? ????? ?? ?????? ????? ?? [city]. ????? ?? ????? ???? ?????? ????? ?????? ???? ????? ??????? ????????? ??? ????? ???? ???????? ????? ????.",
+    "????? ?????? ????? ????? ?? [city]. ??? ?????? ???????? ?????? ???????? ???????? ???????? ???????. ????? ?????? ??????? ????? ???????? ???????."
+  ];
+
+  const INTENTION_FEMALE_ARABIC = [
+    "???? ?????? ??? ??? ???? ?????? ????? ??? ???? ???? ??????? ????? ??????? ???????? ?????? ??????? ??? ??????? ??????? ???????.",
+    "???? ?? ????? ???? ?????? ????? ??? ???????? ???????? ???????? (??????)? ?? ???? ??? ???? ????? ?????? ???????? ?? ???? ????.",
+    "????? ???????? ?????? ???? ?????? ????? ???? ?????? ???????? ???? ???? ?????? ??????? ??????? ???????? ????????? ????????? ???????? ???????."
+  ];
+
+  const ABOUT_ME_MALE_ARABIC = [
+    "???? ?????? ?????? ?????? ???? ?? [city]. ??? ????? ??? ?? ???? ??????? ???? ??????? ????????? ???????? ????????? ?? ??????? ??????? ??????? ????? ??????.",
+    "?????? ?? ?????? ????? ?? [city]. ???? ?????? ?????????? ????? ????? ???? ????? ?? ????? ???? ???? ????? ????? ???????? ???? ?????? ????? ????.",
+    "???? ???? ??????? ??????? ????????? ?? [city]. ???? ????? ?????? ??????? ????????? ????????. ????? ???? ??????? ??? ??????? ????? ?? ????????? ?????.",
+    "???? ???? ????????? ?? [city]. ????? ??? ???? ?????? ??????? ?????? ??????? ??????? ????????? ????????? ?????????? ???????? ?????? ??????.",
+    "?????? ?? ????? ????? ??????? ???????? ????????? ?? [city]. ??? ?????? ??????? ??????? ???????? ????? ?????? ???????? ?????? ???????? ??????? ?? ??????."
+  ];
+
+  const INTENTION_MALE_ARABIC = [
+    "????? ?????? ??? ???? ????? ?????? ???? ??? ???????? ??????? ???????? ?? ????? ???? ????? ???????? ?????? ???? ?????? ???? ????? ???.",
+    "???? ?? ???? ????? ?????? ????? ???? ????? ???????? ?????? ??????? ?????? ???? ??????? ??????????? ???? ??????? ????????? ????????.",
+    "???? ???????? ?????? ???? ??????? ????? ?????? ????? ??????? ?? ?????? ???????? ????? ??????? ??? ?? ???? ?????? ?????? ??????? ???????."
+  ];
+
+  // Generate 10 females and 10 males for each of the 19 governorates (Total = 380)
+  GOVERNORATES.forEach((gov, govIdx) => {
+    // Determine ethnicities in mixed regions (Kirkuk, Diyala, Nineveh)
+    const getEthnicity = (gender: 'male' | 'female', index: number) => {
+      if (gov.isKurdish) return 'kurdish';
+      if (gov.name === 'Kirkuk') {
+        return index % 3 === 0 ? 'kurdish' : index % 3 === 1 ? 'others' : 'arab'; // others matches Turkmen
+      }
+      if (gov.name === 'Diyala') {
+        return index % 2 === 0 ? 'arab' : 'kurdish';
+      }
+      if (gov.name === 'Nineveh') {
+        return index % 2 === 0 ? 'arab' : 'others'; // Turkmen or Assyrian/others
+      }
+      return 'arab';
+    };
+
+    // Helper to determine the stable ID of a profile to match existing custom overrides
+    const getProfileId = (gender: 'male' | 'female', indexInGov: number): string => {
+      if (gov.name === 'Sulaymaniyah' && indexInGov === 0) {
+        return gender === 'female' ? 'f1' : 'm5';
+      }
+      if (gov.name === 'Baghdad' && indexInGov === 0) {
+        return gender === 'female' ? 'f2' : 'm1';
+      }
+      if (gov.name === 'Erbil' && indexInGov === 0 && gender === 'male') {
+        return 'm2';
+      }
+      if (gov.name === 'Najaf' && indexInGov === 0 && gender === 'female') {
+        return 'f3';
+      }
+      if (gov.name === 'Basra' && indexInGov === 0 && gender === 'male') {
+        return 'm3';
+      }
+      if (gov.name === 'Duhok' && indexInGov === 0 && gender === 'female') {
+        return 'f4';
+      }
+      if (gov.name === 'Nineveh' && indexInGov === 0 && gender === 'male') {
+        return 'm4';
+      }
+      if (gov.name === 'Kirkuk' && indexInGov === 0 && gender === 'female') {
+        return 'f5';
+      }
+      
+      const prefix = gender === 'female' ? 'f' : 'm';
+      const govShort = gov.name.replace(/\s+/g, '').toLowerCase();
+      return `${prefix}_${govShort}_${indexInGov}`;
+    };
+
+    // Helper to generate a realistic profile
+    const createProfile = (gender: 'male' | 'female', indexInGov: number): MatchProfile => {
+      const id = getProfileId(gender, indexInGov);
+
+      // Check if custom override exists for this specific ID
+      if (customMatches[id] && customMatches[id].gender === gender && customMatches[id].governorate === gov.name) {
+        return {
+          id,
+          name: customMatches[id].name!,
+          age: customMatches[id].age!,
+          gender: customMatches[id].gender!,
+          governorate: gov.name,
+          city: customMatches[id].city || gov.name,
+          country: 'Iraq',
+          religion: 'islam',
+          sect: (customMatches[id].sect as 'sunni' | 'shiaa' | 'none') || gov.defaultSect as any,
+          ethnicity: (customMatches[id].ethnicity as 'arab' | 'kurdish' | 'others') || 'arab',
+          profession: customMatches[id].profession!,
+          education: customMatches[id].education!,
+          intention: customMatches[id].intention,
+          timeline: 'Within 6 months',
+          wantsChildren: 'Yes, definitely',
+          communicationPreference: 'Prefers quiet respectful correspondence',
+          valuesSummary: customMatches[id].valuesSummary!,
+          verified: true,
+          isOnline: Math.random() > 0.4,
+          photoStatus: customMatches[id].photoStatus as any,
+          avatarSeed: `${id}_photo`,
+          avatarUrl: customMatches[id].avatarUrl!,
+          compatibilityScore: customMatches[id].compatibilityScore!,
+          languages: gender === 'female' ? ['Arabic', 'English'] : ['Arabic', 'Kurdish', 'English'],
+          aboutMe: customMatches[id].aboutMe!,
+          dealbreakers: customMatches[id].dealbreakers || ['Smoking', 'Irresponsibility'],
+          requestStatus: (id === 'f2' ? 'sent' : id === 'm2' ? 'accepted' : id === 'm3' ? 'declined' : 'none') as any,
+          badges: ['Demo Verified', 'Sincere Intention'],
+          maritalStatus: 'Single',
+          relocation: 'Open to discuss',
+          familyValues: 'Traditional values based on mutual respect and consultation',
+          lifestyle: 'Moderate and spiritual'
+        };
+      }
+
+      // Generate programmatically
+      const age = 22 + ((govIdx * 3 + indexInGov * 7) % 11); // Deterministic age between 22 and 32
+      const eth = getEthnicity(gender, indexInGov);
+      
+      let name = "";
+      let avatarUrl = "";
+      let profObj = { title: "", edu: "" };
+
+      if (gender === 'female') {
+        profObj = PROFESSIONS_FEMALE[(govIdx * 3 + indexInGov * 2) % PROFESSIONS_FEMALE.length];
+        avatarUrl = FEMALE_AVATARS[(govIdx * 2 + indexInGov) % FEMALE_AVATARS.length];
+        if (eth === 'kurdish') {
+          name = FEMALE_KURDISH_NAMES[(govIdx * 2 + indexInGov) % FEMALE_KURDISH_NAMES.length];
+        } else if (eth === 'others' && gov.name === 'Kirkuk') {
+          name = FEMALE_TURKMEN_NAMES[(govIdx * 2 + indexInGov) % FEMALE_TURKMEN_NAMES.length];
+        } else {
+          name = FEMALE_ARABIC_NAMES[(govIdx * 2 + indexInGov) % FEMALE_ARABIC_NAMES.length];
+        }
+      } else {
+        profObj = PROFESSIONS_MALE[(govIdx * 3 + indexInGov * 2) % PROFESSIONS_MALE.length];
+        avatarUrl = MALE_AVATARS[(govIdx * 2 + indexInGov) % MALE_AVATARS.length];
+        if (eth === 'kurdish') {
+          name = MALE_KURDISH_NAMES[(govIdx * 2 + indexInGov) % MALE_KURDISH_NAMES.length];
+        } else if (eth === 'others' && gov.name === 'Kirkuk') {
+          name = MALE_TURKMEN_NAMES[(govIdx * 2 + indexInGov) % MALE_TURKMEN_NAMES.length];
+        } else {
+          name = MALE_ARABIC_NAMES[(govIdx * 2 + indexInGov) % MALE_ARABIC_NAMES.length];
+        }
+      }
+
+      // Deduplicate names slightly
+      if (name === "Mustafa" && indexInGov > 0) name = "Yousef";
+      if (name === "Sara" && indexInGov > 0) name = "Tabarak";
+
+      const sect = (gov.isKurdish) ? "sunni" : (gov.name === "Kirkuk" && eth === 'others' ? "sunni" : gov.defaultSect);
+      const isOnline = (govIdx + indexInGov) % 3 !== 0;
+      
+      // Females: always blurred/initials (never public/visible) to ensure safety. Males: optional (some visible, some blurred)
+      const photoStatus = gender === 'female'
+        ? (indexInGov % 3 === 0 ? 'blurred' : (indexInGov % 3 === 1 ? 'initials' : 'hidden'))
+        : (indexInGov % 3 === 0 ? 'visible' : (indexInGov % 3 === 1 ? 'blurred' : 'initials'));
+
+      const vals = [
+        ["Family Support", "Honesty", "Spiritual Grounding"],
+        ["Compassion", "Modesty", "Educational Growth"],
+        ["Respectful Boundaries", "Sincerity", "Financial Wisdom"],
+        ["Kindness", "Faithful Commitment", "Traditional Manners"]
+      ][(govIdx + indexInGov) % 4];
+
+      const arabicCities: Record<string, string[]> = {
+        "Baghdad": ["Mansour", "Karada", "Adhamiyah", "Karkh"],
+        "Basra": ["Zubair", "Qurnah", "Abu Al-Khaseeb", "Basra Center"],
+        "Nineveh": ["Mosul", "Tal Afar", "Sinjar"],
+        "Erbil": ["Erbil Center", "Soran", "Shaqlawa"],
+        "Sulaymaniyah": ["Slemani Center", "Rania", "Kalar"],
+        "Duhok": ["Duhok Center", "Zakho", "Semel"],
+        "Kirkuk": ["Kirkuk Center", "Daquq", "Hawija"],
+        "Diyala": ["Baqubah", "Khanaqin", "Muqdadiyah"],
+        "Anbar": ["Ramadi", "Fallujah", "Hit"],
+        "Salah al-Din": ["Tikrit", "Samarra", "Balad"],
+        "Babil": ["Hilla", "Hashimiyah", "Mahawil"],
+        "Karbala": ["Karbala City", "Hindiyah"],
+        "Najaf": ["Najaf Center", "Kufa"],
+        "Wasit": ["Kut", "Suwayrah"],
+        "Qadisiyah": ["Diwaniyah", "Afak"],
+        "Maysan": ["Amarah", "Al-Maimouna"],
+        "Dhi Qar": ["Nasiriyah", "Shatrah"],
+        "Muthanna": ["Samawah", "Al-Rumaitha"],
+        "Halabja": ["Halabja City", "Said Sadiq"]
+      };
+
+      const citiesList = arabicCities[gov.name] || [gov.name];
+      const city = citiesList[indexInGov % citiesList.length];
+
+      // Determine language and template of descriptions
+      const useKurdishText = gov.isKurdish || eth === 'kurdish';
+      
+      let aboutMe = "";
+      let intention = "";
+
+      if (useKurdishText) {
+        if (gender === 'female') {
+          const rawTemplate = ABOUT_ME_FEMALE_KURDISH[(govIdx + indexInGov) % ABOUT_ME_FEMALE_KURDISH.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_FEMALE_KURDISH[(govIdx + indexInGov) % INTENTION_FEMALE_KURDISH.length];
+        } else {
+          const rawTemplate = ABOUT_ME_MALE_KURDISH[(govIdx + indexInGov) % ABOUT_ME_MALE_KURDISH.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_MALE_KURDISH[(govIdx + indexInGov) % INTENTION_MALE_KURDISH.length];
+        }
+      } else {
+        if (gender === 'female') {
+          const rawTemplate = ABOUT_ME_FEMALE_ARABIC[(govIdx + indexInGov) % ABOUT_ME_FEMALE_ARABIC.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_FEMALE_ARABIC[(govIdx + indexInGov) % INTENTION_FEMALE_ARABIC.length];
+        } else {
+          const rawTemplate = ABOUT_ME_MALE_ARABIC[(govIdx + indexInGov) % ABOUT_ME_MALE_ARABIC.length];
+          aboutMe = rawTemplate.replace("[city]", city);
+          intention = INTENTION_MALE_ARABIC[(govIdx + indexInGov) % INTENTION_MALE_ARABIC.length];
+        }
+      }
+
+      const comPref = photoStatus === 'hidden' || photoStatus === 'initials'
+        ? "Prefers initials representation to safeguard family dignity until mutual fit is approved"
+        : "Direct, polite platform introduction; values respectful communication boundaries";
+
+      return {
+        id,
+        name,
+        age,
+        gender,
+        governorate: gov.name,
+        city,
+        country: "Iraq",
+        religion: "islam",
+        sect: sect as any,
+        ethnicity: eth as any,
+        profession: profObj.title,
+        education: profObj.edu,
+        intention,
+        timeline: indexInGov % 2 === 0 ? "Within 6 months" : "Within 1 year",
+        wantsChildren: "Yes, definitely",
+        communicationPreference: comPref,
+        valuesSummary: vals,
+        verified: Math.random() > 0.15,
+        isOnline,
+        photoStatus,
+        avatarSeed: `${id}_photo`,
+        avatarUrl,
+        compatibilityScore: 82 + ((govIdx * 3 + indexInGov * 7) % 15),
+        languages: eth === 'kurdish' ? ['Kurdish', 'Arabic'] : eth === 'others' && gov.name === 'Kirkuk' ? ['Arabic', 'Kurdish', 'Turkish'] : ['Arabic', 'English'],
+        aboutMe,
+        dealbreakers: ['Smoking', 'Irresponsibility', 'Unseriousness'],
+        requestStatus: 'none',
+        badges: ['Demo Verified', 'Sincere Intention'],
+        maritalStatus: 'Single',
+        relocation: 'Open to discuss within region',
+        familyValues: 'Traditional values based on mutual respect and consultation',
+        lifestyle: 'Moderate and spiritual'
+      };
+    };
+
+    // Push exactly 10 females and 10 males per governorate
+    for (let i = 0; i < 10; i++) {
+      list.push(createProfile('female', i));
+      list.push(createProfile('male', i));
+    }
+  });
+
+  return list;
+}
+
+export const INITIAL_MATCHES: MatchProfile[] = generateMatches();
+
+export const MOCK_GUIDED_PROMPTS = [
+  'What does a peaceful married life look like to you?',
+  'What values matter most in your future home?',
+  'How do you prefer to manage communication and privacy in courtship?',
+  'What kind of partner do you admire most?',
+  'What are your expectations for balancing career and family life?',
+  'What are your goals for the next five years spiritually and professionally?'
+];
+
+export const MOCK_CHATS_RESPONSES: Record<string, string[]> = {
+  'f1': [
+    'Assalamu Alaikum. To me, a peaceful home is where we prioritize respect, kindness, and speak with gentle, soft-spoken tones. Shared spiritual goals ground everything we do in Sulaymaniyah.',
+    'I believe close family support is a great blessing—having dinner with our parents regularly, while maintaining a loving, highly respectful boundary for our own private life.',
+    'I want us to keep our communication respectful, focused on serious marital goals with complete privacy.'
+  ],
+  'f2': [
+    'Assalamu Alaikum. I believe mutual consulting (shura) is what keeps a marriage healthy. Having continuous open dialogue before making major family choices holds us together.',
+    'In medical pharmacy practice, we always say prevention is better than treatment. The exact same rule applies to private conversations: we face any concerns with respect and honesty before they grow.',
+    'My family is extremely supportive of my goals, and they would be delighted to hear that you respect female academic and medical pursuits.'
+  ],
+  'f3': [
+    'Assalamu Alaikum. Integrity and emotional maturity are everything. A home must be structured like historic architecture—stable, deeply rooted in history, yet filled with peace and warmth.',
+    'Najaf is a city of historical wisdom, and I want our marriage to reflect that. Quiet evenings reading, raising kids with strong morals, and avoiding angry outbursts.',
+    'I am glad you asked! I prefer to keep our communications private, and once we identify a mutual values fit, we can discuss our marriage timeline.'
+  ],
+  'f4': [
+    'Assalamu Alaikum. Sincerity is the bedrock of partnership. Understanding each other’s life priorities, financial plans, and how we handle stress is what truly builds trust.',
+    'I believe in keeping our personal goals aligned with our faith. It keeps us anchored through all of life’s high and low seasons.',
+    'Thank you for your very respectful, serious query. This matches the true purpose of Zawaj Al Araqi completely.'
+  ],
+  'f5': [
+    'Assalamu Alaikum. Trust is the baseline of law and life. If there is complete honesty and dedication, any relocation or life change becomes a peaceful breeze.',
+    'I love holding elegant theological discussions, but I value daily spiritual practices even more. Sincerity is shown in how we treat our parents first.',
+    'I would be happy to discuss our next steps towards formal marriage whenever you feel we have covered the key compatibility basics.'
+  ],
+  'm1': [
+    'Assalamu Alaikum. I value structured communication. I want to build a household that integrates sustainable living with deep spiritual peace.',
+    'My family plays a supportive role, and their blessings matter. I also believe in protecting our core family privacy.',
+    'Let’s continue clarifying our primary parameters over this private, secure chat first before deciding how to proceed.'
+  ],
+  'm2': [
+    'Assalamu Alaikum. In clinical cardiology, we listen deeply. I practice that exact patience in my personal life. Building a serene, stable, and highly caring home is my highest goal.',
+    'Our family gatherings are central to Erbil life, and I look forward to hosting them often with rich hospitality.',
+    'I appreciate your serious parameters. Zawaj Al Araqi creates a beautiful standard of dignity that other casual platforms completely lack.'
+  ],
+  'm3': [
+    'Assalamu Alaikum. Patience and direct honesty are the values I respect most. I believe in speaking clearly and building secure, stable agricultural foundations.',
+    'I look forward to raising childen with a strong spiritual anchor, classical poetry appreciation, and hard-working habits.',
+    'Let’s review each other’s dealbreakers completely first to make sure there is absolute alignment before making further decisions.'
+  ]
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

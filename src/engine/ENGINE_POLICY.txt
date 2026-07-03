@@ -1,0 +1,6 @@
+ENGINE POLICY:
+- Engine is internal only
+- UI must NOT import engine directly
+- Only services/API layer is allowed
+
+STATUS: FROZEN

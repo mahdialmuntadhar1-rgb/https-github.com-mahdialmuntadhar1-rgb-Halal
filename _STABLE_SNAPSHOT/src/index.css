@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  /* Primary Brand Colors */
+  --color-neon-pink: #FF2E96;
+  --color-neon-purple: #B829DD;
+  --color-electric-violet: #8B5CF6;
+  
+  /* Secondary/Supporting Colors */
+  --color-soft-lavender: #F3E8FF;
+  --color-light-pink: #FDF2F8;
+  --color-cool-gray: #E5E7EB;
+  --color-warm-white: #FFFBFE;
+  
+  /* Background Colors */
+  --color-pure-white: #FFFFFF;
+  --color-ultra-light-lavender: #FAF5FF;
+  --color-soft-mist: #F8FAFC;
+  
+  /* Text Colors */
+  --color-deep-charcoal: #1F2937;
+  --color-dark-gray: #4B5563;
+  --color-medium-gray: #9CA3AF;
+  
+  /* Accent/Highlight Colors */
+  --color-glowing-pink: #FF6BB3;
+  --color-bright-purple: #C084FC;
+  --color-soft-cyan: #67E8F9;
+  --color-warm-gold: #FBBF24;
+  
+  /* Legacy colors kept for compatibility */
+  --color-warm-ivory: #FAF9F6;
+  --color-warm-charcoal: #2D2A26;
+  --color-accent-coral: #FF7F50;
+  --color-accent-pink: #F4A7B9;
+  --color-accent-blue: #40798C;
+}
+
+/* Neon glow effects */
+.shadow-neon-glow {
+  box-shadow: 0 0 20px rgba(255, 46, 150, 0.3), 0 0 40px rgba(184, 41, 221, 0.2);
+}
+
+.shadow-card-soft {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Glassmorphism helpers */
+.glass-pane {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 32px 0 rgba(45, 42, 38, 0.08);
+}
+
+.glass-pane-dark {
+  background: rgba(45, 42, 38, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Scrollbar styling */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Infinite scrolling marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-rtl {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 30s linear infinite;
+}
+
+.animate-marquee:hover, .animate-marquee-rtl:hover {
+  animation-play-state: paused;
+}
+
