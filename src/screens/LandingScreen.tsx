@@ -374,44 +374,46 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       </section>
 
       {/* ----------------- HOME NAVIGATION TABS ----------------- */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2" id="home-navigation-tabs">
-        <div className="bg-[#FAF8F5] border border-[#E8DCC4] rounded-2xl sm:rounded-3xl p-2 sm:p-3 flex gap-2 shadow-inner">
-          
-          {/* Tab 1: Discover Member */}
-          <button
-            onClick={() => {
-              setHomeTab('discover');
-              showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
-            }}
-            className={`flex-1 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-              homeTab === 'discover'
-                ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
-                : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50'
-            }`}
-          >
-            <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
-            <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
-          </button>
+      <section className="sticky top-0 md:top-20 z-40 bg-warm-ivory/95 backdrop-blur-md py-4 border-b border-[#E8DCC4]/50 shadow-xs" id="home-navigation-tabs">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#FAF8F5]/80 border border-[#E8DCC4] rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 flex gap-2 shadow-inner">
+            
+            {/* Tab 1: Discover Member */}
+            <button
+              onClick={() => {
+                setHomeTab('discover');
+                showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
+              }}
+              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                homeTab === 'discover'
+                  ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
+                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
+              }`}
+            >
+              <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
+              <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
+            </button>
 
-          {/* Tab 2: Marriage Cafe */}
-          <button
-            onClick={() => {
-              setHomeTab('cafe');
-              showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
-            }}
-            className={`flex-1 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-              homeTab === 'cafe'
-                ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-lg shadow-accent-coral/25'
-                : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50'
-            }`}
-          >
-            <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
-            <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
-            <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
-              LIVE FEED
-            </span>
-          </button>
+            {/* Tab 2: Marriage Cafe */}
+            <button
+              onClick={() => {
+                setHomeTab('cafe');
+                showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
+              }}
+              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                homeTab === 'cafe'
+                  ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-lg shadow-accent-coral/25'
+                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
+              }`}
+            >
+              <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
+              <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
+              <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
+                LIVE FEED
+              </span>
+            </button>
 
+          </div>
         </div>
       </section>
 

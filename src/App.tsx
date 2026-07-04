@@ -355,7 +355,7 @@ export default function App() {
     <div 
       dir={t.dir} 
       lang={locale} 
-      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-hidden pb-20 sm:pb-24"
+      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-x-hidden pb-20 sm:pb-24"
     >
       
       {/* Blur blobs background */}
