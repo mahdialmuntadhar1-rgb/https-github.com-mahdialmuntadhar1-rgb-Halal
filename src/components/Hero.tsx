@@ -134,7 +134,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
         
         {/* PREMIUM ROMANTIC CAROUSEL */}
         <div 
-          className="relative w-full aspect-square sm:aspect-auto h-auto sm:h-[480px] md:h-[520px] lg:h-[550px] bg-warm-charcoal rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/25 group/carousel"
+          className="relative w-full aspect-square sm:aspect-auto h-auto sm:h-[480px] md:h-[520px] lg:h-[550px] bg-warm-charcoal rounded-none overflow-hidden shadow-2xl border border-white/25 group/carousel"
           id="romantic-carousel-container"
         >
           {/* SLIDING IMAGES */}
@@ -157,8 +157,8 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
             </motion.div>
           </AnimatePresence>
 
-          {/* GRADIENT OVERLAY (Guarantees high-contrast readability) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-warm-charcoal/95 via-warm-charcoal/50 to-warm-charcoal/30 z-10" />
+          {/* GRADIENT OVERLAY (Subtle for premium image contrast) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
 
           {/* INTERACTIVE CONTROLS: LEFT ARROW */}
           <button
@@ -180,25 +180,9 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* OVERLAY SLIDE TEXT & CTAs */}
+          {/* OVERLAY SLIDE CTAs & INDICATORS (Text removed for a clean background feel) */}
           <div className="absolute inset-x-0 bottom-0 z-20 p-4 sm:p-12 md:p-16 text-center flex flex-col items-center justify-end h-full max-w-4xl mx-auto space-y-3 sm:space-y-6">
             
-            {/* Decent badge */}
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/20 border border-accent-coral/40 px-3 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-mono font-bold text-white tracking-widest uppercase shadow-inner">
-              <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-accent-pink fill-accent-pink animate-pulse" />
-              <span>{locale === 'en' ? 'Halal Matchmaking' : locale === 'ar' ? 'منصة الزواج الحلال' : 'هاوسەرگیری حەڵاڵ'}</span>
-            </span>
-
-            {/* Title */}
-            <h2 className="text-base xs:text-lg sm:text-3xl md:text-4xl lg:text-5xl font-serif text-white tracking-tight font-display font-black leading-tight max-w-3xl drop-shadow-md">
-              {CAROUSEL_SLIDES[currentIndex].title[locale] || CAROUSEL_SLIDES[currentIndex].title.en}
-            </h2>
-
-            {/* Subtitle */}
-            <p className="hidden xs:block text-[10px] sm:text-sm md:text-base text-warm-ivory/90 font-medium max-w-xl mx-auto leading-relaxed drop-shadow-xs">
-              {CAROUSEL_SLIDES[currentIndex].subtitle[locale] || CAROUSEL_SLIDES[currentIndex].subtitle.en}
-            </p>
-
             {/* ADAPTIVE INTERACTIVE CTA BUTTONS */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-3 sm:pt-6 w-full max-w-lg">
               {isAuthenticated ? (
