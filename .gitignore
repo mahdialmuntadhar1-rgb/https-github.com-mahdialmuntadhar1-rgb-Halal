@@ -1,8 +1,22 @@
+# system junk
+AppData/
+**/AppData/
+.cargo/
+**/.cargo/
+.codeium/
+**/.codeium/
+Claude/
+**/.claude/
+
+# OS files
+Desktop.ini
+Thumbs.db
+
+# builds
 node_modules/
-build/
 dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
+build/
+
+# env
+.env
+.env.*
