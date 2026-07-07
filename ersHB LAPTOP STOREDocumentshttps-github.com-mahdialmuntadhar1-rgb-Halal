@@ -1,0 +1,20 @@
+* [33ma37b12b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrestore/two-tab-ui[m[33m, [m[1;31morigin/restore/two-tab-ui[m[33m)[m clean production repo - remove system tracking and stabilize project
+* [33m505f787[m clean repo: remove system files
+[31m|[m * [33md7d4273[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: implement progressive onboarding and UI updates
+[31m|[m * [33m00d2bd6[m feat(community): add poll and opinion post types
+[31m|[m * [33me19523a[m feat: rebrand Community feed to Marriage Café
+[31m|[m * [33m1b99292[m refactor: update brand primary color to purple
+[31m|[m * [33m2e4c97b[m Add Zawaj postcard homepage brand styling
+[31m|[m * [33m12f50c1[m Update Zawaj brand colors to neon pink and purple
+[31m|[m * [33m35729a7[m Fix Zawaj square selection cards and neon branding
+[31m|[m * [33mda03402[m Apply Zawaj neon pink purple branding
+[31m|[m * [33m8de37a8[m refactor: rename platform and streamline routing
+[31m|[m * [33md09d90b[m style: update header layout and branding
+[31m|[m * [33m3b99090[m feat: add Postbox feature and navigation tab
+[31m|[m * [33m053cd3d[m Disable Google Translate popup on Zawaj app
+[31m|[m * [33mb1bc16f[m[33m ([m[1;33mtag: [m[1;33mhalal-pwa-install-instruction-freeze-2026-06-29[m[33m)[m fix: simplify PWA install instructions
+[31m|[m * [33m1976bf6[m[33m ([m[1;33mtag: [m[1;33mhalal-secure-cors-freeze-2026-06-29[m[33m)[m feat: implement gender-aware registration and profile flow
+[31m|[m [32m|[m * [33m56aa311[m[33m ([m[1;31morigin/mvp-clean-source-of-truth[m[33m)[m Add edit and delete support for Marriage Cafe posts
+[31m|[m [32m|[m * [33mdb95425[m Make Marriage Cafe posts full-width and restrict hero admin access
+[31m|[m [32m|[m * [33m12c9835[m Persist Marriage Cafe posts with R2 storage
+[31m|[m [32m|[m * [33madb1974[m Redesign Marriage Cafe as image-first social feed

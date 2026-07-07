@@ -434,7 +434,7 @@ export default function App() {
                   );
                   setTab('onboarding');
                 }}
-                onExploreMatches={() => setTab('explore')}
+                onExploreMatches={() => isAuthenticated ? setTab('explore') : setTab('gender-selection')}
                 setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
