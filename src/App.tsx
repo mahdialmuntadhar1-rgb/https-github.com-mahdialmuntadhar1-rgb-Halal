@@ -434,7 +434,7 @@ export default function App() {
                   );
                   setTab('onboarding');
                 }}
-                onExploreMatches={() => isAuthenticated ? setTab('explore') : setTab('gender-selection')}
+                onExploreMatches={() => setTab('landing')}
                 setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
@@ -583,7 +583,7 @@ export default function App() {
                   <button onClick={() => setTab('onboarding')} className="hover:text-white transition">{t.onboarding}</button>
                 </li>
                 <li>
-                  <button onClick={() => setTab('explore')} className="hover:text-white transition">{t.explore}</button>
+                  <button onClick={() => setTab('landing')} className="hover:text-white transition">{t.explore}</button>
                 </li>
                 <li>
                   <button onClick={() => setTab('chat')} className="hover:text-white transition">{t.chat}</button>
@@ -644,7 +644,7 @@ export default function App() {
 
         {/* Partner Exploration Option */}
         <button
-          onClick={() => setTab('explore')}
+          onClick={() => setTab('landing')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
             currentTab === 'explore' 
               ? 'text-accent-coral scale-105 font-extrabold' 
