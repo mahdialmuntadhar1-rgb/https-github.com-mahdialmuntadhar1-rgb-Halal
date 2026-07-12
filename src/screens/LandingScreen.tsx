@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { AppLanguage, AppTab, MatchProfile, UserProfile } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
 import Hero from '../components/Hero';
@@ -39,48 +39,48 @@ interface LandingScreenProps {
 
 // 19 Governorates list with English, Arabic, and Kurdish translations
 export const GOVERNORATE_OPTIONS = [
-  { id: 'Baghdad', en: 'Baghdad (بغداد / بەغداد)', ar: 'بغداد (Baghdad)', ckb: 'بەغداد (Baghdad)' },
-  { id: 'Erbil', en: 'Erbil (أربيل / هەولێر)', ar: 'أربيل (Erbil)', ckb: 'هەولێر (Erbil)' },
-  { id: 'Sulaymaniyah', en: 'Sulaymaniyah (السليمانية / سلێمانی)', ar: 'السليمانية (Sulaymaniyah)', ckb: 'سلێمانی (Sulaymaniyah)' },
-  { id: 'Duhok', en: 'Duhok (دهوك / دهۆک)', ar: 'دهوك (Duhok)', ckb: 'دهۆک (Duhok)' },
-  { id: 'Halabja', en: 'Halabja (حلبجة / هەڵەبجە)', ar: 'حلبجة (Halabja)', ckb: 'هەڵەبجە (Halabja)' },
-  { id: 'Kirkuk', en: 'Kirkuk (كركوك / کەرکوک)', ar: 'كركوك (Kirkuk)', ckb: 'کەرکوک (Kirkuk)' },
-  { id: 'Nineveh', en: 'Nineveh (نينوى / نەینەوا)', ar: 'نينوى (Nineveh)', ckb: 'نەینەوا (Nineveh)' },
-  { id: 'Basra', en: 'Basra (البصرة / بەسرە)', ar: 'البصرة (Basra)', ckb: 'بەسرە (Basra)' },
-  { id: 'Najaf', en: 'Najaf (النجف / نەجەف)', ar: 'النجف (Najaf)', ckb: 'نەجەف (Najaf)' },
-  { id: 'Karbala', en: 'Karbala (كربلاء / کەربەلا)', ar: 'كربلاء (Karbala)', ckb: 'کەربەلا (Karbala)' },
-  { id: 'Babil', en: 'Babil (بابل / بابل)', ar: 'بابل (Babel)', ckb: 'بابل (Babel)' },
-  { id: 'Anbar', en: 'Anbar (الأنبار / ئەنبار)', ar: 'الأنبار (Anbar)', ckb: 'ئەنبار (Anbar)' },
-  { id: 'Diyala', en: 'Diyala (ديالى / دیالە)', ar: 'ديالى (Diyala)', ckb: 'دیالە (Diyala)' },
-  { id: 'Salah al-Din', en: 'Salah al-Din (صلاح الدين / سەڵاحەدین)', ar: 'صلاح الدين (Salah al-Din)', ckb: 'سەڵاحەدین (Salah al-Din)' },
-  { id: 'Wasit', en: 'Wasit (واسط / واسیت)', ar: 'واسط (Wasit)', ckb: 'واسیت (Wasit)' },
-  { id: 'Maysan', en: 'Maysan (ميسان / میسان)', ar: 'ميسان (Maysan)', ckb: 'میسان (Maysan)' },
-  { id: 'Dhi Qar', en: 'Dhi Qar (ذي قار / زیقار)', ar: 'ذي قار (Dhi Qar)', ckb: 'زیقار (Dhi Qar)' },
-  { id: 'Muthanna', en: 'Muthanna (المثنى / موتەنا)', ar: 'المثنى (Muthanna)', ckb: 'موتەنا (Muthanna)' },
-  { id: 'Qadisiyah', en: 'Qadisiyah (القادسية / قادسيە)', ar: 'القادسية (Qadisiyah)', ckb: 'قادسیە (Qadisiyah)' }
+  { id: 'Baghdad', en: 'Baghdad (Ø¨ØºØ¯Ø§Ø¯ / Ø¨Û•ØºØ¯Ø§Ø¯)', ar: 'Ø¨ØºØ¯Ø§Ø¯ (Baghdad)', ckb: 'Ø¨Û•ØºØ¯Ø§Ø¯ (Baghdad)' },
+  { id: 'Erbil', en: 'Erbil (Ø£Ø±Ø¨ÙŠÙ„ / Ù‡Û•ÙˆÙ„ÛŽØ±)', ar: 'Ø£Ø±Ø¨ÙŠÙ„ (Erbil)', ckb: 'Ù‡Û•ÙˆÙ„ÛŽØ± (Erbil)' },
+  { id: 'Sulaymaniyah', en: 'Sulaymaniyah (Ø§Ù„Ø³Ù„ÙŠÙ…Ø§Ù†ÙŠØ© / Ø³Ù„ÛŽÙ…Ø§Ù†ÛŒ)', ar: 'Ø§Ù„Ø³Ù„ÙŠÙ…Ø§Ù†ÙŠØ© (Sulaymaniyah)', ckb: 'Ø³Ù„ÛŽÙ…Ø§Ù†ÛŒ (Sulaymaniyah)' },
+  { id: 'Duhok', en: 'Duhok (Ø¯Ù‡ÙˆÙƒ / Ø¯Ù‡Û†Ú©)', ar: 'Ø¯Ù‡ÙˆÙƒ (Duhok)', ckb: 'Ø¯Ù‡Û†Ú© (Duhok)' },
+  { id: 'Halabja', en: 'Halabja (Ø­Ù„Ø¨Ø¬Ø© / Ù‡Û•ÚµÛ•Ø¨Ø¬Û•)', ar: 'Ø­Ù„Ø¨Ø¬Ø© (Halabja)', ckb: 'Ù‡Û•ÚµÛ•Ø¨Ø¬Û• (Halabja)' },
+  { id: 'Kirkuk', en: 'Kirkuk (ÙƒØ±ÙƒÙˆÙƒ / Ú©Û•Ø±Ú©ÙˆÚ©)', ar: 'ÙƒØ±ÙƒÙˆÙƒ (Kirkuk)', ckb: 'Ú©Û•Ø±Ú©ÙˆÚ© (Kirkuk)' },
+  { id: 'Nineveh', en: 'Nineveh (Ù†ÙŠÙ†ÙˆÙ‰ / Ù†Û•ÛŒÙ†Û•ÙˆØ§)', ar: 'Ù†ÙŠÙ†ÙˆÙ‰ (Nineveh)', ckb: 'Ù†Û•ÛŒÙ†Û•ÙˆØ§ (Nineveh)' },
+  { id: 'Basra', en: 'Basra (Ø§Ù„Ø¨ØµØ±Ø© / Ø¨Û•Ø³Ø±Û•)', ar: 'Ø§Ù„Ø¨ØµØ±Ø© (Basra)', ckb: 'Ø¨Û•Ø³Ø±Û• (Basra)' },
+  { id: 'Najaf', en: 'Najaf (Ø§Ù„Ù†Ø¬Ù / Ù†Û•Ø¬Û•Ù)', ar: 'Ø§Ù„Ù†Ø¬Ù (Najaf)', ckb: 'Ù†Û•Ø¬Û•Ù (Najaf)' },
+  { id: 'Karbala', en: 'Karbala (ÙƒØ±Ø¨Ù„Ø§Ø¡ / Ú©Û•Ø±Ø¨Û•Ù„Ø§)', ar: 'ÙƒØ±Ø¨Ù„Ø§Ø¡ (Karbala)', ckb: 'Ú©Û•Ø±Ø¨Û•Ù„Ø§ (Karbala)' },
+  { id: 'Babil', en: 'Babil (Ø¨Ø§Ø¨Ù„ / Ø¨Ø§Ø¨Ù„)', ar: 'Ø¨Ø§Ø¨Ù„ (Babel)', ckb: 'Ø¨Ø§Ø¨Ù„ (Babel)' },
+  { id: 'Anbar', en: 'Anbar (Ø§Ù„Ø£Ù†Ø¨Ø§Ø± / Ø¦Û•Ù†Ø¨Ø§Ø±)', ar: 'Ø§Ù„Ø£Ù†Ø¨Ø§Ø± (Anbar)', ckb: 'Ø¦Û•Ù†Ø¨Ø§Ø± (Anbar)' },
+  { id: 'Diyala', en: 'Diyala (Ø¯ÙŠØ§Ù„Ù‰ / Ø¯ÛŒØ§Ù„Û•)', ar: 'Ø¯ÙŠØ§Ù„Ù‰ (Diyala)', ckb: 'Ø¯ÛŒØ§Ù„Û• (Diyala)' },
+  { id: 'Salah al-Din', en: 'Salah al-Din (ØµÙ„Ø§Ø­ Ø§Ù„Ø¯ÙŠÙ† / Ø³Û•ÚµØ§Ø­Û•Ø¯ÛŒÙ†)', ar: 'ØµÙ„Ø§Ø­ Ø§Ù„Ø¯ÙŠÙ† (Salah al-Din)', ckb: 'Ø³Û•ÚµØ§Ø­Û•Ø¯ÛŒÙ† (Salah al-Din)' },
+  { id: 'Wasit', en: 'Wasit (ÙˆØ§Ø³Ø· / ÙˆØ§Ø³ÛŒØª)', ar: 'ÙˆØ§Ø³Ø· (Wasit)', ckb: 'ÙˆØ§Ø³ÛŒØª (Wasit)' },
+  { id: 'Maysan', en: 'Maysan (Ù…ÙŠØ³Ø§Ù† / Ù…ÛŒØ³Ø§Ù†)', ar: 'Ù…ÙŠØ³Ø§Ù† (Maysan)', ckb: 'Ù…ÛŒØ³Ø§Ù† (Maysan)' },
+  { id: 'Dhi Qar', en: 'Dhi Qar (Ø°ÙŠ Ù‚Ø§Ø± / Ø²ÛŒÙ‚Ø§Ø±)', ar: 'Ø°ÙŠ Ù‚Ø§Ø± (Dhi Qar)', ckb: 'Ø²ÛŒÙ‚Ø§Ø± (Dhi Qar)' },
+  { id: 'Muthanna', en: 'Muthanna (Ø§Ù„Ù…Ø«Ù†Ù‰ / Ù…ÙˆØªÛ•Ù†Ø§)', ar: 'Ø§Ù„Ù…Ø«Ù†Ù‰ (Muthanna)', ckb: 'Ù…ÙˆØªÛ•Ù†Ø§ (Muthanna)' },
+  { id: 'Qadisiyah', en: 'Qadisiyah (Ø§Ù„Ù‚Ø§Ø¯Ø³ÙŠØ© / Ù‚Ø§Ø¯Ø³ÙŠÛ•)', ar: 'Ø§Ù„Ù‚Ø§Ø¯Ø³ÙŠØ© (Qadisiyah)', ckb: 'Ù‚Ø§Ø¯Ø³ÛŒÛ• (Qadisiyah)' }
 ];
 
 // System-selected landmarks for the 19 Iraqi governorates
 const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: string; icon: string }> = {
-  Baghdad: { en: 'Al-Mutanabbi Street', ar: 'شارع المتنبي التراثي', ckb: 'شەقامی موتەنەبی مێژوویی', icon: '📚' },
-  Erbil: { en: 'Erbil Citadel', ar: 'قلعة أربيل الأثرية', ckb: 'قەڵای هەولێری دێرین', icon: '🏰' },
-  Sulaymaniyah: { en: 'Salim Street & Azadi Park', ar: 'شارع سالم وحديقة آزادي', ckb: 'شەقامی سالم و باخی دایک', icon: '🌳' },
-  Duhok: { en: 'Duhok Dam & Dream City', ar: 'سد دهوك ومدينة الأحلام', ckb: 'بەنداوی دهۆک و دریم سیتی', icon: '🎡' },
-  Halabja: { en: 'Sarchinar & Ahmad Awa', ar: 'شلالات أحمد آوا الجميلة', ckb: 'هاوینەهەواری ئەحمەد ئاوا', icon: '🌊' },
-  Kirkuk: { en: 'Kirkuk Citadel', ar: 'قلعة كركوك التاريخية', ckb: 'قەڵای کەرکوکی مێژوویی', icon: '🏛️' },
-  Nineveh: { en: 'Al-Nuri Mosque & Mosul Woods', ar: 'غابات الموصل والمنارة الحدباء', ckb: 'دارستانەکانی موسڵ', icon: '🕌' },
-  Basra: { en: 'Shatt al-Arab Corniche', ar: 'كورنيش شط العرب', ckb: 'کۆڕنیشی شەتل عەرەب', icon: '⛵' },
-  Najaf: { en: 'Wadi-us-Salaam & Heritage Bazaar', ar: 'السوق الكبير والتراث النجفي', ckb: 'بازاڕی گەورەی نەجەف', icon: '🕌' },
-  Karbala: { en: 'Al-Hussein Area & Lake Milh', ar: 'منطقة الحرمين وبحيرة الملح', ckb: 'ناوچەی حەرەمەین', icon: '🌅' },
-  Babil: { en: 'Ancient Ruins of Babylon', ar: 'آثار بابل التاريخية وأسد بابل', ckb: 'شوێنەواری دێرینی بابل', icon: '🦁' },
-  Anbar: { en: 'Habbaniyah Lake & Euphrates', ar: 'بحيرة الحبانية ونهر الفرات', ckb: 'دەریاچەی حەبانیە', icon: '🏖️' },
-  Diyala: { en: 'Hamrin Hills & Orange Groves', ar: 'بساتين البرتقال وتلال حمرين', ckb: 'باخەکانی پرتەقاڵی دیالە', icon: '🍊' },
-  "Salah al-Din": { en: 'Spiral Minaret of Samarra', ar: 'مئذنة الملوية الأثرية في سامراء', ckb: 'منارەی مەلوییەی سامەڕا', icon: '🕌' },
-  Wasit: { en: 'Kut Barrage & Tigris Banks', ar: 'سد الكوت وضفاف نهر دجلة', ckb: 'بەنداوی کوت', icon: '🌊' },
-  Maysan: { en: 'Amara Marshes & Kahla River', ar: 'أهوار العمارة ونهر الكحلاء', ckb: 'أهوار العمارة ونهر الكحلاء', icon: '🚣' },
-  "Dhi Qar": { en: 'Ziggurat of Ur & Chibayish Marshes', ar: 'زقورة أور الأثرية وأهوار الجبايش', ckb: 'زەقوورەی ئۆر و ئەهوارەکان', icon: '🏺' },
-  Muthanna: { en: 'Sawa Lake & Warka Ruins', ar: 'بحيرة ساوة وآثار الوركاء', ckb: 'دەریاچەی ساوا', icon: '🏜️' },
-  Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
+  Baghdad: { en: 'Al-Mutanabbi Street', ar: 'Ø´Ø§Ø±Ø¹ Ø§Ù„Ù…ØªÙ†Ø¨ÙŠ Ø§Ù„ØªØ±Ø§Ø«ÙŠ', ckb: 'Ø´Û•Ù‚Ø§Ù…ÛŒ Ù…ÙˆØªÛ•Ù†Û•Ø¨ÛŒ Ù…ÛŽÚ˜ÙˆÙˆÛŒÛŒ', icon: 'ðŸ“š' },
+  Erbil: { en: 'Erbil Citadel', ar: 'Ù‚Ù„Ø¹Ø© Ø£Ø±Ø¨ÙŠÙ„ Ø§Ù„Ø£Ø«Ø±ÙŠØ©', ckb: 'Ù‚Û•ÚµØ§ÛŒ Ù‡Û•ÙˆÙ„ÛŽØ±ÛŒ Ø¯ÛŽØ±ÛŒÙ†', icon: 'ðŸ°' },
+  Sulaymaniyah: { en: 'Salim Street & Azadi Park', ar: 'Ø´Ø§Ø±Ø¹ Ø³Ø§Ù„Ù… ÙˆØ­Ø¯ÙŠÙ‚Ø© Ø¢Ø²Ø§Ø¯ÙŠ', ckb: 'Ø´Û•Ù‚Ø§Ù…ÛŒ Ø³Ø§Ù„Ù… Ùˆ Ø¨Ø§Ø®ÛŒ Ø¯Ø§ÛŒÚ©', icon: 'ðŸŒ³' },
+  Duhok: { en: 'Duhok Dam & Dream City', ar: 'Ø³Ø¯ Ø¯Ù‡ÙˆÙƒ ÙˆÙ…Ø¯ÙŠÙ†Ø© Ø§Ù„Ø£Ø­Ù„Ø§Ù…', ckb: 'Ø¨Û•Ù†Ø¯Ø§ÙˆÛŒ Ø¯Ù‡Û†Ú© Ùˆ Ø¯Ø±ÛŒÙ… Ø³ÛŒØªÛŒ', icon: 'ðŸŽ¡' },
+  Halabja: { en: 'Sarchinar & Ahmad Awa', ar: 'Ø´Ù„Ø§Ù„Ø§Øª Ø£Ø­Ù…Ø¯ Ø¢ÙˆØ§ Ø§Ù„Ø¬Ù…ÙŠÙ„Ø©', ckb: 'Ù‡Ø§ÙˆÛŒÙ†Û•Ù‡Û•ÙˆØ§Ø±ÛŒ Ø¦Û•Ø­Ù…Û•Ø¯ Ø¦Ø§ÙˆØ§', icon: 'ðŸŒŠ' },
+  Kirkuk: { en: 'Kirkuk Citadel', ar: 'Ù‚Ù„Ø¹Ø© ÙƒØ±ÙƒÙˆÙƒ Ø§Ù„ØªØ§Ø±ÙŠØ®ÙŠØ©', ckb: 'Ù‚Û•ÚµØ§ÛŒ Ú©Û•Ø±Ú©ÙˆÚ©ÛŒ Ù…ÛŽÚ˜ÙˆÙˆÛŒÛŒ', icon: 'ðŸ›ï¸' },
+  Nineveh: { en: 'Al-Nuri Mosque & Mosul Woods', ar: 'ØºØ§Ø¨Ø§Øª Ø§Ù„Ù…ÙˆØµÙ„ ÙˆØ§Ù„Ù…Ù†Ø§Ø±Ø© Ø§Ù„Ø­Ø¯Ø¨Ø§Ø¡', ckb: 'Ø¯Ø§Ø±Ø³ØªØ§Ù†Û•Ú©Ø§Ù†ÛŒ Ù…ÙˆØ³Úµ', icon: 'ðŸ•Œ' },
+  Basra: { en: 'Shatt al-Arab Corniche', ar: 'ÙƒÙˆØ±Ù†ÙŠØ´ Ø´Ø· Ø§Ù„Ø¹Ø±Ø¨', ckb: 'Ú©Û†Ú•Ù†ÛŒØ´ÛŒ Ø´Û•ØªÙ„ Ø¹Û•Ø±Û•Ø¨', icon: 'â›µ' },
+  Najaf: { en: 'Wadi-us-Salaam & Heritage Bazaar', ar: 'Ø§Ù„Ø³ÙˆÙ‚ Ø§Ù„ÙƒØ¨ÙŠØ± ÙˆØ§Ù„ØªØ±Ø§Ø« Ø§Ù„Ù†Ø¬ÙÙŠ', ckb: 'Ø¨Ø§Ø²Ø§Ú•ÛŒ Ú¯Û•ÙˆØ±Û•ÛŒ Ù†Û•Ø¬Û•Ù', icon: 'ðŸ•Œ' },
+  Karbala: { en: 'Al-Hussein Area & Lake Milh', ar: 'Ù…Ù†Ø·Ù‚Ø© Ø§Ù„Ø­Ø±Ù…ÙŠÙ† ÙˆØ¨Ø­ÙŠØ±Ø© Ø§Ù„Ù…Ù„Ø­', ckb: 'Ù†Ø§ÙˆÚ†Û•ÛŒ Ø­Û•Ø±Û•Ù…Û•ÛŒÙ†', icon: 'ðŸŒ…' },
+  Babil: { en: 'Ancient Ruins of Babylon', ar: 'Ø¢Ø«Ø§Ø± Ø¨Ø§Ø¨Ù„ Ø§Ù„ØªØ§Ø±ÙŠØ®ÙŠØ© ÙˆØ£Ø³Ø¯ Ø¨Ø§Ø¨Ù„', ckb: 'Ø´ÙˆÛŽÙ†Û•ÙˆØ§Ø±ÛŒ Ø¯ÛŽØ±ÛŒÙ†ÛŒ Ø¨Ø§Ø¨Ù„', icon: 'ðŸ¦' },
+  Anbar: { en: 'Habbaniyah Lake & Euphrates', ar: 'Ø¨Ø­ÙŠØ±Ø© Ø§Ù„Ø­Ø¨Ø§Ù†ÙŠØ© ÙˆÙ†Ù‡Ø± Ø§Ù„ÙØ±Ø§Øª', ckb: 'Ø¯Û•Ø±ÛŒØ§Ú†Û•ÛŒ Ø­Û•Ø¨Ø§Ù†ÛŒÛ•', icon: 'ðŸ–ï¸' },
+  Diyala: { en: 'Hamrin Hills & Orange Groves', ar: 'Ø¨Ø³Ø§ØªÙŠÙ† Ø§Ù„Ø¨Ø±ØªÙ‚Ø§Ù„ ÙˆØªÙ„Ø§Ù„ Ø­Ù…Ø±ÙŠÙ†', ckb: 'Ø¨Ø§Ø®Û•Ú©Ø§Ù†ÛŒ Ù¾Ø±ØªÛ•Ù‚Ø§ÚµÛŒ Ø¯ÛŒØ§Ù„Û•', icon: 'ðŸŠ' },
+  "Salah al-Din": { en: 'Spiral Minaret of Samarra', ar: 'Ù…Ø¦Ø°Ù†Ø© Ø§Ù„Ù…Ù„ÙˆÙŠØ© Ø§Ù„Ø£Ø«Ø±ÙŠØ© ÙÙŠ Ø³Ø§Ù…Ø±Ø§Ø¡', ckb: 'Ù…Ù†Ø§Ø±Û•ÛŒ Ù…Û•Ù„ÙˆÛŒÛŒÛ•ÛŒ Ø³Ø§Ù…Û•Ú•Ø§', icon: 'ðŸ•Œ' },
+  Wasit: { en: 'Kut Barrage & Tigris Banks', ar: 'Ø³Ø¯ Ø§Ù„ÙƒÙˆØª ÙˆØ¶ÙØ§Ù Ù†Ù‡Ø± Ø¯Ø¬Ù„Ø©', ckb: 'Ø¨Û•Ù†Ø¯Ø§ÙˆÛŒ Ú©ÙˆØª', icon: 'ðŸŒŠ' },
+  Maysan: { en: 'Amara Marshes & Kahla River', ar: 'Ø£Ù‡ÙˆØ§Ø± Ø§Ù„Ø¹Ù…Ø§Ø±Ø© ÙˆÙ†Ù‡Ø± Ø§Ù„ÙƒØ­Ù„Ø§Ø¡', ckb: 'Ø£Ù‡ÙˆØ§Ø± Ø§Ù„Ø¹Ù…Ø§Ø±Ø© ÙˆÙ†Ù‡Ø± Ø§Ù„ÙƒØ­Ù„Ø§Ø¡', icon: 'ðŸš£' },
+  "Dhi Qar": { en: 'Ziggurat of Ur & Chibayish Marshes', ar: 'Ø²Ù‚ÙˆØ±Ø© Ø£ÙˆØ± Ø§Ù„Ø£Ø«Ø±ÙŠØ© ÙˆØ£Ù‡ÙˆØ§Ø± Ø§Ù„Ø¬Ø¨Ø§ÙŠØ´', ckb: 'Ø²Û•Ù‚ÙˆÙˆØ±Û•ÛŒ Ø¦Û†Ø± Ùˆ Ø¦Û•Ù‡ÙˆØ§Ø±Û•Ú©Ø§Ù†', icon: 'ðŸº' },
+  Muthanna: { en: 'Sawa Lake & Warka Ruins', ar: 'Ø¨Ø­ÙŠØ±Ø© Ø³Ø§ÙˆØ© ÙˆØ¢Ø«Ø§Ø± Ø§Ù„ÙˆØ±ÙƒØ§Ø¡', ckb: 'Ø¯Û•Ø±ÛŒØ§Ú†Û•ÛŒ Ø³Ø§ÙˆØ§', icon: 'ðŸœï¸' },
+  Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'Ø¢Ø«Ø§Ø± Ù†ÙŠØ¨ÙˆØ± ÙˆØ¶ÙØ§Ù Ù†Ù‡Ø± Ø§Ù„Ø¯ÙŠÙˆØ§Ù†ÙŠØ©', ckb: 'Ø´ÙˆÛŽÙ†Û•ÙˆØ§Ø±ÛŒ Ù†ÛŒÙ¾Û†Ø±', icon: 'ðŸŒ¾' },
 };
 
 export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
@@ -261,9 +261,9 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
   const handleProfileClick = (candidate: MatchProfile) => {
     if (!isAuthenticated) {
       showToast(txt(
-        "💍 Please login or create an account to view deep lifestyle values & send requests!",
-        "💍 يرجى تسجيل الدخول أو إنشاء حساب لاستكشاف تفاصيل القيم العائلية والتواصل الجاد!",
-        "💍 تکایە سەرەتا بچۆ ژوورەوە یان پڕۆفایل دروست بکە بۆ دیتنی بەهاکان!"
+        "ðŸ’ Please login or create an account to view deep lifestyle values & send requests!",
+        "ðŸ’ ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£Ùˆ Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ù„Ø§Ø³ØªÙƒØ´Ø§Ù ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ù‚ÙŠÙ… Ø§Ù„Ø¹Ø§Ø¦Ù„ÙŠØ© ÙˆØ§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„Ø¬Ø§Ø¯!",
+        "ðŸ’ ØªÚ©Ø§ÛŒÛ• Ø³Û•Ø±Û•ØªØ§ Ø¨Ú†Û† Ú˜ÙˆÙˆØ±Û•ÙˆÛ• ÛŒØ§Ù† Ù¾Ú•Û†ÙØ§ÛŒÙ„ Ø¯Ø±ÙˆØ³Øª Ø¨Ú©Û• Ø¨Û† Ø¯ÛŒØªÙ†ÛŒ Ø¨Û•Ù‡Ø§Ú©Ø§Ù†!"
       ));
       setTab('onboarding');
     } else {
@@ -276,7 +276,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       {/* Beta Badge */}
       <div style={{position: "fixed", top: 0, left: 0, right: 0, zIndex: 99999, background: "#1C2541", color: "#E8DCC4", padding: "8px", textAlign: "center", fontSize: "13px", fontFamily: "system-ui", borderBottom: "1px solid #E8DCC4", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px"}}>
         <span style={{width: "8px", height: "8px", background: "#f59e0b", borderRadius: "50%", display: "inline-block"}}></span>
-        {locale === "ar" ? "نسخة تجريبية" : locale === "ckb" ? "وەشانی تاقیکردنەوە" : "Beta"}
+        {locale === "ar" ? "Ù†Ø³Ø®Ø© ØªØ¬Ø±ÙŠØ¨ÙŠØ©" : locale === "ckb" ? "ÙˆÛ•Ø´Ø§Ù†ÛŒ ØªØ§Ù‚ÛŒÚ©Ø±Ø¯Ù†Û•ÙˆÛ•" : "Beta"}
       </div>
       <div style={{height: "36px"}}></div>
 
@@ -316,40 +316,40 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             <div className="lg:col-span-8 text-start space-y-4">
               <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider">
                 <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span>{txt("OFFICIAL PREMIUM DIVISION", "البوابة المهنية الرسمية المعتمدة", "بەشی فەرمی و سەرەکی")}</span>
+                <span>{txt("OFFICIAL PREMIUM DIVISION", "Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù…Ù‡Ù†ÙŠØ© Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø©", "Ø¨Û•Ø´ÛŒ ÙÛ•Ø±Ù…ÛŒ Ùˆ Ø³Û•Ø±Û•Ú©ÛŒ")}</span>
               </span>
               <h2 className="text-2xl sm:text-4xl font-serif font-black tracking-tight leading-tight">
-                {txt("Licensed, Chaperoned Courtship Services", "الوساطة المهنية المعتمدة للزواج الوقور في العراق", "خزمەتگوزاری فەرمی هاوسەرگیری بەپێی بەها کۆمەڵایەتییەکان")}
+                {txt("Licensed, Chaperoned Courtship Services", "Ø§Ù„ÙˆØ³Ø§Ø·Ø© Ø§Ù„Ù…Ù‡Ù†ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù„Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„ÙˆÙ‚ÙˆØ± ÙÙŠ Ø§Ù„Ø¹Ø±Ø§Ù‚", "Ø®Ø²Ù…Û•ØªÚ¯ÙˆØ²Ø§Ø±ÛŒ ÙÛ•Ø±Ù…ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ Ø¨Û•Ù¾ÛŽÛŒ Ø¨Û•Ù‡Ø§ Ú©Û†Ù…Û•ÚµØ§ÛŒÛ•ØªÛŒÛŒÛ•Ú©Ø§Ù†")}
               </h2>
               <p className="text-xs sm:text-sm text-stone-300 font-medium leading-relaxed max-w-3xl">
                 {txt(
                   "We bridge tradition and modernity. Each applicant undergoes rigorous ID validation and manual lifestyle assessment to guarantee the most sincere, family-supported match pool in all 19 Iraqi governorates.",
-                  "نجمع بين الأصالة والحداثة بأسلوب آمن. يخضع كل متقدم لعملية تدقيق وتوثيق شاملة لضمان جدية النوايا وحفظ كرامة وخصوصية العائلات الكريمة في عموم محافظات العراق.",
-                  "ئێمە مۆدێرنە و دابونەریت کۆدەکەینەوە بە شێوازێکی بێوەی. هەموو پڕۆفایلەکان پشتڕاست دەکرێنەوە بۆ دڵنیابوون لە ڕاستگۆیی کارەکان لە ١٩ پارێزگاکەی عێراق."
+                  "Ù†Ø¬Ù…Ø¹ Ø¨ÙŠÙ† Ø§Ù„Ø£ØµØ§Ù„Ø© ÙˆØ§Ù„Ø­Ø¯Ø§Ø«Ø© Ø¨Ø£Ø³Ù„ÙˆØ¨ Ø¢Ù…Ù†. ÙŠØ®Ø¶Ø¹ ÙƒÙ„ Ù…ØªÙ‚Ø¯Ù… Ù„Ø¹Ù…Ù„ÙŠØ© ØªØ¯Ù‚ÙŠÙ‚ ÙˆØªÙˆØ«ÙŠÙ‚ Ø´Ø§Ù…Ù„Ø© Ù„Ø¶Ù…Ø§Ù† Ø¬Ø¯ÙŠØ© Ø§Ù„Ù†ÙˆØ§ÙŠØ§ ÙˆØ­ÙØ¸ ÙƒØ±Ø§Ù…Ø© ÙˆØ®ØµÙˆØµÙŠØ© Ø§Ù„Ø¹Ø§Ø¦Ù„Ø§Øª Ø§Ù„ÙƒØ±ÙŠÙ…Ø© ÙÙŠ Ø¹Ù…ÙˆÙ… Ù…Ø­Ø§ÙØ¸Ø§Øª Ø§Ù„Ø¹Ø±Ø§Ù‚.",
+                  "Ø¦ÛŽÙ…Û• Ù…Û†Ø¯ÛŽØ±Ù†Û• Ùˆ Ø¯Ø§Ø¨ÙˆÙ†Û•Ø±ÛŒØª Ú©Û†Ø¯Û•Ú©Û•ÛŒÙ†Û•ÙˆÛ• Ø¨Û• Ø´ÛŽÙˆØ§Ø²ÛŽÚ©ÛŒ Ø¨ÛŽÙˆÛ•ÛŒ. Ù‡Û•Ù…ÙˆÙˆ Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Ø§Ù† Ù¾Ø´ØªÚ•Ø§Ø³Øª Ø¯Û•Ú©Ø±ÛŽÙ†Û•ÙˆÛ• Ø¨Û† Ø¯ÚµÙ†ÛŒØ§Ø¨ÙˆÙˆÙ† Ù„Û• Ú•Ø§Ø³ØªÚ¯Û†ÛŒÛŒ Ú©Ø§Ø±Û•Ú©Ø§Ù† Ù„Û• Ù¡Ù© Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§Ú©Û•ÛŒ Ø¹ÛŽØ±Ø§Ù‚."
                 )}
               </p>
 
               {/* Core Features list with clean styling */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-semibold text-stone-100">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
-                  <span className="text-lg">💼</span>
+                  <span className="text-lg">ðŸ’¼</span>
                   <div>
-                    <p className="font-extrabold text-amber-300">{txt("100% Manual Vetting", "تدقيق بشري كامل", "پداچوونەوەی دەستی ١٠٠٪")}</p>
-                    <p className="text-[10px] text-stone-400 font-medium">{txt("Employment & ID checks", "توثيق الهوية والعمل", "پشتڕاستکردنەوەی کار")}</p>
+                    <p className="font-extrabold text-amber-300">{txt("100% Manual Vetting", "ØªØ¯Ù‚ÙŠÙ‚ Ø¨Ø´Ø±ÙŠ ÙƒØ§Ù…Ù„", "Ù¾Ø¯Ø§Ú†ÙˆÙˆÙ†Û•ÙˆÛ•ÛŒ Ø¯Û•Ø³ØªÛŒ Ù¡Ù Ù Ùª")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Employment & ID checks", "ØªÙˆØ«ÙŠÙ‚ Ø§Ù„Ù‡ÙˆÙŠØ© ÙˆØ§Ù„Ø¹Ù…Ù„", "Ù¾Ø´ØªÚ•Ø§Ø³ØªÚ©Ø±Ø¯Ù†Û•ÙˆÛ•ÛŒ Ú©Ø§Ø±")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
-                  <span className="text-lg">🛡️</span>
+                  <span className="text-lg">ðŸ›¡ï¸</span>
                   <div>
-                    <p className="font-extrabold text-amber-300">{txt("Privacy Secured", "خصوصية مصونة", "پاراستنی تەواوی نهێنی")}</p>
-                    <p className="text-[10px] text-stone-400 font-medium">{txt("Blur portraits on demand", "تمويه الصور للعرائس", "لێڵکردنی وێنە بەپێی خواست")}</p>
+                    <p className="font-extrabold text-amber-300">{txt("Privacy Secured", "Ø®ØµÙˆØµÙŠØ© Ù…ØµÙˆÙ†Ø©", "Ù¾Ø§Ø±Ø§Ø³ØªÙ†ÛŒ ØªÛ•ÙˆØ§ÙˆÛŒ Ù†Ù‡ÛŽÙ†ÛŒ")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Blur portraits on demand", "ØªÙ…ÙˆÙŠÙ‡ Ø§Ù„ØµÙˆØ± Ù„Ù„Ø¹Ø±Ø§Ø¦Ø³", "Ù„ÛŽÚµÚ©Ø±Ø¯Ù†ÛŒ ÙˆÛŽÙ†Û• Ø¨Û•Ù¾ÛŽÛŒ Ø®ÙˆØ§Ø³Øª")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-3 rounded-xl">
-                  <span className="text-lg">🤝</span>
+                  <span className="text-lg">ðŸ¤</span>
                   <div>
-                    <p className="font-extrabold text-amber-300">{txt("Wali Involvement", "إشراك أولياء الأمور", "ئاگادارکردنەوەی سەرپەرشتیار")}</p>
-                    <p className="text-[10px] text-stone-400 font-medium">{txt("Chaperoned introductions", "خطوبة وقورة وعائلية", "پڕۆسەی فەرمی و عائلی")}</p>
+                    <p className="font-extrabold text-amber-300">{txt("Wali Involvement", "Ø¥Ø´Ø±Ø§Ùƒ Ø£ÙˆÙ„ÙŠØ§Ø¡ Ø§Ù„Ø£Ù…ÙˆØ±", "Ø¦Ø§Ú¯Ø§Ø¯Ø§Ø±Ú©Ø±Ø¯Ù†Û•ÙˆÛ•ÛŒ Ø³Û•Ø±Ù¾Û•Ø±Ø´ØªÛŒØ§Ø±")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">{txt("Chaperoned introductions", "Ø®Ø·ÙˆØ¨Ø© ÙˆÙ‚ÙˆØ±Ø© ÙˆØ¹Ø§Ø¦Ù„ÙŠØ©", "Ù¾Ú•Û†Ø³Û•ÛŒ ÙÛ•Ø±Ù…ÛŒ Ùˆ Ø¹Ø§Ø¦Ù„ÛŒ")}</p>
                   </div>
                 </div>
               </div>
@@ -358,15 +358,15 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             {/* Business Hero Right Column: stats widget */}
             <div className="lg:col-span-4 bg-white/10 border border-white/15 rounded-2xl p-5 text-center space-y-4 shadow-xl backdrop-blur-md">
               <span className="text-[10px] font-mono font-black text-amber-400 uppercase tracking-widest block">
-                ⭐ {txt("IRAQ STATISTICS", "مؤشرات النجاح المبارك", "ئامارەکانی سەرکەوتن")}
+                â­ {txt("IRAQ STATISTICS", "Ù…Ø¤Ø´Ø±Ø§Øª Ø§Ù„Ù†Ø¬Ø§Ø­ Ø§Ù„Ù…Ø¨Ø§Ø±Ùƒ", "Ø¦Ø§Ù…Ø§Ø±Û•Ú©Ø§Ù†ÛŒ Ø³Û•Ø±Ú©Û•ÙˆØªÙ†")}
               </span>
               <div className="grid grid-cols-2 gap-2 text-start">
                 <div className="bg-black/20 p-3 rounded-xl">
-                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Verified Applicants", "الأعضاء الموثقون", "کاندیدەکان")}</span>
+                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Verified Applicants", "Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡ Ø§Ù„Ù…ÙˆØ«Ù‚ÙˆÙ†", "Ú©Ø§Ù†Ø¯ÛŒØ¯Û•Ú©Ø§Ù†")}</span>
                   <span className="text-lg font-serif font-black text-white">24,580+</span>
                 </div>
                 <div className="bg-black/20 p-3 rounded-xl">
-                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Blessed Marriages", "زيجات مباركة", "هاوسەرگیری سەرکەوتوو")}</span>
+                  <span className="block text-[8px] font-mono text-stone-400 uppercase">{txt("Blessed Marriages", "Ø²ÙŠØ¬Ø§Øª Ù…Ø¨Ø§Ø±ÙƒØ©", "Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ Ø³Û•Ø±Ú©Û•ÙˆØªÙˆÙˆ")}</span>
                   <span className="text-lg font-serif font-black text-emerald-400">1,412+</span>
                 </div>
               </div>
@@ -375,8 +375,8 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 animate-pulse" />
                 <p>{txt(
                   "Join our verified circle and discover candidates based on profound cultural, religious, and lifestyle alignment.",
-                  "انضم لصفوتنا المباركة واكتشف الشريك الأنسب المتوافق معك عقائدياً وثقافياً واجتماعياً.",
-                  "ببەرە ئەندام لە خێزانی پیرۆزمان بۆ دۆزینەوەی شیاوترین هاوسەر."
+                  "Ø§Ù†Ø¶Ù… Ù„ØµÙÙˆØªÙ†Ø§ Ø§Ù„Ù…Ø¨Ø§Ø±ÙƒØ© ÙˆØ§ÙƒØªØ´Ù Ø§Ù„Ø´Ø±ÙŠÙƒ Ø§Ù„Ø£Ù†Ø³Ø¨ Ø§Ù„Ù…ØªÙˆØ§ÙÙ‚ Ù…Ø¹Ùƒ Ø¹Ù‚Ø§Ø¦Ø¯ÙŠØ§Ù‹ ÙˆØ«Ù‚Ø§ÙÙŠØ§Ù‹ ÙˆØ§Ø¬ØªÙ…Ø§Ø¹ÙŠØ§Ù‹.",
+                  "Ø¨Ø¨Û•Ø±Û• Ø¦Û•Ù†Ø¯Ø§Ù… Ù„Û• Ø®ÛŽØ²Ø§Ù†ÛŒ Ù¾ÛŒØ±Û†Ø²Ù…Ø§Ù† Ø¨Û† Ø¯Û†Ø²ÛŒÙ†Û•ÙˆÛ•ÛŒ Ø´ÛŒØ§ÙˆØªØ±ÛŒÙ† Ù‡Ø§ÙˆØ³Û•Ø±."
                 )}</p>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             <button
               onClick={() => {
                 setHomeTab('discover');
-                showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
+                showToast(txt("Opening candidate discovery filters...", "Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ù„Ø³Ø§Ø­Ø© Ø§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡...", "Ú©Ø±Ø¯Ù†Û•ÙˆÛ•ÛŒ ÙÙ„ØªÛ•Ø±ÛŒ Ú©Ø§Ù†Ø¯ÛŒØ¯Û•Ú©Ø§Ù†..."));
               }}
               className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                 homeTab === 'discover'
@@ -402,14 +402,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               }`}
             >
               <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
-              <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
+              <span>{txt("Discover Member", "Ø§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡", "Ø¯Û†Ø²ÛŒÙ†Û•ÙˆÛ•ÛŒ Ø¦Û•Ù†Ø¯Ø§Ù…")}</span>
             </button>
 
             {/* Tab 2: Marriage Cafe */}
             <button
               onClick={() => {
                 setHomeTab('cafe');
-                showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
+                showToast(txt("Entering Marriage CafÃ© social feed...", "Ø¬Ø§Ø±ÙŠ ÙØªØ­ Ù…Ù‚Ù‡Ù‰ ÙˆÙ…Ø¬Ù„Ø³ Ø§Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„ØªÙØ§Ø¹Ù„ÙŠ...", "Ú†ÙˆÙˆÙ†Û• Ù†Ø§Ùˆ Ú†Ø§ÛŒØ®Ø§Ù†Û•ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ..."));
               }}
               className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                 homeTab === 'cafe'
@@ -418,7 +418,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               }`}
             >
               <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
-              <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
+              <span>{txt("Marriage CafÃ© (Social)", "Ù…Ù‚Ù‡Ù‰ Ø§Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„ØªÙØ§Ø¹Ù„ÙŠ", "Ú†Ø§ÛŒØ®Ø§Ù†Û•ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ")}</span>
               <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
                 LIVE FEED
               </span>
@@ -439,14 +439,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <div>
                   <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-700 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-extrabold uppercase animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    {txt("Active Nearby Candidates", "نشطون بالقرب منك الآن", "کاندیدە چالاکەکانی نزیکت")}
+                    {txt("Active Nearby Candidates", "Ù†Ø´Ø·ÙˆÙ† Ø¨Ø§Ù„Ù‚Ø±Ø¨ Ù…Ù†Ùƒ Ø§Ù„Ø¢Ù†", "Ú©Ø§Ù†Ø¯ÛŒØ¯Û• Ú†Ø§Ù„Ø§Ú©Û•Ú©Ø§Ù†ÛŒ Ù†Ø²ÛŒÚ©Øª")}
                   </span>
                   <h4 className="text-sm sm:text-lg font-serif font-black text-warm-charcoal flex items-center gap-1 mt-1">
-                    <span>📍 {txt(`Candidates Nearby in ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `عروض مقيمة في ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `کاندیدە نزیکەکانی ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`)}</span>
+                    <span>ðŸ“ {txt(`Candidates Nearby in ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `Ø¹Ø±ÙˆØ¶ Ù…Ù‚ÙŠÙ…Ø© ÙÙŠ ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`, `Ú©Ø§Ù†Ø¯ÛŒØ¯Û• Ù†Ø²ÛŒÚ©Û•Ú©Ø§Ù†ÛŒ ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)}`)}</span>
                   </h4>
                 </div>
                 <p className="text-[10px] text-stone-500 font-bold max-w-sm">
-                  📌 {txt("Based on selected governorate or your profile location.", "تلقائياً حسب موقعك الحالي أو خيار المحافظة المفعّل.", "بەپێی شوێنی دیاریکراو یان پڕۆفایلەکەت.")}
+                  ðŸ“Œ {txt("Based on selected governorate or your profile location.", "ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹ Ø­Ø³Ø¨ Ù…ÙˆÙ‚Ø¹Ùƒ Ø§Ù„Ø­Ø§Ù„ÙŠ Ø£Ùˆ Ø®ÙŠØ§Ø± Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø© Ø§Ù„Ù…ÙØ¹Ù‘Ù„.", "Ø¨Û•Ù¾ÛŽÛŒ Ø´ÙˆÛŽÙ†ÛŒ Ø¯ÛŒØ§Ø±ÛŒÚ©Ø±Ø§Ùˆ ÛŒØ§Ù† Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Û•Øª.")}
                 </p>
               </div>
 
@@ -477,7 +477,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                                     {candidate.name.charAt(0)}
                                   </div>
                                   <span className="mt-1 text-[8px] font-bold text-stone-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow-inner">
-                                    🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                                    ðŸ”’ {txt("Photo Protected", "Ø§Ù„ØµÙˆØ±Ø© Ù…Ø­Ù…ÙŠØ©", "ÙˆÛŽÙ†Û• Ù¾Ø§Ø±ÛŽØ²Ø±Ø§ÙˆÛ•")}
                                   </span>
                                 </div>
                               </>
@@ -491,7 +491,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                                 <span className="absolute bottom-1.5 left-1.5 text-[8px] font-mono font-extrabold text-white bg-black/45 px-1.5 py-0.5 rounded-md">
-                                  {txt("Verified", "حساب موثق", "پشتڕاستکراوە")}
+                                  {txt("Verified", "Ø­Ø³Ø§Ø¨ Ù…ÙˆØ«Ù‚", "Ù¾Ø´ØªÚ•Ø§Ø³ØªÚ©Ø±Ø§ÙˆÛ•")}
                                 </span>
                               </>
                             )}
@@ -511,15 +511,15 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                               </span>
                             </div>
                             <p className="text-[9.5px] font-semibold text-stone-500 truncate flex items-center gap-0.5 mt-0.5">
-                              💼 {candidate.profession}
+                              ðŸ’¼ {candidate.profession}
                             </p>
                           </div>
                         </div>
 
                         <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-[9px] font-bold text-[#40798C]">
-                          <span>📍 {getGovDisplayName(candidate.governorate)}</span>
+                          <span>ðŸ“ {getGovDisplayName(candidate.governorate)}</span>
                           <span className="text-accent-coral flex items-center gap-0.5">
-                            <span>{txt("View ➔", "تفاصيل ➔", "بینین ➔")}</span>
+                            <span>{txt("View âž”", "ØªÙØ§ØµÙŠÙ„ âž”", "Ø¨ÛŒÙ†ÛŒÙ† âž”")}</span>
                           </span>
                         </div>
                       </div>
@@ -532,8 +532,8 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   <p className="text-xs font-bold text-stone-400">
                     {txt(
                       `No active profiles registered in ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)} yet. Try adjusting your gender filter.`,
-                      `لا يوجد عرسان أو عرائس مسجلون في ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)} حالياً.`,
-                      `هیچ کاندیدێک لەم شوێنە نییە.`
+                      `Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø¹Ø±Ø³Ø§Ù† Ø£Ùˆ Ø¹Ø±Ø§Ø¦Ø³ Ù…Ø³Ø¬Ù„ÙˆÙ† ÙÙŠ ${getGovDisplayName(selectedGov === 'all' ? (userProfile?.governorate || 'Baghdad') : selectedGov)} Ø­Ø§Ù„ÙŠØ§Ù‹.`,
+                      `Ù‡ÛŒÚ† Ú©Ø§Ù†Ø¯ÛŒØ¯ÛŽÚ© Ù„Û•Ù… Ø´ÙˆÛŽÙ†Û• Ù†ÛŒÛŒÛ•.`
                     )}
                   </p>
                 </div>
@@ -544,16 +544,16 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
               <MapPin className="w-3.5 h-3.5" />
-              <span>{txt("Governorate Matrimonial Portal", "بوابة المحافظات العراقية للزواج الحلال", "دەروازەی هاوسەرگیری پارێزگاکان")}</span>
+              <span>{txt("Governorate Matrimonial Portal", "Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø§Øª Ø§Ù„Ø¹Ø±Ø§Ù‚ÙŠØ© Ù„Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„Ø­Ù„Ø§Ù„", "Ø¯Û•Ø±ÙˆØ§Ø²Û•ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§Ú©Ø§Ù†")}</span>
             </span>
             <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-warm-charcoal tracking-tight">
-              {txt("Find Serious Candidates by Governorate", "ابحث عن شريك العمر حسب المحافظة", "هاوبەشی گونجاو بەپێی پارێزگا بدۆزەوە")}
+              {txt("Find Serious Candidates by Governorate", "Ø§Ø¨Ø­Ø« Ø¹Ù† Ø´Ø±ÙŠÙƒ Ø§Ù„Ø¹Ù…Ø± Ø­Ø³Ø¨ Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©", "Ù‡Ø§ÙˆØ¨Û•Ø´ÛŒ Ú¯ÙˆÙ†Ø¬Ø§Ùˆ Ø¨Û•Ù¾ÛŽÛŒ Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§ Ø¨Ø¯Û†Ø²Û•ÙˆÛ•")}
             </h3>
             <p className="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">
               {txt(
                 "Select any of the 19 Iraqi governorates to discover serious, verified candidates living nearby. Use our precise filters to explore compatible lifestyles.",
-                "اختر أي من المحافظات الـ ١٩ في العراق لاستعراض ملفات جادة وموثقة مقيمة بالقرب منك، واكتشف مدى التوافق الاجتماعي والثقافي.",
-                "یەکێک لە ١٩ پارێزگاکەی عێراق دیاری بکە بۆ دۆزینەوەی کەسانی جدی و پشتڕاستکراوە کە لە نزیکتەوە دەژین."
+                "Ø§Ø®ØªØ± Ø£ÙŠ Ù…Ù† Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø§Øª Ø§Ù„Ù€ Ù¡Ù© ÙÙŠ Ø§Ù„Ø¹Ø±Ø§Ù‚ Ù„Ø§Ø³ØªØ¹Ø±Ø§Ø¶ Ù…Ù„ÙØ§Øª Ø¬Ø§Ø¯Ø© ÙˆÙ…ÙˆØ«Ù‚Ø© Ù…Ù‚ÙŠÙ…Ø© Ø¨Ø§Ù„Ù‚Ø±Ø¨ Ù…Ù†ÙƒØŒ ÙˆØ§ÙƒØªØ´Ù Ù…Ø¯Ù‰ Ø§Ù„ØªÙˆØ§ÙÙ‚ Ø§Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ÙŠ ÙˆØ§Ù„Ø«Ù‚Ø§ÙÙŠ.",
+                "ÛŒÛ•Ú©ÛŽÚ© Ù„Û• Ù¡Ù© Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§Ú©Û•ÛŒ Ø¹ÛŽØ±Ø§Ù‚ Ø¯ÛŒØ§Ø±ÛŒ Ø¨Ú©Û• Ø¨Û† Ø¯Û†Ø²ÛŒÙ†Û•ÙˆÛ•ÛŒ Ú©Û•Ø³Ø§Ù†ÛŒ Ø¬Ø¯ÛŒ Ùˆ Ù¾Ø´ØªÚ•Ø§Ø³ØªÚ©Ø±Ø§ÙˆÛ• Ú©Û• Ù„Û• Ù†Ø²ÛŒÚ©ØªÛ•ÙˆÛ• Ø¯Û•Ú˜ÛŒÙ†."
               )}
             </p>
           </div>
@@ -567,7 +567,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               {/* 1. Governorate Filter */}
               <div className="space-y-2 text-start">
                 <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
-                  📍 {txt("Governorate / Location", "المحافظة أو الموقع", "پارێزگا یان شوێن")}
+                  ðŸ“ {txt("Governorate / Location", "Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø© Ø£Ùˆ Ø§Ù„Ù…ÙˆÙ‚Ø¹", "Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§ ÛŒØ§Ù† Ø´ÙˆÛŽÙ†")}
                 </label>
                 <div className="relative">
                   <select
@@ -575,14 +575,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     onChange={(e) => {
                       setSelectedGov(e.target.value);
                       const name = e.target.value === 'all' 
-                        ? txt("All Iraq", "كل العراق", "هەموو عێراق")
+                        ? txt("All Iraq", "ÙƒÙ„ Ø§Ù„Ø¹Ø±Ø§Ù‚", "Ù‡Û•Ù…ÙˆÙˆ Ø¹ÛŽØ±Ø§Ù‚")
                         : getGovDisplayName(e.target.value);
-                      showToast(txt(`Location updated: ${name}`, `تم تحديد الموقع: ${name}`, `شوێن دیاریکرا: ${name}`));
+                      showToast(txt(`Location updated: ${name}`, `ØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹: ${name}`, `Ø´ÙˆÛŽÙ† Ø¯ÛŒØ§Ø±ÛŒÚ©Ø±Ø§: ${name}`));
                     }}
                     className="w-full pl-9 pr-4 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
                   >
                     <option value="all" className="text-warm-charcoal font-black">
-                      {txt("🌍 All Iraq", "🌍 كل العراق", "🌍 هەموو عێراق")}
+                      {txt("ðŸŒ All Iraq", "ðŸŒ ÙƒÙ„ Ø§Ù„Ø¹Ø±Ø§Ù‚", "ðŸŒ Ù‡Û•Ù…ÙˆÙˆ Ø¹ÛŽØ±Ø§Ù‚")}
                     </option>
                     {GOVERNORATE_OPTIONS.map((gov) => (
                       <option key={gov.id} value={gov.id} className="text-warm-charcoal font-bold">
@@ -597,9 +597,9 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               {/* 2. Age Range Filter */}
               <div className="space-y-2 text-start md:col-span-2">
                 <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider flex items-center justify-between">
-                  <span>👥 {txt("Required Age Range", "فئة العمر المطلوبة", "تەمەنی داواکراو")}</span>
+                  <span>ðŸ‘¥ {txt("Required Age Range", "ÙØ¦Ø© Ø§Ù„Ø¹Ù…Ø± Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø©", "ØªÛ•Ù…Û•Ù†ÛŒ Ø¯Ø§ÙˆØ§Ú©Ø±Ø§Ùˆ")}</span>
                   <span className="text-accent-coral font-sans font-extrabold bg-accent-coral/10 px-2 py-0.5 rounded-md text-[10px]">
-                    {minAge} - {maxAge} {txt("years old", "سنة", "ساڵ")}
+                    {minAge} - {maxAge} {txt("years old", "Ø³Ù†Ø©", "Ø³Ø§Úµ")}
                   </span>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -619,7 +619,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     >
                       {Array.from({ length: 53 }, (_, i) => i + 18).map((age) => (
                         <option key={`min-${age}`} value={age} className="font-bold">
-                          {txt(`From ${age}`, `من عمر ${age}`, `لە تەمەنی ${age}`)}
+                          {txt(`From ${age}`, `Ù…Ù† Ø¹Ù…Ø± ${age}`, `Ù„Û• ØªÛ•Ù…Û•Ù†ÛŒ ${age}`)}
                         </option>
                       ))}
                     </select>
@@ -641,7 +641,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     >
                       {Array.from({ length: 53 }, (_, i) => i + 18).map((age) => (
                         <option key={`max-${age}`} value={age} className="font-bold">
-                          {txt(`To ${age}`, `إلى عمر ${age}`, `تا تەمەنی ${age}`)}
+                          {txt(`To ${age}`, `Ø¥Ù„Ù‰ Ø¹Ù…Ø± ${age}`, `ØªØ§ ØªÛ•Ù…Û•Ù†ÛŒ ${age}`)}
                         </option>
                       ))}
                     </select>
@@ -653,7 +653,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               {/* 3. Gender / Match Preference Column */}
               <div className="space-y-2 text-start">
                 <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
-                  💖 {txt("I am looking for", "أنا أبحث عن", "من دەگەڕێم بەدوای")}
+                  ðŸ’– {txt("I am looking for", "Ø£Ù†Ø§ Ø£Ø¨Ø­Ø« Ø¹Ù†", "Ù…Ù† Ø¯Û•Ú¯Û•Ú•ÛŽÙ… Ø¨Û•Ø¯ÙˆØ§ÛŒ")}
                 </label>
                 <div className="relative">
                   <select
@@ -663,9 +663,9 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     }}
                     className="w-full pl-9 pr-4 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
                   >
-                    <option value="all" className="font-bold">{txt("All Candidates", "الكل (عرسان وعرائس)", "هەموو کاندیدەکان")}</option>
-                    <option value="female" className="font-bold">👰 {txt("Bride (Woman)", "زوجة صالحة (عروس)", "بووک (کچ)")}</option>
-                    <option value="male" className="font-bold">🤵 {txt("Groom (Man)", "زوج صالح (عريس)", "زاوا (کوڕ)")}</option>
+                    <option value="all" className="font-bold">{txt("All Candidates", "Ø§Ù„ÙƒÙ„ (Ø¹Ø±Ø³Ø§Ù† ÙˆØ¹Ø±Ø§Ø¦Ø³)", "Ù‡Û•Ù…ÙˆÙˆ Ú©Ø§Ù†Ø¯ÛŒØ¯Û•Ú©Ø§Ù†")}</option>
+                    <option value="female" className="font-bold">ðŸ‘° {txt("Bride (Woman)", "Ø²ÙˆØ¬Ø© ØµØ§Ù„Ø­Ø© (Ø¹Ø±ÙˆØ³)", "Ø¨ÙˆÙˆÚ© (Ú©Ú†)")}</option>
+                    <option value="male" className="font-bold">ðŸ¤µ {txt("Groom (Man)", "Ø²ÙˆØ¬ ØµØ§Ù„Ø­ (Ø¹Ø±ÙŠØ³)", "Ø²Ø§ÙˆØ§ (Ú©ÙˆÚ•)")}</option>
                   </select>
                   <Heart className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-pink" />
                 </div>
@@ -677,13 +677,13 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-stone-50 to-[#FCFBF9] border border-stone-150 rounded-2xl mb-6">
               <div className="text-start space-y-1">
                 <span className="inline-flex items-center gap-1 text-[10px] font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-full uppercase">
-                  ⚡ {txt("Instant Live Filtering", "تصفية حية وفورية للملفات", "پاڵاوتنی ڕاستەوخۆ")}
+                  âš¡ {txt("Instant Live Filtering", "ØªØµÙÙŠØ© Ø­ÙŠØ© ÙˆÙÙˆØ±ÙŠØ© Ù„Ù„Ù…Ù„ÙØ§Øª", "Ù¾Ø§ÚµØ§ÙˆØªÙ†ÛŒ Ú•Ø§Ø³ØªÛ•ÙˆØ®Û†")}
                 </span>
                 <p className="text-xs text-stone-600 font-bold leading-snug">
                   {txt(
                     "Displaying real matches below. Click search button below to unlock deep values inside full search page.",
-                    "نعرض لك الملفات المتوافقة مع خياراتك بالأسفل مباشرة. اضغط للبحث الكامل لاستكشاف مرشحات إضافية.",
-                    "هاوتا ڕاستەقینەکان لە خوارەوە پیشان دەدرێن. بۆ بینینی هەموو فلتەرەکان کلیک بکە."
+                    "Ù†Ø¹Ø±Ø¶ Ù„Ùƒ Ø§Ù„Ù…Ù„ÙØ§Øª Ø§Ù„Ù…ØªÙˆØ§ÙÙ‚Ø© Ù…Ø¹ Ø®ÙŠØ§Ø±Ø§ØªÙƒ Ø¨Ø§Ù„Ø£Ø³ÙÙ„ Ù…Ø¨Ø§Ø´Ø±Ø©. Ø§Ø¶ØºØ· Ù„Ù„Ø¨Ø­Ø« Ø§Ù„ÙƒØ§Ù…Ù„ Ù„Ø§Ø³ØªÙƒØ´Ø§Ù Ù…Ø±Ø´Ø­Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ©.",
+                    "Ù‡Ø§ÙˆØªØ§ Ú•Ø§Ø³ØªÛ•Ù‚ÛŒÙ†Û•Ú©Ø§Ù† Ù„Û• Ø®ÙˆØ§Ø±Û•ÙˆÛ• Ù¾ÛŒØ´Ø§Ù† Ø¯Û•Ø¯Ø±ÛŽÙ†. Ø¨Û† Ø¨ÛŒÙ†ÛŒÙ†ÛŒ Ù‡Û•Ù…ÙˆÙˆ ÙÙ„ØªÛ•Ø±Û•Ú©Ø§Ù† Ú©Ù„ÛŒÚ© Ø¨Ú©Û•."
                   )}
                 </p>
               </div>
@@ -698,9 +698,9 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   
                   // Notify and navigate
                   showToast(txt(
-                    "🔍 Opening the advanced matchmaking pool with your filters...",
-                    "🔍 جاري فتح بوابة البحث المبارك بالمرشحات التي اخترتها...",
-                    "🔍 کردنەوەی دەروازەی هاوسەرگیری بە فلتەرەکانتەوە..."
+                    "ðŸ” Opening the advanced matchmaking pool with your filters...",
+                    "ðŸ” Ø¬Ø§Ø±ÙŠ ÙØªØ­ Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ø¨Ø­Ø« Ø§Ù„Ù…Ø¨Ø§Ø±Ùƒ Ø¨Ø§Ù„Ù…Ø±Ø´Ø­Ø§Øª Ø§Ù„ØªÙŠ Ø§Ø®ØªØ±ØªÙ‡Ø§...",
+                    "ðŸ” Ú©Ø±Ø¯Ù†Û•ÙˆÛ•ÛŒ Ø¯Û•Ø±ÙˆØ§Ø²Û•ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ Ø¨Û• ÙÙ„ØªÛ•Ø±Û•Ú©Ø§Ù†ØªÛ•ÙˆÛ•..."
                   ));
                   
                   setTimeout(() => {
@@ -712,7 +712,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               >
                 <Compass className="w-5 h-5 text-white animate-spin-slow" />
                 <span>
-                  {txt("Search & Explore Matches", "البحث واستكشاف العروض", "گەڕان و بینینی کاندیدەکان")}
+                  {txt("Search & Explore Matches", "Ø§Ù„Ø¨Ø­Ø« ÙˆØ§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø¹Ø±ÙˆØ¶", "Ú¯Û•Ú•Ø§Ù† Ùˆ Ø¨ÛŒÙ†ÛŒÙ†ÛŒ Ú©Ø§Ù†Ø¯ÛŒØ¯Û•Ú©Ø§Ù†")}
                 </span>
                 <ArrowRight className="w-4 h-4 text-white transform rtl:rotate-180" />
               </button>
@@ -723,19 +723,19 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs animate-fade-in text-start mb-6" id="complete-profile-banner">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">⚠️</span>
+                    <span className="text-xl">âš ï¸</span>
                     <h4 className="text-base sm:text-lg font-serif font-black text-amber-900">
-                      {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
+                      {txt("Complete Your Marriage Profile", "Ø£ÙƒÙ…Ù„ Ù…Ù„Ù Ø§Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„Ù…Ø¨Ø§Ø±Ùƒ", "Ù¾Ú•Û†ÙØ§ÛŒÙ„ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒÛ•Ú©Û•Øª ØªÛ•ÙˆØ§Ùˆ Ø¨Ú©Û•")}
                     </h4>
                     <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
-                      {txt("Onboarding Pending", "الملف الشخصي معلّق", "پڕۆفایل چاوەڕوانکراوە")}
+                      {txt("Onboarding Pending", "Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ Ù…Ø¹Ù„Ù‘Ù‚", "Ù¾Ú•Û†ÙØ§ÛŒÙ„ Ú†Ø§ÙˆÛ•Ú•ÙˆØ§Ù†Ú©Ø±Ø§ÙˆÛ•")}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
                     {txt(
                       "You can search and explore matches freely. However, to express serious marital interest, send postcards, or build custom serious connections, you must complete your full marriage profile form.",
-                      "يمكنك البحث واستكشاف الشركاء بحرية كاملة، ولكن لإرسال طلبات التعارف الجادة والبطاقات البريدية وبدء تواصل وقور، يرجى ملء استمارة ملفك الشخصي بالكامل.",
-                      "دەتوانیت کاندیدەکان بە سەربەستی ببینی و بگەڕێیت، بەڵام بۆ دەربڕینی نیەتی جدی هاوسەرگیری یان ناردنی نامەی پێشەکی، دەبێت پڕۆفایلی خۆت بە تەواوی پڕبکەیتەوە."
+                      "ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¨Ø­Ø« ÙˆØ§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø´Ø±ÙƒØ§Ø¡ Ø¨Ø­Ø±ÙŠØ© ÙƒØ§Ù…Ù„Ø©ØŒ ÙˆÙ„ÙƒÙ† Ù„Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªØ¹Ø§Ø±Ù Ø§Ù„Ø¬Ø§Ø¯Ø© ÙˆØ§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„Ø¨Ø±ÙŠØ¯ÙŠØ© ÙˆØ¨Ø¯Ø¡ ØªÙˆØ§ØµÙ„ ÙˆÙ‚ÙˆØ±ØŒ ÙŠØ±Ø¬Ù‰ Ù…Ù„Ø¡ Ø§Ø³ØªÙ…Ø§Ø±Ø© Ù…Ù„ÙÙƒ Ø§Ù„Ø´Ø®ØµÙŠ Ø¨Ø§Ù„ÙƒØ§Ù…Ù„.",
+                      "Ø¯Û•ØªÙˆØ§Ù†ÛŒØª Ú©Ø§Ù†Ø¯ÛŒØ¯Û•Ú©Ø§Ù† Ø¨Û• Ø³Û•Ø±Ø¨Û•Ø³ØªÛŒ Ø¨Ø¨ÛŒÙ†ÛŒ Ùˆ Ø¨Ú¯Û•Ú•ÛŽÛŒØªØŒ Ø¨Û•ÚµØ§Ù… Ø¨Û† Ø¯Û•Ø±Ø¨Ú•ÛŒÙ†ÛŒ Ù†ÛŒÛ•ØªÛŒ Ø¬Ø¯ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ ÛŒØ§Ù† Ù†Ø§Ø±Ø¯Ù†ÛŒ Ù†Ø§Ù…Û•ÛŒ Ù¾ÛŽØ´Û•Ú©ÛŒØŒ Ø¯Û•Ø¨ÛŽØª Ù¾Ú•Û†ÙØ§ÛŒÙ„ÛŒ Ø®Û†Øª Ø¨Û• ØªÛ•ÙˆØ§ÙˆÛŒ Ù¾Ú•Ø¨Ú©Û•ÛŒØªÛ•ÙˆÛ•."
                     )}
                   </p>
                 </div>
@@ -744,7 +744,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>{txt("Complete Form Now", "أكمل الاستمارة الآن", "ئێستا پڕۆفایلەکە تەواو بکە")}</span>
+                  <span>{txt("Complete Form Now", "Ø£ÙƒÙ…Ù„ Ø§Ù„Ø§Ø³ØªÙ…Ø§Ø±Ø© Ø§Ù„Ø¢Ù†", "Ø¦ÛŽØ³ØªØ§ Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Û• ØªÛ•ÙˆØ§Ùˆ Ø¨Ú©Û•")}</span>
                 </button>
               </div>
             )}
@@ -778,7 +778,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                                   {candidate.name.charAt(0)}
                                 </div>
                                 <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
-                                  🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                                  ðŸ”’ {txt("Photo Protected", "Ø§Ù„ØµÙˆØ±Ø© Ù…Ø­Ù…ÙŠØ©", "ÙˆÛŽÙ†Û• Ù¾Ø§Ø±ÛŽØ²Ø±Ø§ÙˆÛ•")}
                                 </span>
                               </div>
                             </>
@@ -793,7 +793,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                               <span className="absolute bottom-2.5 left-2.5 text-[8px] sm:text-[9px] font-mono font-extrabold text-white bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md">
-                                {txt("Verified Groom", "شاب جاد للزواج", "زاوا پشتڕاستکراوە")}
+                                {txt("Verified Groom", "Ø´Ø§Ø¨ Ø¬Ø§Ø¯ Ù„Ù„Ø²ÙˆØ§Ø¬", "Ø²Ø§ÙˆØ§ Ù¾Ø´ØªÚ•Ø§Ø³ØªÚ©Ø±Ø§ÙˆÛ•")}
                               </span>
                             </>
                           )}
@@ -816,7 +816,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                               <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
                             </h4>
                             <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
-                              💖 {candidate.compatibilityScore}%
+                              ðŸ’– {candidate.compatibilityScore}%
                             </span>
                           </div>
                           
@@ -834,11 +834,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       {/* Card Footer tags */}
                       <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
                         <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
-                          📍 {txt(candidate.city, candidate.city, candidate.city)}
+                          ðŸ“ {txt(candidate.city, candidate.city, candidate.city)}
                         </span>
                         
                         <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
-                          <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
+                          <span>{txt("View Sincere Intention", "ØªÙØ§ØµÙŠÙ„ Ù†ÙŠØ© Ø§Ù„Ø²ÙˆØ§Ø¬", "Ø¨ÛŒÙ†ÛŒÙ†ÛŒ Ù…Û•Ø¨Û•Ø³Øª")}</span>
                           <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
                         </span>
                       </div>
@@ -851,7 +851,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
                 <Users className="w-10 h-10 text-stone-300 mx-auto" />
                 <p className="text-xs font-bold text-stone-400">
-                  {txt("No serious candidates match these categories in this governorate yet.", "لا يوجد عرسان أو عرائس يطابقون هذا التصنيف في هذه المحافظة حالياً.", "کاندیدێک بۆ ئەم جۆرە پۆلێنکردنە لەم پارێزگایەدا نەدۆزرایەوە.")}
+                  {txt("No serious candidates match these categories in this governorate yet.", "Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø¹Ø±Ø³Ø§Ù† Ø£Ùˆ Ø¹Ø±Ø§Ø¦Ø³ ÙŠØ·Ø§Ø¨Ù‚ÙˆÙ† Ù‡Ø°Ø§ Ø§Ù„ØªØµÙ†ÙŠÙ ÙÙŠ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø© Ø­Ø§Ù„ÙŠØ§Ù‹.", "Ú©Ø§Ù†Ø¯ÛŒØ¯ÛŽÚ© Ø¨Û† Ø¦Û•Ù… Ø¬Û†Ø±Û• Ù¾Û†Ù„ÛŽÙ†Ú©Ø±Ø¯Ù†Û• Ù„Û•Ù… Ù¾Ø§Ø±ÛŽØ²Ú¯Ø§ÛŒÛ•Ø¯Ø§ Ù†Û•Ø¯Û†Ø²Ø±Ø§ÛŒÛ•ÙˆÛ•.")}
                 </p>
               </div>
             )}
@@ -859,17 +859,17 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             {/* CTAs banner to enter search */}
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-100 text-xs text-stone-500 font-semibold">
               <p className="text-start leading-snug">
-                💍 {txt(
+                ðŸ’ {txt(
                   "To protect photos and prevent casual swipe culture, only mutual, serious matches with completed profiles can initiate chaperoned discussion.",
-                  "لحماية الخصوصية ومنع المراسلات العشوائية العابرة، يمكن فقط للملفات الحقيقية والمكتملة البدء بالتواصل الوقور تحت إشراف شرعي.",
-                  "بۆ پاراستنی وێنەکان، تەنها ئەو کەسانەی پڕۆفایلەکەیان تەواو کردووە دەتوانن پەیوەندی بکەن."
+                  "Ù„Ø­Ù…Ø§ÙŠØ© Ø§Ù„Ø®ØµÙˆØµÙŠØ© ÙˆÙ…Ù†Ø¹ Ø§Ù„Ù…Ø±Ø§Ø³Ù„Ø§Øª Ø§Ù„Ø¹Ø´ÙˆØ§Ø¦ÙŠØ© Ø§Ù„Ø¹Ø§Ø¨Ø±Ø©ØŒ ÙŠÙ…ÙƒÙ† ÙÙ‚Ø· Ù„Ù„Ù…Ù„ÙØ§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ© ÙˆØ§Ù„Ù…ÙƒØªÙ…Ù„Ø© Ø§Ù„Ø¨Ø¯Ø¡ Ø¨Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„ÙˆÙ‚ÙˆØ± ØªØ­Øª Ø¥Ø´Ø±Ø§Ù Ø´Ø±Ø¹ÙŠ.",
+                  "Ø¨Û† Ù¾Ø§Ø±Ø§Ø³ØªÙ†ÛŒ ÙˆÛŽÙ†Û•Ú©Ø§Ù†ØŒ ØªÛ•Ù†Ù‡Ø§ Ø¦Û•Ùˆ Ú©Û•Ø³Ø§Ù†Û•ÛŒ Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Û•ÛŒØ§Ù† ØªÛ•ÙˆØ§Ùˆ Ú©Ø±Ø¯ÙˆÙˆÛ• Ø¯Û•ØªÙˆØ§Ù†Ù† Ù¾Û•ÛŒÙˆÛ•Ù†Ø¯ÛŒ Ø¨Ú©Û•Ù†."
                 )}
               </p>
               <button
                 onClick={onExploreMatches}
                 className="w-full sm:w-auto px-6 py-3 bg-[#40798C] hover:bg-[#316070] text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-[#40798C]/10 cursor-pointer"
               >
-                {txt("Explore Compatibility Pool", "استكشاف مصفوفة التوافق الكاملة", "گەڕان بەدوای هاوشێوەکاندا")}
+                {txt("Explore Compatibility Pool", "Ø§Ø³ØªÙƒØ´Ø§Ù Ù…ØµÙÙˆÙØ© Ø§Ù„ØªÙˆØ§ÙÙ‚ Ø§Ù„ÙƒØ§Ù…Ù„Ø©", "Ú¯Û•Ú•Ø§Ù† Ø¨Û•Ø¯ÙˆØ§ÛŒ Ù‡Ø§ÙˆØ´ÛŽÙˆÛ•Ú©Ø§Ù†Ø¯Ø§")}
               </button>
             </div>
 
@@ -878,7 +878,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         </div>
       </section>
       ) : (
-        /* Marriage Café Social Media Feed active tab */
+        /* Marriage CafÃ© Social Media Feed active tab */
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 animate-fade-in" id="marriage-cafe-social-hub">
           <MarriageCafe
             locale={locale}
@@ -899,18 +899,18 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             <div>
               <h4 className="text-base sm:text-xl font-serif font-black text-warm-charcoal flex items-center gap-1.5">
                 <UserCheck className="w-5 h-5 text-accent-coral" />
-                <span>{txt("Featured Active Candidates", "أعضاء متميزون ونشطون اليوم", "کاندیدە چالاکە دیارەکان")}</span>
+                <span>{txt("Featured Active Candidates", "Ø£Ø¹Ø¶Ø§Ø¡ Ù…ØªÙ…ÙŠØ²ÙˆÙ† ÙˆÙ†Ø´Ø·ÙˆÙ† Ø§Ù„ÙŠÙˆÙ…", "Ú©Ø§Ù†Ø¯ÛŒØ¯Û• Ú†Ø§Ù„Ø§Ú©Û• Ø¯ÛŒØ§Ø±Û•Ú©Ø§Ù†")}</span>
               </h4>
               <p className="text-[11px] sm:text-xs text-stone-500 font-medium leading-relaxed">
                 {txt(
                   "These active members are looking for lifelong marriage right now. Women's photos are automatically blurred, and men are authentic Iraqi applicants.",
-                  "هؤلاء الأعضاء متصلون ويبحثون بنية جادة عن شريك الحياة حالياً. صور النساء محمية بالتمويه تلقائياً، والرجال متقدمون عراقيون أصيلون.",
-                  "ئەم ئەندامانە ئێستا چالاکن و بەدوای هاوسەرگیری دەگەڕێن. وێنەی کچان لێڵکراوە بۆ پاراستن و کوڕانیش کاندیدی ڕاستەقینەی عێراقین."
+                  "Ù‡Ø¤Ù„Ø§Ø¡ Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡ Ù…ØªØµÙ„ÙˆÙ† ÙˆÙŠØ¨Ø­Ø«ÙˆÙ† Ø¨Ù†ÙŠØ© Ø¬Ø§Ø¯Ø© Ø¹Ù† Ø´Ø±ÙŠÙƒ Ø§Ù„Ø­ÙŠØ§Ø© Ø­Ø§Ù„ÙŠØ§Ù‹. ØµÙˆØ± Ø§Ù„Ù†Ø³Ø§Ø¡ Ù…Ø­Ù…ÙŠØ© Ø¨Ø§Ù„ØªÙ…ÙˆÙŠÙ‡ ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹ØŒ ÙˆØ§Ù„Ø±Ø¬Ø§Ù„ Ù…ØªÙ‚Ø¯Ù…ÙˆÙ† Ø¹Ø±Ø§Ù‚ÙŠÙˆÙ† Ø£ØµÙŠÙ„ÙˆÙ†.",
+                  "Ø¦Û•Ù… Ø¦Û•Ù†Ø¯Ø§Ù…Ø§Ù†Û• Ø¦ÛŽØ³ØªØ§ Ú†Ø§Ù„Ø§Ú©Ù† Ùˆ Ø¨Û•Ø¯ÙˆØ§ÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ Ø¯Û•Ú¯Û•Ú•ÛŽÙ†. ÙˆÛŽÙ†Û•ÛŒ Ú©Ú†Ø§Ù† Ù„ÛŽÚµÚ©Ø±Ø§ÙˆÛ• Ø¨Û† Ù¾Ø§Ø±Ø§Ø³ØªÙ† Ùˆ Ú©ÙˆÚ•Ø§Ù†ÛŒØ´ Ú©Ø§Ù†Ø¯ÛŒØ¯ÛŒ Ú•Ø§Ø³ØªÛ•Ù‚ÛŒÙ†Û•ÛŒ Ø¹ÛŽØ±Ø§Ù‚ÛŒÙ†."
                 )}
               </p>
             </div>
             <span className="text-[10px] bg-accent-coral/10 text-accent-coral px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
-              ⚡ {txt("Active Today", "نشطون اليوم", "ئەمڕۆ چالاک بوون")}
+              âš¡ {txt("Active Today", "Ù†Ø´Ø·ÙˆÙ† Ø§Ù„ÙŠÙˆÙ…", "Ø¦Û•Ù…Ú•Û† Ú†Ø§Ù„Ø§Ú© Ø¨ÙˆÙˆÙ†")}
             </span>
           </div>
 
@@ -957,7 +957,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       <span className="text-[10px] text-stone-400">({candidate.age})</span>
                     </h5>
                     <p className="text-[9px] font-mono text-stone-500 bg-[#FAF7F2] border border-[#E8DCC4]/50 px-2 py-0.5 rounded-md inline-block">
-                      📍 {txt(candidate.governorate, candidate.governorateAr, candidate.governorateCkb)}
+                      ðŸ“ {txt(candidate.governorate, candidate.governorateAr, candidate.governorateCkb)}
                     </p>
                     <p className="text-[10px] font-extrabold text-stone-400 truncate max-w-[140px] mx-auto">
                       {candidate.profession}
@@ -965,7 +965,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   </div>
 
                   <span className="text-[8.5px] uppercase font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
-                    ✨ {txt("Compatible", "متوافق", "هاوتا")}
+                    âœ¨ {txt("Compatible", "Ù…ØªÙˆØ§ÙÙ‚", "Ù‡Ø§ÙˆØªØ§")}
                   </span>
                 </div>
               );
@@ -1069,7 +1069,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   </div>
                   <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                    {txt("Online Now", "نشط الآن بنية جادة", "ئێستا چالاکە")}
+                    {txt("Online Now", "Ù†Ø´Ø· Ø§Ù„Ø¢Ù† Ø¨Ù†ÙŠØ© Ø¬Ø§Ø¯Ø©", "Ø¦ÛŽØ³ØªØ§ Ú†Ø§Ù„Ø§Ú©Û•")}
                   </span>
                 </div>
               </div>
@@ -1089,10 +1089,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               {/* Serious Intention Display */}
               <div className="bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl p-4 space-y-2 relative">
                 <span className="absolute -top-2.5 left-4 bg-[#40798C] text-white text-[8px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                  💍 {txt("Serious Marital Intention", "نية الزواج الجادة", "مەبەستی هاوسەرگیری")}
+                  ðŸ’ {txt("Serious Marital Intention", "Ù†ÙŠØ© Ø§Ù„Ø²ÙˆØ§Ø¬ Ø§Ù„Ø¬Ø§Ø¯Ø©", "Ù…Û•Ø¨Û•Ø³ØªÛŒ Ù‡Ø§ÙˆØ³Û•Ø±Ú¯ÛŒØ±ÛŒ")}
                 </span>
                 <p className="text-xs sm:text-sm font-serif font-black text-warm-charcoal leading-relaxed pt-1 italic">
-                  "{selectedStory.intention || txt("To build a pious and quiet home based on mutual consultation and respect.", "تأسيس بيت صالح وقائم على المودة والرحمة والاحترام المتبادل.", "دروستکردنی خێزانێکی بەختەوەر لەسەر بنەمای ڕێز.")}"
+                  "{selectedStory.intention || txt("To build a pious and quiet home based on mutual consultation and respect.", "ØªØ£Ø³ÙŠØ³ Ø¨ÙŠØª ØµØ§Ù„Ø­ ÙˆÙ‚Ø§Ø¦Ù… Ø¹Ù„Ù‰ Ø§Ù„Ù…ÙˆØ¯Ø© ÙˆØ§Ù„Ø±Ø­Ù…Ø© ÙˆØ§Ù„Ø§Ø­ØªØ±Ø§Ù… Ø§Ù„Ù…ØªØ¨Ø§Ø¯Ù„.", "Ø¯Ø±ÙˆØ³ØªÚ©Ø±Ø¯Ù†ÛŒ Ø®ÛŽØ²Ø§Ù†ÛŽÚ©ÛŒ Ø¨Û•Ø®ØªÛ•ÙˆÛ•Ø± Ù„Û•Ø³Û•Ø± Ø¨Ù†Û•Ù…Ø§ÛŒ Ú•ÛŽØ².")}"
                 </p>
               </div>
 
@@ -1100,7 +1100,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               <div className="space-y-3">
                 <div>
                   <span className="text-[10px] font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
-                    👤 {txt("About Me", "نبذة تعريفية شخصية", "دەربارەی من")}
+                    ðŸ‘¤ {txt("About Me", "Ù†Ø¨Ø°Ø© ØªØ¹Ø±ÙŠÙÙŠØ© Ø´Ø®ØµÙŠØ©", "Ø¯Û•Ø±Ø¨Ø§Ø±Û•ÛŒ Ù…Ù†")}
                   </span>
                   <p className="text-xs text-stone-600 leading-relaxed font-semibold mt-1">
                     {selectedStory.aboutMe}
@@ -1110,7 +1110,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="bg-stone-50 border border-stone-100 rounded-xl p-2.5">
                     <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase">
-                      💼 {txt("Profession", "المهنة", "پیشە")}
+                      ðŸ’¼ {txt("Profession", "Ø§Ù„Ù…Ù‡Ù†Ø©", "Ù¾ÛŒØ´Û•")}
                     </span>
                     <span className="text-[10.5px] font-bold text-warm-charcoal truncate block">
                       {selectedStory.profession}
@@ -1118,7 +1118,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   </div>
                   <div className="bg-stone-50 border border-stone-100 rounded-xl p-2.5">
                     <span className="block text-[8px] font-mono font-extrabold text-[#9C7F59] uppercase">
-                      📍 {txt("Location", "السكن والموقع", "شوێنی نیشتەجێبوون")}
+                      ðŸ“ {txt("Location", "Ø§Ù„Ø³ÙƒÙ† ÙˆØ§Ù„Ù…ÙˆÙ‚Ø¹", "Ø´ÙˆÛŽÙ†ÛŒ Ù†ÛŒØ´ØªÛ•Ø¬ÛŽØ¨ÙˆÙˆÙ†")}
                     </span>
                     <span className="text-[10.5px] font-bold text-[#40798C] truncate block">
                       {selectedStory.city}, {getGovDisplayName(selectedStory.governorate)}
@@ -1132,10 +1132,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <ShieldCheck className="w-4 h-4 text-[#40798C] shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
                   <span className="block text-[9px] font-black text-stone-800">
-                    {txt("Chaperoned Protocol", "بروتوكول الخطوبة الشرعي", "پڕۆتۆکۆلی شەرعی")}
+                    {txt("Chaperoned Protocol", "Ø¨Ø±ÙˆØªÙˆÙƒÙˆÙ„ Ø§Ù„Ø®Ø·ÙˆØ¨Ø© Ø§Ù„Ø´Ø±Ø¹ÙŠ", "Ù¾Ú•Û†ØªÛ†Ú©Û†Ù„ÛŒ Ø´Û•Ø±Ø¹ÛŒ")}
                   </span>
                   <p className="text-[9px] text-stone-500 font-medium leading-normal">
-                    {txt("Profiles are strictly identity-verified. Casual messaging is blocked. Connection occurs under guardian (Wali) supervision.", "الملفات موثقة بالكامل بالهوية الوطنية. لا توجد دردشة عشوائية، التواصل يتم بوقار وتحت إشراف عائلي.", "پڕۆفایلەکان بە تەواوی موثق کراون. چاتی عشوایی قەدەغەیە.")}
+                    {txt("Profiles are strictly identity-verified. Casual messaging is blocked. Connection occurs under guardian (Wali) supervision.", "Ø§Ù„Ù…Ù„ÙØ§Øª Ù…ÙˆØ«Ù‚Ø© Ø¨Ø§Ù„ÙƒØ§Ù…Ù„ Ø¨Ø§Ù„Ù‡ÙˆÙŠØ© Ø§Ù„ÙˆØ·Ù†ÙŠØ©. Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¯Ø±Ø¯Ø´Ø© Ø¹Ø´ÙˆØ§Ø¦ÙŠØ©ØŒ Ø§Ù„ØªÙˆØ§ØµÙ„ ÙŠØªÙ… Ø¨ÙˆÙ‚Ø§Ø± ÙˆØªØ­Øª Ø¥Ø´Ø±Ø§Ù Ø¹Ø§Ø¦Ù„ÙŠ.", "Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Ø§Ù† Ø¨Û• ØªÛ•ÙˆØ§ÙˆÛŒ Ù…ÙˆØ«Ù‚ Ú©Ø±Ø§ÙˆÙ†. Ú†Ø§ØªÛŒ Ø¹Ø´ÙˆØ§ÛŒÛŒ Ù‚Û•Ø¯Û•ØºÛ•ÛŒÛ•.")}
                   </p>
                 </div>
               </div>
@@ -1148,30 +1148,30 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 onClick={() => setSelectedStory(null)}
                 className="flex-1 py-3 border border-[#E6DCC3] rounded-xl text-xs font-black text-stone-500 hover:bg-stone-100 transition active:scale-98 cursor-pointer"
               >
-                {txt("Go Back", "رجوع", "گەڕانەوە")}
+                {txt("Go Back", "Ø±Ø¬ÙˆØ¹", "Ú¯Û•Ú•Ø§Ù†Û•ÙˆÛ•")}
               </button>
               <button
                 onClick={() => {
                   setSelectedStory(null);
                   if (!isAuthenticated) {
                     showToast(txt(
-                      "💍 Please log in or register to request chaperoned contact.",
-                      "💍 يرجى تسجيل الدخول أو إنشاء حساب لطلب تواصل وقور وعائلي.",
-                      "💍 تکایە سەرەتا بچۆ ژوورەوە بۆ ناردنی داواکاری."
+                      "ðŸ’ Please log in or register to request chaperoned contact.",
+                      "ðŸ’ ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£Ùˆ Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ù„Ø·Ù„Ø¨ ØªÙˆØ§ØµÙ„ ÙˆÙ‚ÙˆØ± ÙˆØ¹Ø§Ø¦Ù„ÙŠ.",
+                      "ðŸ’ ØªÚ©Ø§ÛŒÛ• Ø³Û•Ø±Û•ØªØ§ Ø¨Ú†Û† Ú˜ÙˆÙˆØ±Û•ÙˆÛ• Ø¨Û† Ù†Ø§Ø±Ø¯Ù†ÛŒ Ø¯Ø§ÙˆØ§Ú©Ø§Ø±ÛŒ."
                     ));
                     setTab('onboarding');
                   } else {
                     showToast(txt(
-                      `💍 Intention Match request sent successfully to ${selectedStory.gender === 'female' ? selectedStory.name : selectedStory.name}'s guardian.`,
-                      `💍 تم إرسال طلب نية التعارف الشرعي بنجاح إلى ولي أمر الطرف الآخر لمراجعته متبادلاً.`,
-                      `💍 داواکارییەکە بە سەرکەوتوویی نێردرا.`
+                      `ðŸ’ Intention Match request sent successfully to ${selectedStory.gender === 'female' ? selectedStory.name : selectedStory.name}'s guardian.`,
+                      `ðŸ’ ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ Ù†ÙŠØ© Ø§Ù„ØªØ¹Ø§Ø±Ù Ø§Ù„Ø´Ø±Ø¹ÙŠ Ø¨Ù†Ø¬Ø§Ø­ Ø¥Ù„Ù‰ ÙˆÙ„ÙŠ Ø£Ù…Ø± Ø§Ù„Ø·Ø±Ù Ø§Ù„Ø¢Ø®Ø± Ù„Ù…Ø±Ø§Ø¬Ø¹ØªÙ‡ Ù…ØªØ¨Ø§Ø¯Ù„Ø§Ù‹.`,
+                      `ðŸ’ Ø¯Ø§ÙˆØ§Ú©Ø§Ø±ÛŒÛŒÛ•Ú©Û• Ø¨Û• Ø³Û•Ø±Ú©Û•ÙˆØªÙˆÙˆÛŒÛŒ Ù†ÛŽØ±Ø¯Ø±Ø§.`
                     ));
                   }
                 }}
                 className="flex-2 py-3 bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-accent-coral/10 transition active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Heart className="w-3.5 h-3.5 text-white" />
-                <span>{txt("Send Serious Intention", "إرسال رغبة جادة", "ناردنی مەبەستی جدی")}</span>
+                <span>{txt("Send Serious Intention", "Ø¥Ø±Ø³Ø§Ù„ Ø±ØºØ¨Ø© Ø¬Ø§Ø¯Ø©", "Ù†Ø§Ø±Ø¯Ù†ÛŒ Ù…Û•Ø¨Û•Ø³ØªÛŒ Ø¬Ø¯ÛŒ")}</span>
               </button>
             </div>
 
@@ -1182,3 +1182,4 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     </div>
   );
 }
+
