@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield, ChevronDown, LogOut, ShieldAlert } from 'lucide-react';
 import { Language } from '../lib/translations';
 import { TRANSLATIONS } from '../lib/translations';
@@ -47,7 +47,7 @@ export default function Header({
               <div className="flex flex-row items-baseline space-x-2 sm:space-x-3 rtl:space-x-reverse">
                 <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-warm-charcoal whitespace-nowrap">{t.brand}</span>
                 <p className="text-[10px] sm:text-xs text-[#6B635B] font-medium hidden xs:block whitespace-nowrap">
-                  <span className="text-[#40798C] mx-1 sm:mx-2">â€¢</span> {t.slogan}
+                  <span className="text-[#40798C] mx-1 sm:mx-2">•</span> {t.slogan}
                 </p>
               </div>
             </div>
@@ -66,7 +66,7 @@ export default function Header({
               {t.overview}
             </button>
             <button
-              onClick={onLoginClick}
+              onClick={() => setTab('onboarding')}
               className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
                 currentTab === 'onboarding'
                   ? 'bg-accent-coral text-white shadow-md'
@@ -84,7 +84,7 @@ export default function Header({
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
               }`}
             >
-              {txt('Members', 'Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡', 'Ø¦Û•Ù†Ø¯Ø§Ù…Ø§Ù†')}
+              {txt('Members', 'الأعضاء', 'ئەندامان')}
             </button>
             
             {/* Community tab */}
@@ -96,7 +96,7 @@ export default function Header({
                   : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
               }`}
             >
-              <span>â˜• {txt('Marriage CafÃ©', 'ÙƒØ§ÙÙŠÙ‡ Ø§Ù„Ø²ÙˆØ§Ø¬', 'Ú©Ø§ÙÛŽÛŒ Ø²ÙˆØ§Ø¬')}</span>
+              <span>☕ {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}</span>
             </button>
 
             <button
@@ -120,7 +120,7 @@ export default function Header({
                   : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
               }`}
             >
-              <span>âœ‰ï¸ {txt('Postbox', 'ØµÙ†Ø¯ÙˆÙ‚ Ø§Ù„Ø¨Ø±ÙŠØ¯', 'Ø³Ù†Ø¯ÙˆÙ‚ÛŒ Ù¾Û†Ø³ØªÛ•')}</span>
+              <span>✉️ {txt('Postbox', 'صندوق البريد', 'سندوقی پۆستە')}</span>
             </button>
 
             {/* Admin control panel tab */}
@@ -133,7 +133,7 @@ export default function Header({
                     : 'bg-white/60 text-stone-700 hover:bg-stone-100 hover:text-stone-900'
                 }`}
               >
-                <span>ðŸ›¡ï¸ {txt('Admin Panel', 'Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…', 'Ø¨Û•Ø´ÛŒ Ø¨Û•Ú•ÛŽÙˆÛ•Ø¨Û•Ø±')}</span>
+                <span>🛡️ {txt('Admin Panel', 'لوحة التحكم', 'بەشی بەڕێوەبەر')}</span>
               </button>
             )}
           </nav>
@@ -142,7 +142,7 @@ export default function Header({
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             
             {/* Profile Info block / Login Button */}
-            {isAuthenticated ? (
+            {userProfileName ? (
               <>
                 <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
                   <div className="flex items-center gap-2">
@@ -157,9 +157,9 @@ export default function Header({
                       <button 
                         onClick={onLogout}
                         className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
-                        title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬' : 'Ú†ÙˆÙˆÙ†Û• Ø¯Û•Ø±Û•ÙˆÛ•'}
+                        title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
                       >
-                        {locale === 'en' ? 'Logout' : locale === 'ar' ? 'Ø®Ø±ÙˆØ¬' : 'Ø¯Û•Ø±Ú†ÙˆÙˆÙ†'}
+                        {locale === 'en' ? 'Logout' : locale === 'ar' ? 'خروج' : 'دەرچوون'}
                       </button>
                     )}
                   </div>
@@ -230,12 +230,12 @@ export default function Header({
               </>
             ) : (
               <button
-                onClick={onLoginClick}
+                onClick={() => setTab('onboarding')}
                 className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 shadow-md shadow-accent-coral/10 hover:shadow-lg transition-all duration-200 flex items-center gap-1.5 cursor-pointer hover:scale-102"
                 id="header-login-btn"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>{locale === 'en' ? 'Login' : locale === 'ar' ? 'Ø¯Ø®ÙˆÙ„ / ØªØ³Ø¬ÙŠÙ„' : 'Ú†ÙˆÙˆÙ†Û• Ú˜ÙˆÙˆØ±Û•ÙˆÛ•'}</span>
+                <span>{locale === 'en' ? 'Login' : locale === 'ar' ? 'دخول / تسجيل' : 'چوونە ژوورەوە'}</span>
               </button>
             )}
           </div>
@@ -249,10 +249,10 @@ export default function Header({
             </div>
             <div className="flex flex-col text-left rtl:text-right">
               <span className="text-[9px] font-mono font-bold text-[#6B635B] uppercase tracking-wider leading-tight">
-                Language / Ø²Ù…Ø§Ù† / Ø§Ù„Ù„ØºØ©
+                Language / زمان / اللغة
               </span>
               <span className="text-[11px] font-black text-warm-charcoal">
-                {locale === 'en' ? 'Gateway Interface' : locale === 'ar' ? 'ÙˆØ§Ø¬Ù‡Ø© Ø§Ù„Ù…Ù†ØµØ©' : 'Ú•ÙˆÙˆÚ©Ø§Ø±ÛŒ Ø³Û•Ø±Û•Ú©ÛŒ'}
+                {locale === 'en' ? 'Gateway Interface' : locale === 'ar' ? 'واجهة المنصة' : 'ڕووکاری سەرەکی'}
               </span>
             </div>
           </div>
@@ -267,8 +267,8 @@ export default function Header({
                   : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">ðŸ‡®ðŸ‡¶</span>
-              <span className="tracking-wide">Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">🇮🇶</span>
+              <span className="tracking-wide">العربية</span>
             </button>
 
             {/* Kurdish Link */}
@@ -280,8 +280,8 @@ export default function Header({
                   : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">â˜€ï¸</span>
-              <span className="tracking-wide">Ú©ÙˆØ±Ø¯ÛŒ</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">☀️</span>
+              <span className="tracking-wide">کوردی</span>
             </button>
 
             {/* English Link */}
@@ -293,7 +293,7 @@ export default function Header({
                   : 'bg-white/80 border border-stone-200/50 text-warm-charcoal hover:bg-white hover:border-[#40798C]/20 hover:scale-101 hover:shadow-xs'
               }`}
             >
-              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">ðŸ‡¬ðŸ‡§</span>
+              <span className="text-lg sm:text-xl select-none mb-0.5 filter drop-shadow">🇬🇧</span>
               <span className="tracking-wide">English</span>
             </button>
           </div>
@@ -312,13 +312,13 @@ export default function Header({
             {t.overview}
           </button>
           <button
-            onClick={onLoginClick}
+            onClick={() => setTab('onboarding')}
             className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap flex items-center space-x-0.5 rtl:space-x-reverse ${
               currentTab === 'onboarding' ? 'bg-accent-coral text-white' : 'text-[#4A443F]/80'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span className="shrink-0">{txt('Onboarding', 'Ø§Ù„ØªØ³Ø¬ÙŠÙ„', 'ØªÛ†Ù…Ø§Ø±Ú©Ø±Ø¯Ù†')}</span>
+            <span className="shrink-0">{txt('Onboarding', 'التسجيل', 'تۆمارکردن')}</span>
           </button>
           <button
             onClick={() => setTab('landing')}
@@ -326,7 +326,7 @@ export default function Header({
               currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {txt('Members', 'Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡', 'Ø¦Û•Ù†Ø¯Ø§Ù…Ø§Ù†')}
+            {txt('Members', 'الأعضاء', 'ئەندامان')}
           </button>
           <button
             onClick={() => setTab('community')}
@@ -334,7 +334,7 @@ export default function Header({
               currentTab === 'community' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80 bg-[#40798C]/5 border border-[#40798C]/10'
             }`}
           >
-            {txt('Marriage CafÃ©', 'ÙƒØ§ÙÙŠÙ‡ Ø§Ù„Ø²ÙˆØ§Ø¬', 'Ú©Ø§ÙÛŽÛŒ Ø²ÙˆØ§Ø¬')}
+            {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}
           </button>
           <button
             onClick={() => setTab('chat')}
@@ -342,7 +342,7 @@ export default function Header({
               currentTab === 'chat' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {txt('Chats', 'Ø§Ù„Ø¯Ø±Ø¯Ø´Ø§Øª', 'Ú¯ÙØªÙˆÚ¯Û†Ú©Ø§Ù†')}
+            {txt('Chats', 'الدردشات', 'گفتوگۆکان')}
           </button>
           {isAdmin && (
             <button
@@ -351,7 +351,7 @@ export default function Header({
                 currentTab === 'admin' ? 'bg-stone-850 text-white' : 'text-stone-700 bg-stone-100'
               }`}
             >
-              ðŸ›¡ï¸ {txt('Admin', 'Ø§Ù„ØªØ­ÙƒÙ…', 'Ø¨Û•Ú•ÛŽÙˆÛ•Ø¨Û•Ø±')}
+              🛡️ {txt('Admin', 'التحكم', 'بەڕێوەبەر')}
             </button>
           )}
           {profileStrength > 0 && (
@@ -362,7 +362,7 @@ export default function Header({
                   currentTab === 'profile' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
-                {txt('Profile', 'Ø§Ù„Ù…Ù„Ù', 'Ù¾Ú•Û†ÙØ§ÛŒÙ„')}
+                {txt('Profile', 'الملف', 'پڕۆفایل')}
               </button>
               <button
                 onClick={() => setTab('privacy')}
@@ -370,7 +370,7 @@ export default function Header({
                   currentTab === 'privacy' ? 'bg-[#9333EA] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
-                {txt('Privacy', 'Ø§Ù„Ø³Ø±ÙŠØ©', 'Ù†Ù‡ÛŽÙ†ÛŒÙ¾Ø§Ø±ÛŽØ²ÛŒ')}
+                {txt('Privacy', 'السرية', 'نهێنیپارێزی')}
               </button>
               <button
                 onClick={() => setTab('account')}
@@ -378,14 +378,14 @@ export default function Header({
                   currentTab === 'account' ? 'bg-emerald-600 text-white' : 'text-[#4A443F]/80'
                 }`}
               >
-                {txt('Verification', 'Ø§Ù„ØªÙˆØ«ÙŠÙ‚', 'Ø³Û•Ù„Ù…Ø§Ù†Ø¯Ù†')}
+                {txt('Verification', 'التوثيق', 'سەلماندن')}
               </button>
               {onLogout && (
                 <button
                   onClick={onLogout}
                   className="px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap bg-red-50 text-red-600 border border-red-100 hover:bg-red-100"
                 >
-                  {locale === 'en' ? 'Logout ðŸšª' : locale === 'ar' ? 'Ø®Ø±ÙˆØ¬ ðŸšª' : 'Ø¯Û•Ø±Ú†ÙˆÙˆÙ† ðŸšª'}
+                  {locale === 'en' ? 'Logout 🚪' : locale === 'ar' ? 'خروج 🚪' : 'دەرچوون 🚪'}
                 </button>
               )}
             </>
@@ -395,4 +395,3 @@ export default function Header({
     </header>
   );
 }
-
