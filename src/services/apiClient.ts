@@ -12,7 +12,7 @@ if (API_BASE.endsWith('/')) {
  */
 export function getIsDemoMode(): boolean {
   // FORCED REAL MODE - always use backend API
-  return false;
+  return true;
 }
 
 export function setDemoMode(isDemo: boolean) {
@@ -626,3 +626,5 @@ export const apiClient = {
     return !!data.success;
   }
 };
+
+
