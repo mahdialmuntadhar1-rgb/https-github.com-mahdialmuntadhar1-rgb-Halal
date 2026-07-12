@@ -78,9 +78,9 @@ export default function App() {
 
           // Route initial loaded user appropriately based on profile completeness
           if (!profile.gender) {
-            setTab('explore');
+            setTab('gender-selection');
           } else if (!profile.education || !profile.profession || !profile.values || profile.values.length === 0) {
-            setTab('explore');
+            setTab('onboarding');
           } else {
             setTab('explore');
           }
@@ -132,9 +132,9 @@ export default function App() {
       
       // Route user correctly: registration, login, and onboarding are united as a single flow
       if (!currentProfile.gender) {
-        setTab('explore');
+        setTab('gender-selection');
       } else if (!currentProfile.education || !currentProfile.profession || !currentProfile.values || currentProfile.values.length === 0) {
-        setTab('explore');
+        setTab('onboarding');
       } else {
         setTab('explore');
       }
@@ -162,7 +162,7 @@ export default function App() {
             ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
             : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
       );
-      setTab('explore');
+      setTab('onboarding');
     } catch (err) {
       console.error("Failed to update gender", err);
     }
@@ -376,20 +376,14 @@ export default function App() {
       {/* Header bar component */}
       <Header
         currentTab={currentTab}
-        isAuthenticated={isAuthenticated}
         setTab={setTab}
         profileStrength={profileStrength}
         userProfileName={userProfile ? userProfile.name : undefined}
         locale={locale}
         setLocale={setLocale}
-        isAdmin={userProfile?.role === 'admin' || userProfile?.email === 'safaribosafar@gmail.com'}
+        isAdmin={userProfile?.role === 'admin'}
         heroImages={heroImages}
-          onLogin={() => setTab('explore')}
         onLogout={isAuthenticated ? handleLogout : undefined}
-        onProfile={() => setTab('profile')}
-        onPrivacy={() => setTab('privacy')}
-        onAccount={() => setTab('account')}
-        onAdmin={() => setTab('admin')}
       />
 
       {/* Primary switcher layout */}
@@ -402,10 +396,6 @@ export default function App() {
           />
         ) : (
           <>
-            {currentTab === 'reset-password' && (
-                <ResetPasswordScreen />
-            )}
-
             {currentTab === 'gender-selection' && (
               <GenderSelectionScreen
                 locale={locale}
@@ -426,7 +416,7 @@ export default function App() {
                           ? `💍 ڕەگەز دیاریکرا بە ${gender === 'male' ? 'زاوا' : 'بووک'}. تکایە بۆ بەردەوامبوون پڕۆفایلەکەت دروست بکە یان بچۆ ژوورەوە!`
                           : `💍 تم تحديد الجنس كـ ${gender === 'male' ? 'عريس' : 'عروسة'}. يرجى إنشاء حسابك أو تسجيل الدخول للمتابعة!`
                     );
-                    setTab('explore');
+                    setTab('onboarding');
                     return;
                   }
                   const updatedProfile = {
@@ -442,7 +432,7 @@ export default function App() {
                         ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
                         : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
                   );
-                  setTab('explore');
+                  setTab('onboarding');
                 }}
                 onExploreMatches={() => setTab('landing')}
                 setTab={setTab}
@@ -675,7 +665,7 @@ export default function App() {
                   ? '💍 Please log in or create an account to view and chat with matches.' 
                   : '💍 يرجى تسجيل الدخول أولاً لتصفح والدردشة مع شركاء التوافق.'
               );
-              setTab('explore');
+              setTab('onboarding');
             } else {
               setTab('chat');
             }
@@ -705,7 +695,7 @@ export default function App() {
                   ? '💍 Please log in to view received postcards.' 
                   : '💍 يرجى تسجيل الدخول أولاً لتصفح الرسائل والبطاقات البريدية.'
               );
-              setTab('explore');
+              setTab('onboarding');
             } else {
               setTab('postcards');
             }
@@ -734,7 +724,7 @@ export default function App() {
                   ? '💍 Please sign in to view your profile dossier.' 
                   : '💍 يرجى تسجيل الدخول لعرض وتعديل ملفك التعريفي.'
               );
-              setTab('explore');
+              setTab('onboarding');
             } else {
               setTab('profile');
             }

@@ -194,17 +194,15 @@ export const apiClient = {
         message: 'Demo forgot password instructions simulated. Check your inbox.'
       };
     }
-
-    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
   },
 
-  /**
-   * USER PROFILE
-   */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, newPassword }),
+    });
+  },
   async getCurrentUser(): Promise<UserProfile> {
     if (getIsDemoMode()) {
       return mockApi.getCurrentUser();

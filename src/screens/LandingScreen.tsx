@@ -6,7 +6,7 @@ import HowItWorks from '../components/HowItWorks';
 import PhotoPrivacyModule from '../components/PhotoPrivacyModule';
 import TrustSafety from '../components/TrustSafety';
 import MarriageCafe from '../components/MarriageCafe';
-import { INITIAL_MATCHES } from '../data/matches';
+import { apiClient } from '../services/apiClient';
 import { 
   Check, 
   MapPin, 
@@ -109,6 +109,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   // Synchronize default gender preference when profile changes
   React.useEffect(() => {
+    apiClient.getMatches().then(res => setPreviewMatches(res.matches.slice(0, 6))).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const activeG = userProfile?.gender || preSelectedGender;
     if (activeG) {
       setGenderPref(activeG === 'male' ? 'female' : 'male');
@@ -126,11 +130,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     setTimeout(() => setLocalToast(null), 4000);
   };
 
-  // Filter matches dynamically (we guarantee at least 10 men and 10 women per governorate in INITIAL_MATCHES)
+  // Filter matches dynamically (we guarantee at least 10 men and 10 women per governorate in previewMatches.length > 0 ? previewMatches : [])
   const filteredMatches = useMemo(() => {
     let result = (selectedGov.toLowerCase() === 'all' || selectedGov.toLowerCase() === 'all iraq')
-      ? INITIAL_MATCHES
-      : INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
+      ? previewMatches.length > 0 ? previewMatches : []
+      : previewMatches.length > 0 ? previewMatches : [].filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
     
     // Filter by age range
     result = result.filter(m => m.age >= minAge && m.age <= maxAge);
@@ -176,10 +180,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     const activeG = userProfile?.gender || preSelectedGender;
     
     // Pick 4 outstanding profiles from diverse regions
-    const baghdadGroom = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'male' && m.id === 'm1');
-    const erbilGroom = INITIAL_MATCHES.find(m => m.governorate === 'Erbil' && m.gender === 'male' && m.id === 'm2');
-    const slemaniBride = INITIAL_MATCHES.find(m => m.governorate === 'Sulaymaniyah' && m.gender === 'female' && m.id === 'f1');
-    const baghdadBride = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'female' && m.id === 'f2');
+    const baghdadGroom = previewMatches.length > 0 ? previewMatches : [].find(m => m.governorate === 'Baghdad' && m.gender === 'male' && m.id === 'm1');
+    const erbilGroom = previewMatches.length > 0 ? previewMatches : [].find(m => m.governorate === 'Erbil' && m.gender === 'male' && m.id === 'm2');
+    const slemaniBride = previewMatches.length > 0 ? previewMatches : [].find(m => m.governorate === 'Sulaymaniyah' && m.gender === 'female' && m.id === 'f1');
+    const baghdadBride = previewMatches.length > 0 ? previewMatches : [].find(m => m.governorate === 'Baghdad' && m.gender === 'female' && m.id === 'f2');
     
     const candidates: MatchProfile[] = [];
     
@@ -209,7 +213,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
     if (hasFilter) {
       // User explicitly filtered by governorate
-      let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
+      let result = previewMatches.length > 0 ? previewMatches : [].filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
       if (genderPref !== 'all') {
         result = result.filter(m => m.gender === genderPref);
       } else {
@@ -221,8 +225,8 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       return result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
     } else {
       // No explicit governorate filter: show user's governorate first, then make public whoever is available in Iraq
-      let nearbyResult = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === userGov.toLowerCase());
-      let otherResult = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() !== userGov.toLowerCase());
+      let nearbyResult = previewMatches.length > 0 ? previewMatches : [].filter(m => m.governorate.toLowerCase() === userGov.toLowerCase());
+      let otherResult = previewMatches.length > 0 ? previewMatches : [].filter(m => m.governorate.toLowerCase() !== userGov.toLowerCase());
 
       let targetGender = genderPref;
       if (targetGender === 'all') {

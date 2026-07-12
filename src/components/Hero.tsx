@@ -4,7 +4,7 @@ import { Language, TRANSLATIONS } from '../lib/translations';
 import { AppTab, MatchProfile, UserProfile } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { GOVERNORATE_OPTIONS } from '../screens/LandingScreen';
-import { INITIAL_MATCHES } from '../data/matches';
+import { CAROUSEL_SLIDES, GENDER_IMAGES } from './heroConfig';
 
 interface HeroProps {
   locale: Language;
@@ -20,78 +20,7 @@ interface HeroProps {
   preSelectedGender?: 'male' | 'female' | null;
 }
 
-const CAROUSEL_SLIDES = [
-  {
-    localUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=1200',
-    fallbackUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=1200',
-    title: {
-      en: 'Find a Serious Path to Marriage',
-      ar: 'ابدأ طريقاً جاداً نحو الزواج',
-      ckb: 'ڕێگایەکی جددی بۆ هاوسەرگیری دەست پێ بکە'
-    },
-    subtitle: {
-      en: 'Dignified, values-first marital matchmaking with complete command over photo security.',
-      ar: 'تواصل كريم ومحترم يسعى لبناء عائلة مستقرة مبنية على المودة والرحمة والالتزام.',
-      ckb: 'پەیوەندی بەهادار و بەڕێز بۆ پێکهێنانی خێزانێکی بەختەوەر و جێگیر.'
-    }
-  },
-  {
-    localUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1200',
-    fallbackUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1200',
-    title: {
-      en: 'A Sacred Covenant of Trust',
-      ar: 'ميثاق غليظ مبني على الثقة والاحترام',
-      ckb: 'پەیمانێکی پیرۆز لەسەر متمانە و ڕێزگرتن'
-    },
-    subtitle: {
-      en: 'Every single profile is verified for absolute seriousness and marital intentions.',
-      ar: 'كل ملف شخصي يتم توثيقه لضمان الجدية التامة والالتزام بالقيم الأصيلة.',
-      ckb: 'هەموو پڕۆفایلەکان پشتڕاست دەکرێنەوە بۆ دڵنیابوون لە جدیبوونی تەواو.'
-    }
-  },
-  {
-    localUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
-    fallbackUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1200',
-    title: {
-      en: 'Dignified Photo Protection',
-      ar: 'الخصوصية التامة لصورك التعريفية',
-      ckb: 'پاراستنی تەواوی وێنەکانت'
-    },
-    subtitle: {
-      en: 'You fully control who can request and view your portrait, completely on your terms.',
-      ar: 'تتحكمين بشكل كامل في من يشاهد صورتك التعريفية، محمية بالكامل حسب شروطك.',
-      ckb: 'کۆنترۆڵی تەواو بکە کێ دەتوانێت وێنەکەت ببینێت بەپێی یاساکانی خۆت.'
-    }
-  },
-  {
-    localUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&q=80&w=1200',
-    fallbackUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&q=80&w=1200',
-    title: {
-      en: 'Sincere Matches, Shared Goals',
-      ar: 'نوايا صادقة وأهداف عائلية مشتركة',
-      ckb: 'نیەتی پاک و ئامانجی هاوبەش'
-    },
-    subtitle: {
-      en: 'Connect based on lifestyle values, courtship timelines, and spiritual compatibility.',
-      ar: 'تواصل على أساس التوافق الفكري والروحي، والخط الزمني للزواج، ورؤية الأسرة.',
-      ckb: 'پەیوەندی دروست بکە لەسەر بنەمای گونجانی فیکری و بەها هاوبەشەکان.'
-    }
-  },
-  {
-    localUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
-    fallbackUrl: 'https://images.unsplash.com/photo-1621616875450-79f22448040e?auto=format&fit=crop&q=80&w=1200',
-    title: {
-      en: 'Blessed Halal Union',
-      ar: 'عقود مباركة وبيوت مطمئنة',
-      ckb: 'هاوسەرگیری حەڵاڵ و ژیانی پڕ خێر'
-    },
-    subtitle: {
-      en: 'Take a secure, respectable path toward sealing a happy, long-lasting household.',
-      ar: 'خذ مساراً آمناً ووقوراً نحو تأسيس زواج مستقر وحياة زوجية عامرة بالسعادة.',
-      ckb: 'ڕێگايەکی ئارام و بەڕێز بگرەبەر بۆ پێکهێنانی ژیانێکی هاوسەری جێگیر.'
-    }
-  }
-];
+
 
 export default function Hero({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, selectedGov, setSelectedGov, showToast, userProfile, preSelectedGender }: HeroProps) {
   const t = TRANSLATIONS[locale];
@@ -148,7 +77,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
               className="absolute inset-0 w-full h-full"
             >
               <img
-                src={failedImages[currentIndex] ? CAROUSEL_SLIDES[currentIndex].fallbackUrl : CAROUSEL_SLIDES[currentIndex].localUrl}
+                src={failedImages[currentIndex] ? CAROUSEL_SLIDES[currentIndex].imageUrl : CAROUSEL_SLIDES[currentIndex].imageUrl}
                 alt={CAROUSEL_SLIDES[currentIndex].title[locale] || CAROUSEL_SLIDES[currentIndex].title.en}
                 onError={() => setFailedImages((prev) => ({ ...prev, [currentIndex]: true }))}
                 className="w-full h-full object-cover select-none"
@@ -308,7 +237,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                 <div className="space-y-2 sm:space-y-3">
                   <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
                     <img 
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400" 
+                      src={GENDER_IMAGES.male} 
                       alt={t.iamMan} 
                       className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -365,7 +294,7 @@ export default function Hero({ locale, onSelectGender, onExploreMatches, setTab,
                 <div className="space-y-2 sm:space-y-3">
                   <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm">
                     <img 
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400" 
+                      src={GENDER_IMAGES.female} 
                       alt={t.iamWoman} 
                       className="w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
