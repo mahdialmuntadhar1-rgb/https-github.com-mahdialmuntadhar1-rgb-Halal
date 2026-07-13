@@ -11,8 +11,8 @@ if (API_BASE.endsWith('/')) {
  * FORCED TO ALWAYS RETURN FALSE - uses real backend API
  */
 export function getIsDemoMode(): boolean {
-  // FORCED REAL MODE - always use backend API
-  return true;
+  // Real backend mode - forced false so all API calls hit the live Worker
+  return false;
 }
 
 export function setDemoMode(isDemo: boolean) {
@@ -126,7 +126,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
+      body: JSON.stringify({ email: identifier, password }),
     });
 
     if (data.token) {
@@ -400,10 +400,11 @@ export const apiClient = {
       return mockApi.getConversations();
     }
 
-    return safeFetch<Conversation[]>(`${API_BASE}/conversations`, {
+    const result = await safeFetch<{ conversations: Conversation[] }>(`${API_BASE}/conversations`, {
       method: 'GET',
       headers: getHeaders(),
     });
+    return result.conversations || [];
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -626,5 +627,6 @@ export const apiClient = {
     return !!data.success;
   }
 };
+
 
 

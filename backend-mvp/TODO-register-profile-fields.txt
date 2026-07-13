@@ -1,0 +1,5 @@
+﻿TODO: Register does not currently save fullName/governorate/district/phone/age.
+To fix this safely, paste the contents of:
+  backend-mvp/src/routes/auth.ts
+  backend-mvp/src/db.ts (or wherever the D1 schema/insert statements live)
+and I'll write the exact INSERT statement matching your real columns.

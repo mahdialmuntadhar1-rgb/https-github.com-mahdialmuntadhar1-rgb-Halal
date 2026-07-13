@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+*.backup-*
+diagnostic-output.txt
+*-review.ts
+*-review.sql
