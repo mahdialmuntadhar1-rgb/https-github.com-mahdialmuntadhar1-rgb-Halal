@@ -13,7 +13,7 @@ export interface User {
   name: string;
   membershipStatus: 'free' | 'premium' | 'verified';
   createdAt: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'member';
 }
 
 export interface PrivacySettings {
@@ -64,7 +64,7 @@ export interface UserProfile {
   email?: string;
   phone?: string;
   district?: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'member';
   badges?: string[];
   savedMatches?: string[]; // Array of match profile IDs that are bookmarked
   

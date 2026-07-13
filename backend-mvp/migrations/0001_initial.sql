@@ -166,7 +166,7 @@ INSERT OR IGNORE INTO halal_cafe_questions (id, question, question_ar, category,
 VALUES (
   'daily-intentions-001',
   'What quality matters most to you in a serious marriage conversation?',
-  '┘à╪º ╪º┘ä╪╡┘ü╪⌐ ╪º┘ä╪ú┘ç┘à ┘ä╪»┘è┘â ┘ü┘è ╪¡┘ê╪º╪▒ ╪▓┘ê╪º╪¼ ╪¼╪º╪»╪ƒ',
+  'ما الصفة الأهم لك في حوار زواج جاد؟',
   'daily',
   date('now')
 );

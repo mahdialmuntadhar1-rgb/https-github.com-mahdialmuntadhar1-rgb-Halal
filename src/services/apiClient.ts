@@ -1,4 +1,4 @@
-﻿import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
+import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
 
 let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
@@ -109,7 +109,7 @@ export const apiClient = {
         name: identifier.split('@')[0],
         membershipStatus: 'free',
         createdAt: new Date().toISOString(),
-        role: identifier.includes('admin') || identifier.includes('safar') ? 'admin' : 'user'
+        role: identifier.includes('admin') || identifier.includes('safar') ? 'admin' : 'member'
       };
 
       // Update mock api profile
@@ -148,7 +148,7 @@ export const apiClient = {
         name: fullName,
         membershipStatus: 'free',
         createdAt: new Date().toISOString(),
-        role: email.includes('admin') ? 'admin' : 'user'
+        role: email.includes('admin') ? 'admin' : 'member'
       };
 
       // Reset mock profile with basic data
@@ -352,7 +352,7 @@ export const apiClient = {
       return mockApi.toggleSaveProfile(matchId);
     }
 
-    return safeFetch<UserProfile>(`${API_BASE}/matches/${matchId}/save`, {
+    return safeFetch<UserProfile>(`${API_BASE}/saved-profiles/${matchId}`, {
       method: 'POST',
       headers: getHeaders(),
     });
@@ -366,7 +366,7 @@ export const apiClient = {
     return safeFetch<{ success: boolean; request: any }>(`${API_BASE}/requests`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ targetMatchId: matchId }),
+      body: JSON.stringify({ receiverId: matchId }),
     });
   },
 
@@ -407,15 +407,15 @@ export const apiClient = {
     return result.conversations || [];
   },
 
-  async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
+  async sendMessage(conversationId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
     if (getIsDemoMode()) {
-      return mockApi.sendMessage(matchId, text, sender);
+      return mockApi.sendMessage(conversationId, text, sender);
     }
 
-    return safeFetch<Message>(`${API_BASE}/conversations/${matchId}/messages`, {
+    return safeFetch<Message>(`${API_BASE}/conversations/${conversationId}/messages`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ text, sender }),
+      body: JSON.stringify({ text }),
     });
   },
 
@@ -438,11 +438,11 @@ export const apiClient = {
       return mockApi.addHeroImage(url, title, isActive);
     }
 
-    return safeFetch<HeroImage>(`${API_BASE}/hero-images`, {
+    return safeFetch<{ heroImage: HeroImage }>(`${API_BASE}/admin/hero-images`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ url, title, isActive }),
-    });
+      body: JSON.stringify({ imageUrl: url, title, altText: title }),
+    }).then(data => data.heroImage);
   },
 
   async updateHeroImage(id: string, updatedFields: Partial<HeroImage>): Promise<HeroImage> {
@@ -450,11 +450,17 @@ export const apiClient = {
       return mockApi.updateHeroImage(id, updatedFields);
     }
 
-    return safeFetch<HeroImage>(`${API_BASE}/hero-images/${id}`, {
+    const payload: Record<string, any> = {};
+    if (updatedFields.url !== undefined) payload.imageUrl = updatedFields.url;
+    if (updatedFields.title !== undefined) payload.title = updatedFields.title;
+    if (updatedFields.isActive !== undefined) payload.active = updatedFields.isActive;
+    if (updatedFields.order !== undefined) payload.sortOrder = updatedFields.order;
+
+    return safeFetch<{ heroImage: HeroImage }>(`${API_BASE}/admin/hero-images/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
-      body: JSON.stringify(updatedFields),
-    });
+      body: JSON.stringify(payload),
+    }).then(data => data.heroImage);
   },
 
   async deleteHeroImage(id: string): Promise<boolean> {
@@ -462,11 +468,11 @@ export const apiClient = {
       return mockApi.deleteHeroImage(id);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/hero-images/${id}`, {
+    await safeFetch(`${API_BASE}/admin/hero-images/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    return !!data.success;
+    return true;
   },
 
   async reorderHeroImages(reordered: HeroImage[]): Promise<HeroImage[]> {
@@ -474,11 +480,11 @@ export const apiClient = {
       return mockApi.reorderHeroImages(reordered);
     }
 
-    return safeFetch<HeroImage[]>(`${API_BASE}/hero-images/reorder`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({ reordered }),
-    });
+    // Backend doesn't have a reorder endpoint, update each individually
+    for (let i = 0; i < reordered.length; i++) {
+      await this.updateHeroImage(reordered[i].id, { order: i + 1 });
+    }
+    return reordered;
   },
 
   /**
@@ -489,10 +495,8 @@ export const apiClient = {
       return mockApi.getCommunityPosts();
     }
 
-    return safeFetch<CommunityPost[]>(`${API_BASE}/community/posts`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
+    // Backend doesn't have community posts endpoint yet, return empty array
+    return [];
   },
 
   async createCommunityPost(
@@ -511,11 +515,8 @@ export const apiClient = {
       return mockApi.createCommunityPost(title, content, category, isDaily, image, status, postType, opinionColor, pollOptions, pollVotes);
     }
 
-    return safeFetch<CommunityPost>(`${API_BASE}/community/posts`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ title, content, category, isDaily, image, status, postType, opinionColor, pollOptions, pollVotes }),
-    });
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async voteInPoll(postId: string, optionText: string, userName: string): Promise<CommunityPost> {
@@ -523,11 +524,8 @@ export const apiClient = {
       return mockApi.voteInPoll(postId, optionText, userName);
     }
 
-    return safeFetch<CommunityPost>(`${API_BASE}/community/posts/${postId}/vote`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ optionText, userName }),
-    });
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async likePost(postId: string, userName: string): Promise<CommunityPost> {
@@ -535,11 +533,8 @@ export const apiClient = {
       return mockApi.likePost(postId, userName);
     }
 
-    return safeFetch<CommunityPost>(`${API_BASE}/community/posts/${postId}/like`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ userName }),
-    });
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async addComment(postId: string, text: string, userName: string, userGender: 'male' | 'female'): Promise<PostComment> {
@@ -547,11 +542,8 @@ export const apiClient = {
       return mockApi.addComment(postId, text, userName, userGender);
     }
 
-    return safeFetch<PostComment>(`${API_BASE}/community/posts/${postId}/comments`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ text, userName, userGender }),
-    });
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async reportPost(postId: string): Promise<boolean> {
@@ -559,11 +551,8 @@ export const apiClient = {
       return mockApi.reportPost(postId);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/report`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async reportComment(postId: string, commentId: string): Promise<boolean> {
@@ -571,11 +560,8 @@ export const apiClient = {
       return mockApi.reportComment(postId, commentId);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}/report`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async deletePost(postId: string): Promise<boolean> {
@@ -583,11 +569,8 @@ export const apiClient = {
       return mockApi.deletePost(postId);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async deleteComment(postId: string, commentId: string): Promise<boolean> {
@@ -595,11 +578,8 @@ export const apiClient = {
       return mockApi.deleteComment(postId, commentId);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async updatePostStatus(postId: string, status: 'approved' | 'hidden' | 'rejected' | 'pending'): Promise<boolean> {
@@ -607,12 +587,8 @@ export const apiClient = {
       return mockApi.updatePostStatus(postId, status);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/status`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   },
 
   async toggleFeaturePost(postId: string): Promise<boolean> {
@@ -620,11 +596,8 @@ export const apiClient = {
       return mockApi.toggleFeaturePost(postId);
     }
 
-    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/feature`, {
-      method: 'PUT',
-      headers: getHeaders(),
-    });
-    return !!data.success;
+    // Backend doesn't have community posts endpoint yet
+    throw new Error('Community posts not implemented in backend');
   }
 };
 
