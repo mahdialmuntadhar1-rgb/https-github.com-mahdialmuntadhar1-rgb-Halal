@@ -15,6 +15,8 @@ interface HeaderProps {
   isAdmin?: boolean;
   heroImages?: HeroImage[];
   onLogout?: () => void;
+  isAuthenticated?: boolean;
+  onLoginClick?: () => void;
 }
 
 export default function Header({ 
@@ -26,7 +28,9 @@ export default function Header({
   setLocale,
   isAdmin = false,
   heroImages = [],
-  onLogout
+  onLogout,
+  isAuthenticated,
+  onLoginClick,
 }: HeaderProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -142,7 +146,7 @@ export default function Header({
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             
             {/* Profile Info block / Login Button */}
-            {userProfileName ? (
+            {isAuthenticated ? (
               <>
                 <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
                   <div className="flex items-center gap-2">
@@ -230,7 +234,7 @@ export default function Header({
               </>
             ) : (
               <button
-                onClick={() => setTab('onboarding')}
+                onClick={onLoginClick}
                 className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 shadow-md shadow-accent-coral/10 hover:shadow-lg transition-all duration-200 flex items-center gap-1.5 cursor-pointer hover:scale-102"
                 id="header-login-btn"
               >
@@ -312,7 +316,7 @@ export default function Header({
             {t.overview}
           </button>
           <button
-            onClick={() => setTab('onboarding')}
+            onClick={onLoginClick}
             className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap flex items-center space-x-0.5 rtl:space-x-reverse ${
               currentTab === 'onboarding' ? 'bg-accent-coral text-white' : 'text-[#4A443F]/80'
             }`}
