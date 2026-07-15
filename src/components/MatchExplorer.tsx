@@ -918,7 +918,7 @@ export default function MatchExplorer({ locale, matches, onSendRequest, onInitia
                   <button
                     type="button"
                     disabled
-                    className="w-1/2 py-2.5 bg-[#FF7F50]/10 border border-accent-coral/10 text-[#6B635B] font-bold text-xs rounded-xl cursor-not-allowed"
+                    className="w-1/2 py-2.5 bg-[#9333EA]/10 border border-accent-coral/10 text-[#6B635B] font-bold text-xs rounded-xl cursor-not-allowed"
                   >
                     Request Pending Review
                   </button>

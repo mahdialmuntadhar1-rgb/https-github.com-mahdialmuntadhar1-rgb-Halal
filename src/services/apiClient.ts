@@ -150,10 +150,10 @@ export const apiClient = {
     return data;
   },
 
-  async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string): Promise<{ token: string; user: User }> {
+  async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
     if (getIsDemoMode()) {
       // Mock register response
-      if (!fullName || !governorate || !district || !email || !password) {
+      if (!fullName || !governorate || !email || !password) {
         throw new Error('Please fill in all required registration fields');
       }
       localStorage.setItem('halal_token', 'mock_jwt_token_for_demo');
@@ -169,12 +169,14 @@ export const apiClient = {
       // Reset mock profile with basic data
       await mockApi.updateCurrentUserProfile({
         email,
+        phone,
         name: fullName,
         governorate,
         city: district, // district stored as city
+        district,
         gender: undefined, // do not send gender on register
         role: user.role,
-        age: 0, // not onboarded
+        age: age || 24,
         education: '',
         profession: ''
       });
@@ -186,7 +188,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName, governorate, email, phone, password }),
+      body: JSON.stringify({ fullName, governorate, district, email, phone, password, age }),
     });
 
     if (data.token) {
@@ -394,6 +396,17 @@ export const apiClient = {
     });
   },
 
+  async declineIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {
+    if (getIsDemoMode()) {
+      return mockApi.declineIntroductionRequest(matchId);
+    }
+
+    return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/decline`, {
+      method: 'PUT',
+      headers: getHeaders(),
+    });
+  },
+
   /**
    * CHAT / CONVERSATIONS
    */
@@ -496,15 +509,15 @@ export const apiClient = {
     });
   },
 
-  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false): Promise<CommunityPost> {
+  async createCommunityPost(title: string, content: string, category: CommunityPost['category'], isDaily: boolean = false, image?: string, status?: 'pending' | 'approved' | 'hidden' | 'rejected'): Promise<CommunityPost> {
     if (getIsDemoMode()) {
-      return mockApi.createCommunityPost(title, content, category, isDaily);
+      return mockApi.createCommunityPost(title, content, category, isDaily, image, status);
     }
 
     return safeFetch<CommunityPost>(`${API_BASE}/community/posts`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ title, content, category, isDaily }),
+      body: JSON.stringify({ title, content, category, isDaily, image, status }),
     });
   },
 
@@ -575,6 +588,31 @@ export const apiClient = {
 
     const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return !!data.success;
+  },
+
+  async updatePostStatus(postId: string, status: 'approved' | 'hidden' | 'rejected' | 'pending'): Promise<boolean> {
+    if (getIsDemoMode()) {
+      return mockApi.updatePostStatus(postId, status);
+    }
+
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/status`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    return !!data.success;
+  },
+
+  async toggleFeaturePost(postId: string): Promise<boolean> {
+    if (getIsDemoMode()) {
+      return mockApi.toggleFeaturePost(postId);
+    }
+
+    const data = await safeFetch<{ success: boolean }>(`${API_BASE}/community/posts/${postId}/feature`, {
+      method: 'PUT',
       headers: getHeaders(),
     });
     return !!data.success;

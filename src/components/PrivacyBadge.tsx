@@ -15,7 +15,7 @@ export default function PrivacyBadge({ status }: PrivacyBadgeProps) {
         </span>
       )}
       {status === 'blurred' && (
-        <span className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF7F50]/15 text-accent-coral border border-accent-coral/20 uppercase tracking-wider">
+        <span className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#9333EA]/15 text-accent-coral border border-accent-coral/20 uppercase tracking-wider">
           <Lock className="w-3.5 h-3.5 animate-pulse" />
           <span>Blurred (Unlocked on Match)</span>
         </span>

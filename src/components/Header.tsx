@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield, AlertCircle } from 'lucide-react';
 import { Language } from '../lib/translations';
 import { TRANSLATIONS } from '../lib/translations';
 import { HeroImage, AppTab } from '../types';
@@ -29,9 +29,23 @@ export default function Header({
   onLogout
 }: HeaderProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutConfirm(false);
+    if (onLogout) onLogout();
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   return (
@@ -40,20 +54,14 @@ export default function Header({
         <div className="flex justify-between items-center h-20">
           
           {/* Logo & Slogan */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center shadow-lg shadow-accent-coral/20 shrink-0">
-              <span className="text-white font-serif font-bold text-xl">Z</span>
-            </div>
+          <div className="flex items-center cursor-pointer animate-fade-in" onClick={() => setTab('landing')}>
             <div className="text-start">
-              <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                <span className="text-2xl font-serif font-bold tracking-tight text-warm-charcoal">{t.brand}</span>
-                <span className="text-[10px] bg-accent-coral/10 text-accent-coral font-bold px-2.5 py-0.5 rounded-full border border-accent-coral/20 tracking-wider">
-                  {t.marriageOnly}
-                </span>
+              <div className="flex flex-row items-baseline space-x-2 sm:space-x-3 rtl:space-x-reverse">
+                <span className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-warm-charcoal whitespace-nowrap">{t.brand}</span>
+                <p className="text-[10px] sm:text-xs text-[#6B635B] font-medium hidden xs:block whitespace-nowrap">
+                  <span className="text-[#40798C] mx-1 sm:mx-2">•</span> {t.slogan}
+                </p>
               </div>
-              <p className="text-xs text-[#6B635B] hidden sm:block font-medium">
-                {t.slogan}
-              </p>
             </div>
           </div>
 
@@ -88,19 +96,19 @@ export default function Header({
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
               }`}
             >
-              {t.explore}
+              {txt('Members', 'الأعضاء', 'ئەندامان')}
             </button>
             
             {/* Community tab */}
             <button
               onClick={() => setTab('community')}
-              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1 ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1.5 ${
                 currentTab === 'community'
                   ? 'bg-[#40798C] text-white shadow-md'
                   : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
               }`}
             >
-              <span>{txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}</span>
+              <span>☕ {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}</span>
             </button>
 
             <button
@@ -113,6 +121,18 @@ export default function Header({
             >
               <MessageSquareHeart className="w-4 h-4 text-accent-coral" />
               <span>{t.chat}</span>
+            </button>
+
+            {/* Postbox Tab */}
+            <button
+              onClick={() => setTab('postcards')}
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center space-x-1.5 rtl:space-x-reverse ${
+                currentTab === 'postcards'
+                  ? 'bg-[#40798C] text-white shadow-md'
+                  : 'text-[#4A443F]/80 hover:text-[#40798C] hover:bg-white/40'
+              }`}
+            >
+              <span>✉️ {txt('Postbox', 'صندوق البريد', 'سندوقی پۆستە')}</span>
             </button>
 
             {/* Admin control panel tab */}
@@ -147,7 +167,7 @@ export default function Header({
                     </span>
                     {onLogout && (
                       <button 
-                        onClick={onLogout}
+                        onClick={handleLogoutClick}
                         className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
                         title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
                       >
@@ -190,7 +210,7 @@ export default function Header({
                       title="Privacy Settings"
                       className={`p-1.5 rounded-lg transition-all ${
                         currentTab === 'privacy' 
-                          ? 'bg-[#FF7F50] text-white shadow-sm scale-102' 
+                          ? 'bg-[#9333EA] text-white shadow-sm scale-102' 
                           : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
                       }`}
                     >
@@ -212,9 +232,9 @@ export default function Header({
 
                 <button
                   onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
-                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#FF7F50]/10 text-accent-coral hover:bg-[#FF7F50]/20 flex items-center gap-1"
+                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#9333EA]/10 text-accent-coral hover:bg-[#9333EA]/20 flex items-center gap-1"
                 >
-                  <User className="w-3.5 h-3.5 text-[#FF7F50]" />
+                  <User className="w-3.5 h-3.5 text-[#9333EA]" />
                   <span className="hidden xs:inline">
                     {t.editDetails}
                   </span>
@@ -318,7 +338,7 @@ export default function Header({
               currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
-            {txt('Matches', 'البحث', 'گەڕان')}
+            {txt('Members', 'الأعضاء', 'ئەندامان')}
           </button>
           <button
             onClick={() => setTab('community')}
@@ -326,7 +346,7 @@ export default function Header({
               currentTab === 'community' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80 bg-[#40798C]/5 border border-[#40798C]/10'
             }`}
           >
-            {txt('💬 Forum', '💬 مجتمع الأسرة', '💬 کلتور')}
+            {txt('Marriage Café', 'كافيه الزواج', 'کافێی زواج')}
           </button>
           <button
             onClick={() => setTab('chat')}
@@ -359,7 +379,7 @@ export default function Header({
               <button
                 onClick={() => setTab('privacy')}
                 className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'privacy' ? 'bg-[#FF7F50] text-white' : 'text-[#4A443F]/80'
+                  currentTab === 'privacy' ? 'bg-[#9333EA] text-white' : 'text-[#4A443F]/80'
                 }`}
               >
                 {txt('Privacy', 'السرية', 'نهێنیپارێزی')}
@@ -374,7 +394,7 @@ export default function Header({
               </button>
               {onLogout && (
                 <button
-                  onClick={onLogout}
+                  onClick={handleLogoutClick}
                   className="px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap bg-red-50 text-red-600 border border-red-100 hover:bg-red-100"
                 >
                   {locale === 'en' ? 'Logout 🚪' : locale === 'ar' ? 'خروج 🚪' : 'دەرچوون 🚪'}
@@ -384,6 +404,41 @@ export default function Header({
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center shrink-0">
+                <AlertCircle className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-warm-charcoal">
+                  {txt('Confirm Logout', 'تأكيد تسجيل الخروج', 'دڵنیاکردنەوەی دەرچوون')}
+                </h3>
+                <p className="text-xs text-stone-500 mt-1">
+                  {txt('Are you sure you want to log out?', 'هل أنت متأكد أنك تريد تسجيل الخروج؟', 'ئایا دڵنیایت کە دەتەوێت دەربچیت؟')}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCancelLogout}
+                className="flex-1 px-4 py-2 border border-stone-300 text-stone-700 font-bold rounded-xl hover:bg-stone-50 transition text-sm"
+              >
+                {txt('Cancel', 'إلغاء', 'پاشگەزبوونەوە')}
+              </button>
+              <button
+                onClick={handleConfirmLogout}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-[#40798C] to-[#599da0] text-white font-bold rounded-xl hover:opacity-90 transition text-sm shadow-md"
+              >
+                {txt('Yes, Log Out', 'نعم، تسجيل الخروج', 'بەڵێ، دەربچۆ')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -23,7 +23,7 @@ export default function MainTabs({ activeTab, onTabChange, locale }: MainTabsPro
   const isRTL = locale === 'ar' || locale === 'ckb';
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-6">
+    <div className="w-full max-w-4xl mx-auto">
       <div className="bg-pure-white border border-cool-gray rounded-2xl p-1.5 flex gap-1.5 shadow-card-soft">
         <button
           onClick={() => onTabChange('explore')}

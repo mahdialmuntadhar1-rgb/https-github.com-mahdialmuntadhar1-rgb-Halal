@@ -14,14 +14,15 @@ import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
 import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
-import CommunityFeed from './components/CommunityFeed';
+import MarriageCafeFeed from './components/MarriageCafeFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
+import Postbox from './components/Postbox';
 import GenderSelectionScreen from './screens/GenderSelectionScreen';
 import FloatingInstallButton from './components/FloatingInstallButton';
 import { useLocale } from './hooks/useLocale';
 import { apiClient } from './services/apiClient';
-import { Sparkles, Check, Heart, Home, Compass, MessageCircle, User } from 'lucide-react';
+import { Sparkles, Check, Heart, Home, Compass, MessageCircle, User, Inbox } from 'lucide-react';
 import { HeroImage, AppTab } from './types';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [preselectedGender, setPreselectedGender] = useState<'male' | 'female' | null>(null);
 
   // Load Slideshow photos
   const loadHeroImages = async () => {
@@ -74,12 +76,8 @@ export default function App() {
           setMatches(matchesResult.matches);
           setConversations(convs);
 
-          // Route initial loaded user appropriately
-          if (!profile.gender) {
-            setTab('gender-selection');
-          } else if (!profile.age || profile.age === 0 || !profile.education || !profile.profession) {
-            setTab('onboarding');
-          }
+          // Route initial loaded user appropriately - allow full explore access
+          setTab('explore');
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -102,7 +100,22 @@ export default function App() {
     setIsLoadingSession(true);
     localStorage.setItem('halal_token', token);
     try {
-      setUserProfile(profile);
+      let currentProfile = profile;
+      if (preselectedGender) {
+        try {
+          const updated = {
+            ...profile,
+            gender: preselectedGender,
+            photoPrivacy: preselectedGender === 'female' ? ('hidden_by_default' as const) : ('visible' as const)
+          };
+          currentProfile = await apiClient.updateCurrentUserProfile(updated);
+          setPreselectedGender(null); // Clear it
+        } catch (err) {
+          console.error("Failed to update preselected gender", err);
+        }
+      }
+
+      setUserProfile(currentProfile);
       setIsAuthenticated(true);
       const [matchesResult, convs] = await Promise.all([
         apiClient.getMatches(),
@@ -169,11 +182,26 @@ export default function App() {
       setSavedMatchIds(savedIds);
       
       const isSavedNow = savedIds.includes(matchId);
-      triggerToast(
-        isSavedNow
-          ? "⭐ Candidate added to your Saved Portfolios!"
-          : "🗑️ Portfolio bookmark removed."
-      );
+      
+      // Check if this was a mutual like by checking if match status changed to accepted
+      const match = matches.find(m => m.id === matchId);
+      const isMutualMatch = match && match.requestStatus === 'accepted';
+      
+      if (isMutualMatch && isSavedNow) {
+        triggerToast("🎉 It's a Match! You both liked each other. Chat now unlocked!");
+        // Reload matches to get updated status
+        const updatedMatches = await apiClient.getMatches();
+        setMatches(updatedMatches);
+        // Load conversations
+        const convos = await apiClient.getConversations();
+        setConversations(convos);
+      } else {
+        triggerToast(
+          isSavedNow
+            ? "⭐ Candidate added to your Saved Portfolios!"
+            : "🗑️ Portfolio bookmark removed."
+        );
+      }
     } catch (err) {
       console.error("Failed toggling save candidates", err);
     }
@@ -261,6 +289,30 @@ export default function App() {
 
     } catch (err) {
       console.error("Failed to send introduction request", err);
+    }
+  };
+
+  const handleAcceptRequest = async (matchId: string) => {
+    try {
+      await apiClient.acceptIntroductionRequest(matchId);
+      const [updatedMatchesListRes, updatedConvs] = await Promise.all([
+        apiClient.getMatches(),
+        apiClient.getConversations()
+      ]);
+      setMatches(updatedMatchesListRes.matches);
+      setConversations(updatedConvs);
+    } catch (err) {
+      console.error("Failed to accept proposal request", err);
+    }
+  };
+
+  const handleDeclineRequest = async (matchId: string) => {
+    try {
+      await apiClient.declineIntroductionRequest(matchId);
+      const updatedMatchesListRes = await apiClient.getMatches();
+      setMatches(updatedMatchesListRes.matches);
+    } catch (err) {
+      console.error("Failed to decline proposal request", err);
     }
   };
 
@@ -360,10 +412,13 @@ export default function App() {
                 locale={locale}
                 onSelectGender={async (gender) => {
                   if (!isAuthenticated || !userProfile) {
+                    setPreselectedGender(gender);
                     triggerToast(
                       locale === 'en' 
-                        ? `💍 Please authenticate first to seal your profile and select matches!` 
-                        : `💍 يرجى تسجيل الدخول أولاً لتحديد تفضيلاتك وتصفح الملفات!`
+                        ? `💍 Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!` 
+                        : locale === 'ckb'
+                          ? `💍 ڕەگەز دیاریکرا بە ${gender === 'male' ? 'زاوا' : 'بووک'}. تکایە بۆ بەردەوامبوون پڕۆفایلەکەت دروست بکە یان بچۆ ژوورەوە!`
+                          : `💍 تم تحديد الجنس كـ ${gender === 'male' ? 'عريس' : 'عروسة'}. يرجى إنشاء حسابك أو تسجيل الدخول للمتابعة!`
                     );
                     setTab('onboarding');
                     return;
@@ -388,6 +443,7 @@ export default function App() {
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
                 userProfile={userProfile || undefined}
+                preSelectedGender={preselectedGender}
               />
             )}
 
@@ -397,7 +453,7 @@ export default function App() {
                 userProfile={userProfile || {
                   name: '',
                   age: 24,
-                  gender: 'male',
+                  gender: preselectedGender || 'male',
                   country: 'Iraq',
                   governorate: 'Baghdad',
                   religion: 'islam',
@@ -405,7 +461,7 @@ export default function App() {
                   education: "Bachelor Degree",
                   profession: 'Professional',
                   languages: ['Arabic'],
-                  photoPrivacy: 'visible',
+                  photoPrivacy: preselectedGender === 'female' ? 'hidden_by_default' : 'visible',
                   values: ['Family First', 'Mutual Respect']
                 }}
                 onComplete={handleOnboardingComplete}
@@ -424,6 +480,18 @@ export default function App() {
                 onToggleSaveMatch={handleToggleSaveMatch}
                 userProfile={userProfile}
                 onUpdateUserProfile={handleUpdateUserProfile}
+                onNavigateToTab={setTab}
+              />
+            )}
+
+            {currentTab === 'postcards' && userProfile && (
+              <Postbox
+                locale={locale}
+                userProfile={userProfile}
+                matches={matches}
+                onAcceptRequest={handleAcceptRequest}
+                onDeclineRequest={handleDeclineRequest}
+                triggerToast={triggerToast}
                 onNavigateToTab={setTab}
               />
             )}
@@ -474,10 +542,9 @@ export default function App() {
             )}
 
             {currentTab === 'community' && userProfile && (
-              <CommunityFeed
+              <MarriageCafeFeed
                 locale={locale}
-                currentEmail={userProfile.email}
-                currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
+                userProfile={userProfile}
                 triggerToast={triggerToast}
               />
             )}
@@ -502,9 +569,6 @@ export default function App() {
             {/* Branding */}
             <div className="md:col-span-5 space-y-4">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-coral to-accent-pink flex items-center justify-center">
-                  <span className="text-white font-serif font-bold text-sm">Z</span>
-                </div>
                 <span className="text-xl font-serif font-bold tracking-wider text-white font-display">{t.brand}</span>
               </div>
               <p className="text-xs text-[#C3BFB9]/80 max-w-sm font-normal">
@@ -624,6 +688,35 @@ export default function App() {
             )}
           </div>
           <span className="text-[10px] sm:text-xs tracking-tight">{t.chat}</span>
+        </button>
+
+        {/* Postbox Option */}
+        <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              triggerToast(
+                locale === 'en' 
+                  ? '💍 Please log in to view received postcards.' 
+                  : '💍 يرجى تسجيل الدخول أولاً لتصفح الرسائل والبطاقات البريدية.'
+              );
+              setTab('onboarding');
+            } else {
+              setTab('postcards');
+            }
+          }}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            currentTab === 'postcards' 
+              ? 'text-accent-coral scale-105 font-extrabold' 
+              : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
+          }`}
+          id="taskbar-postcards-btn"
+        >
+          <div className="relative">
+            <Inbox className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'postcards' ? 'scale-110' : ''}`} />
+          </div>
+          <span className="text-[10px] sm:text-xs tracking-tight">
+            {locale === 'en' ? 'Postbox' : locale === 'ar' ? 'صندوقي' : 'سندوقی پۆستە'}
+          </span>
         </button>
 
         {/* My Dossier Option */}

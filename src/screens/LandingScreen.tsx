@@ -33,10 +33,11 @@ interface LandingScreenProps {
   isAuthenticated: boolean;
   userProfileName?: string;
   userProfile?: UserProfile;
+  preSelectedGender?: 'male' | 'female' | null;
 }
 
 // 19 Governorates list with English, Arabic, and Kurdish translations
-const GOVERNORATE_OPTIONS = [
+export const GOVERNORATE_OPTIONS = [
   { id: 'Baghdad', en: 'Baghdad (بغداد / بەغداد)', ar: 'بغداد (Baghdad)', ckb: 'بەغداد (Baghdad)' },
   { id: 'Erbil', en: 'Erbil (أربيل / هەولێر)', ar: 'أربيل (Erbil)', ckb: 'هەولێر (Erbil)' },
   { id: 'Sulaymaniyah', en: 'Sulaymaniyah (السليمانية / سلێمانی)', ar: 'السليمانية (Sulaymaniyah)', ckb: 'سلێمانی (Sulaymaniyah)' },
@@ -81,7 +82,7 @@ const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: strin
   Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
 };
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isEn = locale === 'en';
   const isCkb = locale === 'ckb';
@@ -93,7 +94,26 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
   }, [isAuthenticated, userProfile]);
 
   // State management for governorate filtering
-  const [selectedGov, setSelectedGov] = useState<string>('Baghdad');
+  const [selectedGov, setSelectedGov] = useState<string>('all');
+  const [minAge, setMinAge] = useState<number>(18);
+  const [maxAge, setMaxAge] = useState<number>(55);
+  
+  // Set default gender preference based on user profile or default
+  const defaultGenderPref = useMemo(() => {
+    const activeG = userProfile?.gender || preSelectedGender;
+    return activeG ? (activeG === 'male' ? 'female' : 'male') : 'all';
+  }, [userProfile, preSelectedGender]);
+
+  const [genderPref, setGenderPref] = useState<'all' | 'female' | 'male'>(defaultGenderPref);
+
+  // Synchronize default gender preference when profile changes
+  React.useEffect(() => {
+    const activeG = userProfile?.gender || preSelectedGender;
+    if (activeG) {
+      setGenderPref(activeG === 'male' ? 'female' : 'male');
+    }
+  }, [userProfile, preSelectedGender]);
+
   const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
   const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
   const [mainTab, setMainTab] = useState<'explore' | 'cafe'>('explore');
@@ -107,13 +127,32 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   // Filter matches dynamically (we guarantee at least 10 men and 10 women per governorate in INITIAL_MATCHES)
   const filteredMatches = useMemo(() => {
-    let result = INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
+    let result = (selectedGov.toLowerCase() === 'all' || selectedGov.toLowerCase() === 'all iraq')
+      ? INITIAL_MATCHES
+      : INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase());
     
-    if (activeCategory === 'brides') {
-      result = result.filter(m => m.gender === 'female');
-    } else if (activeCategory === 'grooms') {
-      result = result.filter(m => m.gender === 'male');
-    } else if (activeCategory === 'professionals') {
+    // Filter by age range
+    result = result.filter(m => m.age >= minAge && m.age <= maxAge);
+    
+    // Filter by gender preference
+    if (genderPref !== 'all') {
+      result = result.filter(m => m.gender === genderPref);
+    } else {
+      const activeG = userProfile?.gender || preSelectedGender;
+      if (activeG) {
+        const opposite = activeG === 'male' ? 'female' : 'male';
+        result = result.filter(m => m.gender === opposite);
+      } else {
+        // If not logged in, apply category pills (brides / grooms)
+        if (activeCategory === 'brides') {
+          result = result.filter(m => m.gender === 'female');
+        } else if (activeCategory === 'grooms') {
+          result = result.filter(m => m.gender === 'male');
+        }
+      }
+    }
+    
+    if (activeCategory === 'professionals') {
       result = result.filter(m => 
         m.education.toLowerCase().includes('bachelor') || 
         m.education.toLowerCase().includes('doctor') || 
@@ -128,17 +167,13 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     // Return sorted by compatibility score or verification
     const sorted = result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
     
-    if (isProfileIncomplete) {
-      const women = sorted.filter(m => m.gender === 'female').slice(0, 2);
-      const men = sorted.filter(m => m.gender === 'male').slice(0, 2);
-      return [...women, ...men];
-    }
-    
     return sorted;
-  }, [selectedGov, activeCategory, isProfileIncomplete]);
+  }, [selectedGov, activeCategory, userProfile, isProfileIncomplete, minAge, maxAge, genderPref, preSelectedGender]);
 
   // Featured Active Candidates (filtered active profiles who have been online)
   const featuredCandidates = useMemo(() => {
+    const activeG = userProfile?.gender || preSelectedGender;
+    
     // Pick 4 outstanding profiles from diverse regions
     const baghdadGroom = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'male' && m.id === 'm1');
     const erbilGroom = INITIAL_MATCHES.find(m => m.governorate === 'Erbil' && m.gender === 'male' && m.id === 'm2');
@@ -146,13 +181,25 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     const baghdadBride = INITIAL_MATCHES.find(m => m.governorate === 'Baghdad' && m.gender === 'female' && m.id === 'f2');
     
     const candidates: MatchProfile[] = [];
-    if (slemaniBride) candidates.push(slemaniBride);
-    if (erbilGroom) candidates.push(erbilGroom);
-    if (baghdadBride) candidates.push(baghdadBride);
-    if (baghdadGroom) candidates.push(baghdadGroom);
+    
+    if (activeG === 'male') {
+      // User is male, show brides only
+      if (slemaniBride) candidates.push(slemaniBride);
+      if (baghdadBride) candidates.push(baghdadBride);
+    } else if (activeG === 'female') {
+      // User is female, show grooms only
+      if (erbilGroom) candidates.push(erbilGroom);
+      if (baghdadGroom) candidates.push(baghdadGroom);
+    } else {
+      // Not selected yet, show both
+      if (slemaniBride) candidates.push(slemaniBride);
+      if (erbilGroom) candidates.push(erbilGroom);
+      if (baghdadBride) candidates.push(baghdadBride);
+      if (baghdadGroom) candidates.push(baghdadGroom);
+    }
     
     return candidates;
-  }, []);
+  }, [userProfile, preSelectedGender]);
 
   const getGovDisplayName = (govId: string) => {
     const gov = GOVERNORATE_OPTIONS.find(g => g.id === govId);
@@ -196,29 +243,36 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         setTab={setTab}
         isAuthenticated={isAuthenticated}
         userProfileName={userProfileName}
+        selectedGov={selectedGov}
+        setSelectedGov={setSelectedGov}
+        showToast={showToast}
+        userProfile={userProfile}
+        preSelectedGender={preSelectedGender}
       />
 
-      {/* MAIN TABS - Explore Partners / Marriage Cafe */}
-      <MainTabs 
-        activeTab={mainTab}
-        onTabChange={setMainTab}
-        locale={locale}
-      />
+      {/* STICKY MAIN TABS - Explore Partners / Marriage Cafe */}
+      <div className="sticky top-0 z-40 bg-warm-ivory/95 backdrop-blur-md py-4 border-b border-[#E6DCC3]/50">
+        <MainTabs 
+          activeTab={mainTab}
+          onTabChange={setMainTab}
+          locale={locale}
+        />
+      </div>
 
       {/* TAB CONTENT */}
       {mainTab === 'explore' ? (
         <>
-          {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
+      {/* INTERACTIVE GOVERNORATE FILTER MATCH GRID (CHALLENGE REQUIREMENT) */}
       <section className="py-4" id="governorate-matrimonial-portal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-neon-pink/10 text-neon-pink px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse bg-accent-coral/10 text-accent-coral px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
               <MapPin className="w-3.5 h-3.5" />
               <span>{txt("Governorate Matrimonial Portal", "بوابة المحافظات العراقية للزواج الحلال", "دەروازەی هاوسەرگیری پارێزگاکان")}</span>
             </span>
-            <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-deep-charcoal tracking-tight">
+            <h3 className="text-2xl sm:text-3.5xl font-serif font-black text-warm-charcoal tracking-tight">
               {txt("Find Serious Candidates by Governorate", "ابحث عن شريك العمر حسب المحافظة", "هاوبەشی گونجاو بەپێی پارێزگا بدۆزەوە")}
             </h3>
             <p className="text-xs sm:text-sm text-stone-500 font-medium leading-relaxed">
@@ -231,165 +285,163 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
           </div>
 
           {/* PORTAL INTERACTION BOX */}
-          <div className="bg-white/60 backdrop-blur-md border border-cool-gray rounded-[2.5rem] p-6 sm:p-8 shadow-xl space-y-6 text-start">
-
-            {/* Controls row */}
-            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-cool-gray pb-6">
-
-              {/* Dropdown column */}
-              <div className="space-y-2 flex-grow max-w-md">
-                <label className="block text-[11px] font-mono font-extrabold text-neon-purple uppercase tracking-wider">
-                  📍 {txt("Select Governorate", "المحافظة المطلوبة", "پارێزگا دیاری بکە")}
+          <div className="bg-white/60 backdrop-blur-md border border-[#E8DCC4] rounded-[2.5rem] p-6 sm:p-8 shadow-xl space-y-6 text-start">
+            
+            {/* CLEAN FILTER AREA */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-[#FAF8F5] border border-[#E6DCC3] rounded-3xl p-5 sm:p-6 mb-6">
+              
+              {/* 1. Governorate Filter */}
+              <div className="space-y-2 text-start">
+                <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                  📍 {txt("Governorate / Location", "المحافظة أو الموقع", "پارێزگا یان شوێن")}
                 </label>
                 <div className="relative">
                   <select
-                    value={selectedGov}
+                    value={selectedGov || 'all'}
                     onChange={(e) => {
                       setSelectedGov(e.target.value);
-                      showToast(txt(`Displaying candidates from ${e.target.value}`, `عرض المقبلين على الزواج من محافظة ${getGovDisplayName(e.target.value)}`, `پیشاندانی کاندیدەکانی پارێزگای ${getGovDisplayName(e.target.value)}`));
+                      const name = e.target.value === 'all' 
+                        ? txt("All Iraq", "كل العراق", "هەموو عێراق")
+                        : getGovDisplayName(e.target.value);
+                      showToast(txt(`Location updated: ${name}`, `تم تحديد الموقع: ${name}`, `شوێن دیاریکرا: ${name}`));
                     }}
-                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-soft-mist border border-cool-gray focus:border-neon-purple focus:ring-1 focus:ring-neon-purple text-sm font-black text-deep-charcoal outline-none cursor-pointer shadow-xs transition"
+                    className="w-full pl-9 pr-4 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
                   >
+                    <option value="all" className="text-warm-charcoal font-black">
+                      {txt("🌍 All Iraq", "🌍 كل العراق", "🌍 هەموو عێراق")}
+                    </option>
                     {GOVERNORATE_OPTIONS.map((gov) => (
-                      <option key={gov.id} value={gov.id}>
-                        {isEn ? gov.en : isCkb ? gov.ckb : gov.ar}
+                      <option key={gov.id} value={gov.id} className="text-warm-charcoal font-bold">
+                        {locale === 'en' ? gov.en : locale === 'ckb' ? gov.ckb : gov.ar}
                       </option>
                     ))}
                   </select>
-                  <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neon-purple" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-coral" />
                 </div>
               </div>
 
-              {/* Category Pills */}
-              <div className="space-y-2 flex-grow-0">
-                <label className="block text-[11px] font-mono font-extrabold text-neon-purple uppercase tracking-wider">
-                  🎯 {txt("Category alignment", "الفئة والتصنيف", "پۆلێنکردن")}
+              {/* 2. Age Range Filter */}
+              <div className="space-y-2 text-start md:col-span-2">
+                <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider flex items-center justify-between">
+                  <span>👥 {txt("Required Age Range", "فئة العمر المطلوبة", "تەمەنی داواکراو")}</span>
+                  <span className="text-accent-coral font-sans font-extrabold bg-accent-coral/10 px-2 py-0.5 rounded-md text-[10px]">
+                    {minAge} - {maxAge} {txt("years old", "سنة", "ساڵ")}
+                  </span>
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: 'all', labelEn: 'All Matches', labelAr: 'الكل', labelCkb: 'هەموو' },
-                    { id: 'brides', labelEn: 'Brides (Women)', labelAr: 'العرائس 👩‍💼', labelCkb: 'کچان 👩‍💼' },
-                    { id: 'grooms', labelEn: 'Grooms (Men)', labelAr: 'العرسان 👨‍💼', labelCkb: 'کوڕان 👨‍💼' },
-                    { id: 'professionals', labelEn: 'Academic & Career', labelAr: 'أكاديمي ومهني 🎓', labelCkb: 'ئەکادیمی و پیشەیی 🎓' }
-                  ].map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveCategory(cat.id as any)}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-                        activeCategory === cat.id
-                          ? 'bg-gradient-to-r from-neon-pink to-neon-purple border-neon-pink text-white shadow-md shadow-neon-pink/20'
-                          : 'bg-soft-mist border-cool-gray hover:bg-soft-lavender text-dark-gray'
-                      }`}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="relative">
+                    <select
+                      value={minAge}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val <= maxAge) {
+                          setMinAge(val);
+                        } else {
+                          setMinAge(val);
+                          setMaxAge(Math.min(80, val + 5));
+                        }
+                      }}
+                      className="w-full pl-8 pr-3 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
                     >
-                      {txt(cat.labelEn, cat.labelAr, cat.labelCkb)}
-                    </button>
-                  ))}
+                      {Array.from({ length: 53 }, (_, i) => i + 18).map((age) => (
+                        <option key={`min-${age}`} value={age} className="font-bold">
+                          {txt(`From ${age}`, `من عمر ${age}`, `لە تەمەنی ${age}`)}
+                        </option>
+                      ))}
+                    </select>
+                    <User className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={maxAge}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val >= minAge) {
+                          setMaxAge(val);
+                        } else {
+                          setMaxAge(val);
+                          setMinAge(Math.max(18, val - 5));
+                        }
+                      }}
+                      className="w-full pl-8 pr-3 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
+                    >
+                      {Array.from({ length: 53 }, (_, i) => i + 18).map((age) => (
+                        <option key={`max-${age}`} value={age} className="font-bold">
+                          {txt(`To ${age}`, `إلى عمر ${age}`, `تا تەمەنی ${age}`)}
+                        </option>
+                      ))}
+                    </select>
+                    <User className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Gender / Match Preference Column */}
+              <div className="space-y-2 text-start">
+                <label className="block text-xs font-mono font-extrabold text-[#9C7F59] uppercase tracking-wider">
+                  💖 {txt("I am looking for", "أنا أبحث عن", "من دەگەڕێم بەدوای")}
+                </label>
+                <div className="relative">
+                  <select
+                    value={genderPref}
+                    onChange={(e) => {
+                      setGenderPref(e.target.value as any);
+                    }}
+                    className="w-full pl-9 pr-4 py-3 bg-white text-warm-charcoal border border-[#E6DCC3] rounded-xl text-xs sm:text-sm font-black outline-none cursor-pointer hover:border-accent-coral/30 transition shadow-inner"
+                  >
+                    <option value="all" className="font-bold">{txt("All Candidates", "الكل (عرسان وعرائس)", "هەموو کاندیدەکان")}</option>
+                    <option value="female" className="font-bold">👰 {txt("Bride (Woman)", "زوجة صالحة (عروس)", "بووک (کچ)")}</option>
+                    <option value="male" className="font-bold">🤵 {txt("Groom (Man)", "زوج صالح (عريس)", "زاوا (کوڕ)")}</option>
+                  </select>
+                  <Heart className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent-pink" />
                 </div>
               </div>
 
             </div>
 
-            {/* GOVERNORATE STORYLINE / STORIES (SOCIAL MEDIA SQUARE STORIES) */}
-            <div className="border-t border-b border-stone-100 py-6 space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent-coral/10 text-accent-coral animate-pulse shrink-0">
-                    📸
-                  </span>
-                  <div>
-                    <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal">
-                      {txt("Live Intention Stories", "قصص حية من المحافظة", "چیرۆکە زیندووەکانی پارێزگا")}
-                    </h5>
-                    <p className="text-[10px] text-stone-500 font-semibold">
-                      {txt("Click square cards to view real marital life goals", "انقر لمشاهدة أهداف الحياة ونوايا الزواج الصادقة", "بۆ بینینی مەبەستەکان کلیک لەسەر کارتەکان بکە")}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* System-selected Landmark badge */}
-                <div className="flex items-center gap-2 bg-soft-mist border border-cool-gray/80 px-3 py-1.5 rounded-xl shadow-xs self-stretch sm:self-auto justify-between sm:justify-start">
-                  <div className="flex items-center gap-1.5 text-start">
-                    <span className="text-sm shrink-0">{GOVERNORATE_LANDMARKS[selectedGov]?.icon || '📍'}</span>
-                    <div>
-                      <span className="block text-[8px] font-mono font-extrabold text-neon-purple uppercase tracking-wider leading-none mb-0.5">
-                        📍 {txt("System Location Spotlight", "معلم المحافظة المختار", "شوێنەواری پارێزگا")}
-                      </span>
-                      <span className="text-[10.5px] font-black text-electric-violet leading-none">
-                        {GOVERNORATE_LANDMARKS[selectedGov]?.[locale] || GOVERNORATE_LANDMARKS[selectedGov]?.ar || GOVERNORATE_LANDMARKS[selectedGov]?.en}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {/* BIG SEARCH EXPLORE ACTION ROW */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-stone-50 to-[#FCFBF9] border border-stone-150 rounded-2xl mb-6">
+              <div className="text-start space-y-1">
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-full uppercase">
+                  ⚡ {txt("Instant Live Filtering", "تصفية حية وفورية للملفات", "پاڵاوتنی ڕاستەوخۆ")}
+                </span>
+                <p className="text-xs text-stone-600 font-bold leading-snug">
+                  {txt(
+                    "Displaying real matches below. Click search button below to unlock deep values inside full search page.",
+                    "نعرض لك الملفات المتوافقة مع خياراتك بالأسفل مباشرة. اضغط للبحث الكامل لاستكشاف مرشحات إضافية.",
+                    "هاوتا ڕاستەقینەکان لە خوارەوە پیشان دەدرێن. بۆ بینینی هەموو فلتەرەکان کلیک بکە."
+                  )}
+                </p>
               </div>
-
-              {/* Horizontal scrolling square stories */}
-              {INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase()).length > 0 ? (
-                <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent snap-x">
-                  {INITIAL_MATCHES.filter(m => m.governorate.toLowerCase() === selectedGov.toLowerCase()).map((m) => {
-                    const isFemale = m.gender === 'female';
-
-                    // Get a custom quick intention summary based on their database text
-                    const briefQuote = m.intention ? (m.intention.length > 55 ? m.intention.substring(0, 52) + '...' : m.intention) : txt("Seeking serious marriage built on trust.", "البحث عن زواج مستقر مبني على التفاهم والمحبة.", "هیواداری دروستکردنی خێزانێکی بەختەوەر.");
-
-                    return (
-                      <div
-                        key={`story-${m.id}`}
-                        onClick={() => setSelectedStory(m)}
-                        className="flex-shrink-0 w-32 h-44 bg-pure-white border border-cool-gray hover:border-neon-pink rounded-2xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md hover:shadow-neon-pink/10 transition-all duration-300 transform hover:-translate-y-0.5 snap-start text-start relative overflow-hidden group select-none"
-                      >
-                        {/* Story progress indicator bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-neon-pink to-neon-purple opacity-90 group-hover:h-1.5 transition-all" />
-
-                        {/* Profile ring & Age */}
-                        <div className="flex items-center justify-between mt-1">
-                          <div className="relative">
-                            <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-neon-pink via-neon-purple to-electric-violet">
-                              <div className="w-full h-full rounded-full overflow-hidden border border-white bg-stone-100 flex items-center justify-center">
-                                {isFemale ? (
-                                  <div className="w-full h-full flex items-center justify-center bg-light-pink">
-                                    <span className="text-neon-pink font-serif font-black text-xs">{m.name.charAt(0)}</span>
-                                  </div>
-                                ) : (
-                                  <img
-                                    src={m.avatarUrl}
-                                    alt={m.name}
-                                    className="w-full h-full object-cover grayscale-[10%]"
-                                    referrerPolicy="no-referrer"
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
-                          </div>
-
-                          <span className="text-[9px] font-mono font-bold text-medium-gray bg-soft-mist px-1.5 py-0.5 rounded-md">
-                            {m.age}
-                          </span>
-                        </div>
-
-                        {/* Content excerpt & Name */}
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-black text-deep-charcoal truncate">
-                            {m.name}
-                          </p>
-                          <p className="text-[9px] text-dark-gray font-semibold leading-tight line-clamp-3 group-hover:text-neon-pink transition-colors">
-                            "{briefQuote}"
-                          </p>
-                        </div>
-
-                        {/* Small badge representing local identity */}
-                        <span className="text-[8.5px] font-black text-neon-pink bg-neon-pink/5 px-2 py-0.5 rounded-md inline-block truncate max-w-full">
-                          📍 {isEn ? selectedGov : isCkb ? getGovDisplayName(selectedGov) : getGovDisplayName(selectedGov)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="py-6 text-center text-xs font-semibold text-medium-gray bg-soft-mist rounded-2xl border border-dashed border-cool-gray/80">
-                  {txt("No stories in this governorate yet.", "لا توجد قصص في هذه المحافظة حالياً.", "هیچ چیرۆکێک لەم پارێزگایەدا نییە تا ئێستا.")}
-                </div>
-              )}
+              
+              <button
+                onClick={() => {
+                  // Save filters into localStorage so they pre-populate the MatchExplorerScreen perfectly
+                  localStorage.setItem('home_filter_governorate', selectedGov);
+                  localStorage.setItem('home_filter_minAge', String(minAge));
+                  localStorage.setItem('home_filter_maxAge', String(maxAge));
+                  localStorage.setItem('home_filter_gender', genderPref);
+                  
+                  // Notify and navigate
+                  showToast(txt(
+                    "🔍 Opening the advanced matchmaking pool with your filters...",
+                    "🔍 جاري فتح بوابة البحث المبارك بالمرشحات التي اخترتها...",
+                    "🔍 کردنەوەی دەروازەی هاوسەرگیری بە فلتەرەکانتەوە..."
+                  ));
+                  
+                  setTimeout(() => {
+                    onExploreMatches();
+                  }, 600);
+                }}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#2F5866] hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-lg shadow-[#40798C]/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                id="homepage-main-search-explore-btn"
+              >
+                <Compass className="w-5 h-5 text-white animate-spin-slow" />
+                <span>
+                  {txt("Search & Explore Matches", "البحث واستكشاف العروض", "گەڕان و بینینی کاندیدەکان")}
+                </span>
+                <ArrowRight className="w-4 h-4 text-white transform rtl:rotate-180" />
+              </button>
             </div>
 
             {/* PROFILE INCOMPLETE ALERT BANNER */}
@@ -402,14 +454,14 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                       {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
                     </h4>
                     <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
-                      {txt("Limited Access", "وصول محدود", "دەستپێگەیشتنی سنووردار")}
+                      {txt("Onboarding Pending", "الملف الشخصي معلّق", "پڕۆفایل چاوەڕوانکراوە")}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
                     {txt(
-                      "To ensure a respectful, serious, and Shari'a-compliant matchmaking process, you are currently shown exactly two women and two men. Please complete your marriage profile parameters to unlock full access, custom match lists, and private filters.",
-                      "لضمان تعارف وقور وجاد متوافق مع الشريعة الغراء، يظهر لك حالياً امرأتان ورجلان فقط. يرجى إكمال بيانات ملفك الشخصي لتتمكن من استكشاف كافة الشركاء المناسبين وتفعيل مرشحات البحث المتقدمة والخاصة.",
-                      "بۆ دڵنیابوون لەوەی کە پڕۆسەی هاوسەرگیری بە شێوەیەکی ڕێزدار و جدی ئەنجام دەدرێت، لە ئێستادا تەنها دوو ژن و دوو پیاو پیشان دەدرێن. تکایە پڕۆفایلی خۆت تەواو بکە بۆ بەدەستهێنانی دەستپێگەیشتنی تەواو."
+                      "You can search and explore matches freely. However, to express serious marital interest, send postcards, or build custom serious connections, you must complete your full marriage profile form.",
+                      "يمكنك البحث واستكشاف الشركاء بحرية كاملة، ولكن لإرسال طلبات التعارف الجادة والبطاقات البريدية وبدء تواصل وقور، يرجى ملء استمارة ملفك الشخصي بالكامل.",
+                      "دەتوانیت کاندیدەکان بە سەربەستی ببینی و بگەڕێیت، بەڵام بۆ دەربڕینی نیەتی جدی هاوسەرگیری یان ناردنی نامەی پێشەکی، دەبێت پڕۆفایلی خۆت بە تەواوی پڕبکەیتەوە."
                     )}
                   </p>
                 </div>
@@ -418,7 +470,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>{txt("Complete Profile Now", "أكمل ملفك الشخصي الآن", "ئێستا پڕۆفایلەکەت تەواو بکە")}</span>
+                  <span>{txt("Complete Form Now", "أكمل الاستمارة الآن", "ئێستا پڕۆفایلەکە تەواو بکە")}</span>
                 </button>
               </div>
             )}
@@ -433,11 +485,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     <div
                       key={candidate.id}
                       onClick={() => handleProfileClick(candidate)}
-                      className="group cursor-pointer bg-pure-white hover:bg-warm-white border border-cool-gray hover:border-neon-pink/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:shadow-neon-pink/10 hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
+                      className="group cursor-pointer bg-[#FCFBF9] hover:bg-white border border-[#E6DCC3]/80 hover:border-accent-coral/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
                     >
                       <div className="space-y-3">
                         {/* Avatar photo with forced privacy constraint */}
-                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-soft-mist flex items-center justify-center">
+                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
                           {isFemale ? (
                             <>
                               {/* FROSTED BLUR FEMALE PORTRAIT - strictly private constraint */}
@@ -448,10 +500,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                                 referrerPolicy="no-referrer"
                               />
                               <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[6px] flex flex-col items-center justify-center text-center p-3">
-                                <div className="w-12 h-12 rounded-full bg-light-pink border border-neon-pink/30 shadow-md flex items-center justify-center text-neon-pink font-serif font-black text-sm">
+                                <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-accent-pink/30 shadow-md flex items-center justify-center text-accent-pink font-serif font-black text-sm">
                                   {candidate.name.charAt(0)}
                                 </div>
-                                <span className="mt-2.5 text-[9px] font-bold text-deep-charcoal bg-light-pink/90 border border-cool-gray px-2 py-1 rounded-full shadow-inner tracking-tight">
+                                <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
                                   🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
                                 </span>
                               </div>
@@ -471,7 +523,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                               </span>
                             </>
                           )}
-
+                          
                           {/* Top floating badges */}
                           <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
                             {candidate.verified && (
@@ -485,33 +537,33 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                         {/* Name & Basic details */}
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-serif font-black text-sm sm:text-base text-deep-charcoal group-hover:text-neon-purple transition-colors flex items-center gap-1">
+                            <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal group-hover:text-[#40798C] transition-colors flex items-center gap-1">
                               <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
-                              <span className="text-xs text-dark-gray font-medium font-mono">({candidate.age})</span>
+                              <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
                             </h4>
-                            <span className="text-[10px] font-mono font-black text-electric-violet bg-electric-violet/10 px-2 py-0.5 rounded-md">
+                            <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
                               💖 {candidate.compatibilityScore}%
                             </span>
                           </div>
-
+                          
                           {/* Profession & Education */}
-                          <p className="text-[10.5px] font-extrabold text-dark-gray flex items-center gap-1 truncate">
-                            <GraduationCap className="w-3.5 h-3.5 text-electric-violet shrink-0" />
+                          <p className="text-[10.5px] font-extrabold text-stone-500 flex items-center gap-1 truncate">
+                            <GraduationCap className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
                             <span className="truncate">{candidate.profession}</span>
                           </p>
-                          <p className="text-[9.5px] text-medium-gray font-semibold truncate">
+                          <p className="text-[9.5px] text-stone-400 font-semibold truncate">
                             {candidate.education}
                           </p>
                         </div>
                       </div>
 
                       {/* Card Footer tags */}
-                      <div className="pt-2 border-t border-cool-gray flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-medium-gray font-mono tracking-wider">
+                      <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+                        <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
                           📍 {txt(candidate.city, candidate.city, candidate.city)}
                         </span>
-
-                        <span className="text-[9.5px] font-bold text-electric-violet group-hover:text-neon-pink flex items-center gap-0.5 font-sans">
+                        
+                        <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
                           <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
                           <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
                         </span>
@@ -522,16 +574,16 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 })}
               </div>
             ) : (
-              <div className="py-12 text-center space-y-3 bg-soft-mist rounded-3xl border border-dashed border-cool-gray/80">
-                <Users className="w-10 h-10 text-medium-gray mx-auto" />
-                <p className="text-xs font-bold text-medium-gray">
+              <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
+                <Users className="w-10 h-10 text-stone-300 mx-auto" />
+                <p className="text-xs font-bold text-stone-400">
                   {txt("No serious candidates match these categories in this governorate yet.", "لا يوجد عرسان أو عرائس يطابقون هذا التصنيف في هذه المحافظة حالياً.", "کاندیدێک بۆ ئەم جۆرە پۆلێنکردنە لەم پارێزگایەدا نەدۆزرایەوە.")}
                 </p>
               </div>
             )}
 
             {/* CTAs banner to enter search */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-cool-gray text-xs text-dark-gray font-semibold">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-100 text-xs text-stone-500 font-semibold">
               <p className="text-start leading-snug">
                 💍 {txt(
                   "To protect photos and prevent casual swipe culture, only mutual, serious matches with completed profiles can initiate chaperoned discussion.",
@@ -541,7 +593,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               </p>
               <button
                 onClick={onExploreMatches}
-                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-neon-pink/10 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 bg-[#40798C] hover:bg-[#316070] text-white font-black text-xs rounded-xl shrink-0 transition active:scale-95 shadow-md shadow-[#40798C]/10 cursor-pointer"
               >
                 {txt("Explore Compatibility Pool", "استكشاف مصفوفة التوافق الكاملة", "گەڕان بەدوای هاوشێوەکاندا")}
               </button>
@@ -551,27 +603,18 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
-        </>
-      ) : (
-        <MarriageCafe 
-          locale={locale} 
-          triggerToast={showToast} 
-          onNavigateToTab={setTab}
-        />
-      )}
 
-      {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) - Only show in explore tab */}
-      {mainTab === 'explore' && (
-      <section className="bg-ultra-light-lavender border border-cool-gray rounded-[2.5rem] py-10" id="featured-active-candidates">
+      {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) */}
+      <section className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2.5rem] py-10" id="featured-active-candidates">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-start">
             <div>
-              <h4 className="text-base sm:text-xl font-serif font-black text-deep-charcoal flex items-center gap-1.5">
-                <UserCheck className="w-5 h-5 text-neon-pink" />
+              <h4 className="text-base sm:text-xl font-serif font-black text-warm-charcoal flex items-center gap-1.5">
+                <UserCheck className="w-5 h-5 text-accent-coral" />
                 <span>{txt("Featured Active Candidates", "أعضاء متميزون ونشطون اليوم", "کاندیدە چالاکە دیارەکان")}</span>
               </h4>
-              <p className="text-[11px] sm:text-xs text-dark-gray font-medium leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-stone-500 font-medium leading-relaxed">
                 {txt(
                   "These active members are looking for lifelong marriage right now. Women's photos are automatically blurred, and men are authentic Iraqi applicants.",
                   "هؤلاء الأعضاء متصلون ويبحثون بنية جادة عن شريك الحياة حالياً. صور النساء محمية بالتمويه تلقائياً، والرجال متقدمون عراقيون أصيلون.",
@@ -579,7 +622,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 )}
               </p>
             </div>
-            <span className="text-[10px] bg-neon-pink/10 text-neon-pink px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
+            <span className="text-[10px] bg-accent-coral/10 text-accent-coral px-3 py-1 rounded-full font-mono font-extrabold uppercase shrink-0">
               ⚡ {txt("Active Today", "نشطون اليوم", "ئەمڕۆ چالاک بوون")}
             </span>
           </div>
@@ -589,52 +632,52 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               const isFemale = candidate.gender === 'female';
 
               return (
-                <div
+                <div 
                   key={candidate.id}
                   onClick={() => handleProfileClick(candidate)}
-                  className="bg-pure-white border border-cool-gray rounded-2xl p-4 flex flex-col items-center text-center space-y-3 cursor-pointer hover:shadow-lg hover:shadow-neon-pink/10 transition duration-200 relative group"
+                  className="bg-white border border-stone-150 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 cursor-pointer hover:shadow-lg transition duration-200 relative group"
                 >
                   {/* Photo area */}
-                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-soft-mist shadow-md">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-stone-100 shadow-md">
                     {isFemale ? (
                       <>
-                        <img
-                          src={candidate.avatarUrl}
-                          alt={candidate.name}
-                          className="w-full h-full object-cover blur-md scale-110 select-none pointer-events-none"
+                        <img 
+                          src={candidate.avatarUrl} 
+                          alt={candidate.name} 
+                          className="w-full h-full object-cover blur-md scale-110 select-none pointer-events-none" 
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[4px] flex items-center justify-center">
-                          <span className="text-neon-pink font-serif font-black text-xs">{candidate.name.charAt(0)}</span>
+                          <span className="text-accent-pink font-serif font-black text-xs">{candidate.name.charAt(0)}</span>
                         </div>
                       </>
                     ) : (
-                      <img
-                        src={candidate.avatarUrl}
-                        alt={candidate.name}
-                        className="w-full h-full object-cover grayscale-[10%]"
+                      <img 
+                        src={candidate.avatarUrl} 
+                        alt={candidate.name} 
+                        className="w-full h-full object-cover grayscale-[10%]" 
                         referrerPolicy="no-referrer"
                       />
                     )}
-
+                    
                     {/* Live status dot */}
                     <span className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" title="Online now" />
                   </div>
 
                   <div className="space-y-1">
-                    <h5 className="font-serif font-black text-xs sm:text-sm text-deep-charcoal group-hover:text-neon-pink transition-colors flex items-center justify-center gap-1">
+                    <h5 className="font-serif font-black text-xs sm:text-sm text-warm-charcoal group-hover:text-accent-coral transition-colors flex items-center justify-center gap-1">
                       <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
-                      <span className="text-[10px] text-medium-gray">({candidate.age})</span>
+                      <span className="text-[10px] text-stone-400">({candidate.age})</span>
                     </h5>
-                    <p className="text-[9px] font-mono text-dark-gray bg-soft-mist border border-cool-gray/50 px-2 py-0.5 rounded-md inline-block">
+                    <p className="text-[9px] font-mono text-stone-500 bg-[#FAF7F2] border border-[#E8DCC4]/50 px-2 py-0.5 rounded-md inline-block">
                       📍 {txt(candidate.governorate, candidate.governorateAr, candidate.governorateCkb)}
                     </p>
-                    <p className="text-[10px] font-extrabold text-medium-gray truncate max-w-[140px] mx-auto">
+                    <p className="text-[10px] font-extrabold text-stone-400 truncate max-w-[140px] mx-auto">
                       {candidate.profession}
                     </p>
                   </div>
 
-                  <span className="text-[8.5px] uppercase font-mono font-extrabold text-electric-violet bg-electric-violet/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[8.5px] uppercase font-mono font-extrabold text-[#40798C] bg-[#40798C]/10 px-2 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
                     ✨ {txt("Compatible", "متوافق", "هاوتا")}
                   </span>
                 </div>
@@ -644,8 +687,13 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
-      )}
 
+      {/* MARRIAGE CAFE & DAILY ENGAGEMENT POLL */}
+      <MarriageCafe 
+        locale={locale} 
+        triggerToast={showToast} 
+        onNavigateToTab={setTab}
+      />
 
       {/* HOW IT WORKS */}
       <HowItWorks locale={locale} />
@@ -705,6 +753,10 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
           </div>
         </div>
       </section>
+        </>
+      ) : (
+        <MarriageCafe locale={locale} />
+      )}
 
       {/* SOCIAL MEDIA STYLE SQUARE STORY VIEWER MODAL */}
       {selectedStory && (
