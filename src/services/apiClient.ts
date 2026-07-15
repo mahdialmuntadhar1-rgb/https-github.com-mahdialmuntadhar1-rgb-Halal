@@ -1,5 +1,6 @@
 import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
+import * as realApiClient from '../api/realApiClient';
 
 let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 if (API_BASE.endsWith('/')) {
@@ -137,13 +138,9 @@ export const apiClient = {
       return { token: 'mock_jwt_token_for_demo', user };
     }
 
-    // Real API call
-    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
-    });
-
+    // Real API call using realApiClient
+    const data = await realApiClient.login({ email: identifier, password });
+    
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
@@ -184,11 +181,15 @@ export const apiClient = {
       return { token: 'mock_jwt_token_for_demo', user };
     }
 
-    // Real API call
-    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName, governorate, district, email, phone, password, age }),
+    // Real API call using realApiClient
+    const data = await realApiClient.register({
+      name: fullName,
+      email,
+      password,
+      gender: 'male', // Will be updated later
+      age: age || 24,
+      country: 'Iraq',
+      governorate
     });
 
     if (data.token) {
@@ -198,6 +199,13 @@ export const apiClient = {
   },
 
   async logout(): Promise<void> {
+    if (!getIsDemoMode()) {
+      try {
+        await realApiClient.logout();
+      } catch (err) {
+        console.error('Logout API call failed:', err);
+      }
+    }
     localStorage.removeItem('halal_token');
     localStorage.removeItem('halal_force_real');
   },
@@ -330,36 +338,23 @@ export const apiClient = {
       };
     }
 
-    // Real API call
-    const params = new URLSearchParams();
-    params.append('page', page.toString());
-    params.append('limit', limit.toString());
-
+    // Real API call using realApiClient
+    const params: any = {
+      page,
+      limit
+    };
+    
     if (filters) {
-      Object.entries(filters).forEach(([key, val]) => {
-        if (val !== undefined && val !== null && val !== '') {
-          params.append(key, val.toString());
-        }
-      });
+      if (filters.gender) params.gender = filters.gender;
+      if (filters.governorate) params.governorate = filters.governorate;
     }
 
-    const data = await safeFetch<any>(`${API_BASE}/matches?${params.toString()}`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-
-    if (Array.isArray(data)) {
-      return {
-        matches: data,
-        hasMore: data.length >= limit
-      };
-    } else if (data && Array.isArray(data.matches)) {
-      return {
-        matches: data.matches,
-        hasMore: data.hasMore !== undefined ? !!data.hasMore : data.matches.length >= limit
-      };
-    }
-    return { matches: [], hasMore: false };
+    const data = await realApiClient.getMembers(params);
+    
+    return {
+      matches: data.members,
+      hasMore: data.members.length >= limit
+    };
   },
 
   async toggleSaveProfile(matchId: string): Promise<UserProfile> {
@@ -367,10 +362,18 @@ export const apiClient = {
       return mockApi.toggleSaveProfile(matchId);
     }
 
-    return safeFetch<UserProfile>(`${API_BASE}/matches/${matchId}/save`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
+    // Real API call using realApiClient
+    const result = await realApiClient.toggleLike(matchId);
+    
+    // If match was created, reload user profile to get updated state
+    if (result.matchCreated) {
+      const currentUser = await realApiClient.getCurrentUser();
+      return currentUser as UserProfile;
+    }
+    
+    // Return current user profile
+    const currentUser = await realApiClient.getCurrentUser();
+    return currentUser as UserProfile;
   },
 
   async sendIntroductionRequest(matchId: string): Promise<{ success: boolean; request: any }> {
@@ -415,10 +418,16 @@ export const apiClient = {
       return mockApi.getConversations();
     }
 
-    return safeFetch<Conversation[]>(`${API_BASE}/conversations`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
+    // Real API call - get matches first, then convert to conversations format
+    const matchesData = await realApiClient.getMatches();
+    
+    // Convert matches to conversations format
+    const conversations: Conversation[] = matchesData.matches.map((match: any) => ({
+      matchId: match.id,
+      messages: [] // Will be loaded separately when needed
+    }));
+    
+    return conversations;
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -426,11 +435,16 @@ export const apiClient = {
       return mockApi.sendMessage(matchId, text, sender);
     }
 
-    return safeFetch<Message>(`${API_BASE}/conversations/${matchId}/messages`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ text, sender }),
-    });
+    // Real API call using realApiClient
+    const result = await realApiClient.sendMessage({ matchId, text });
+    
+    return {
+      id: result.messageId,
+      matchId,
+      senderId: 'user',
+      text,
+      timestamp: new Date().toISOString()
+    } as Message;
   },
 
   /**
