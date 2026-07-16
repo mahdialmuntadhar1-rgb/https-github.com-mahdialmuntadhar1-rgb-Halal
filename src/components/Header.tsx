@@ -89,9 +89,9 @@ export default function Header({
               <span>{t.onboarding}</span>
             </button>
             <button
-              onClick={() => setTab('explore')}
+              onClick={() => setTab('landing')}
               className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
-                currentTab === 'explore'
+                currentTab === 'landing'
                   ? 'bg-white/60 text-warm-charcoal shadow-sm border border-white/20'
                   : 'text-[#4A443F]/80 hover:text-warm-charcoal hover:bg-white/40'
               }`}
@@ -231,7 +231,7 @@ export default function Header({
                 )}
 
                 <button
-                  onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
+                  onClick={() => setTab(currentTab === 'onboarding' ? 'landing' : 'onboarding')}
                   className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#9333EA]/10 text-accent-coral hover:bg-[#9333EA]/20 flex items-center gap-1"
                 >
                   <User className="w-3.5 h-3.5 text-[#9333EA]" />

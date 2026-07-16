@@ -35,6 +35,9 @@ interface LandingScreenProps {
   userProfileName?: string;
   userProfile?: UserProfile;
   preSelectedGender?: 'male' | 'female' | null;
+  onSendRequest?: (matchId: string) => void;
+  onToggleSaveMatch?: (matchId: string) => void;
+  savedMatchIds?: string[];
 }
 
 // 19 Governorates list with English, Arabic, and Kurdish translations
@@ -83,7 +86,7 @@ const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: strin
   Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
 };
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, onViewMemberProfile, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, onViewMemberProfile, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender, onSendRequest, onToggleSaveMatch, savedMatchIds = [] }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isEn = locale === 'en';
   const isCkb = locale === 'ckb';
@@ -113,12 +116,36 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     if (activeG) {
       setGenderPref(activeG === 'male' ? 'female' : 'male');
     }
+
+    // Restore saved state from localStorage
+    const savedGov = localStorage.getItem('landing_filter_governorate');
+    const savedMinAge = localStorage.getItem('landing_filter_minAge');
+    const savedMaxAge = localStorage.getItem('landing_filter_maxAge');
+    const savedGender = localStorage.getItem('landing_filter_gender');
+    const savedVisibleCount = localStorage.getItem('landing_visible_count');
+
+    if (savedGov) setSelectedGov(savedGov);
+    if (savedMinAge) setMinAge(Number(savedMinAge));
+    if (savedMaxAge) setMaxAge(Number(savedMaxAge));
+    if (savedGender) setGenderPref(savedGender as any);
+    if (savedVisibleCount) setVisibleCount(Number(savedVisibleCount));
   }, [userProfile, preSelectedGender]);
+
+  // Save state to localStorage when filters change
+  React.useEffect(() => {
+    localStorage.setItem('landing_filter_governorate', selectedGov);
+    localStorage.setItem('landing_filter_minAge', String(minAge));
+    localStorage.setItem('landing_filter_maxAge', String(maxAge));
+    localStorage.setItem('landing_filter_gender', genderPref);
+    localStorage.setItem('landing_visible_count', String(visibleCount));
+  }, [selectedGov, minAge, maxAge, genderPref, visibleCount]);
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
   const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
   const [mainTab, setMainTab] = useState<'explore' | 'cafe'>('explore');
-  
+  const [selectedProfile, setSelectedProfile] = useState<MatchProfile | null>(null);
+  const [visibleCount, setVisibleCount] = useState(8);
+
   // Local toast notification system
   const [localToast, setLocalToast] = useState<string | null>(null);
   const showToast = (msg: string) => {
@@ -221,7 +248,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       ));
       setTab('onboarding');
     } else {
-      onViewMemberProfile(candidate.id);
+      setSelectedProfile(candidate);
     }
   };
 
@@ -479,7 +506,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
             {/* RESULTS MATCHES GRID */}
             {filteredMatches.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {filteredMatches.slice(0, 8).map((candidate) => {
+                {filteredMatches.slice(0, visibleCount).map((candidate) => {
                   const isFemale = candidate.gender === 'female';
 
                   return (
@@ -574,6 +601,22 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                   );
                 })}
               </div>
+
+              {/* Load More Button for Pagination */}
+              {visibleCount < filteredMatches.length && (
+                <div className="flex justify-center pt-6">
+                  <button
+                    onClick={() => setVisibleCount(prev => Math.min(prev + 8, filteredMatches.length))}
+                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#2F5866] hover:opacity-95 text-white font-black text-sm shadow-lg shadow-[#40798C]/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Compass className="w-4 h-4" />
+                    <span>
+                      {txt("Load More Matches", "تحميل المزيد من العروض", "بارکردنی زیاتر")}
+                    </span>
+                    <span className="text-xs opacity-75">({visibleCount}/{filteredMatches.length})</span>
+                  </button>
+                </div>
+              )}
             ) : (
               <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
                 <Users className="w-10 h-10 text-stone-300 mx-auto" />
@@ -900,6 +943,106 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Profile Detail Modal */}
+      {selectedProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-serif font-bold text-warm-charcoal">
+                  {selectedProfile.name}, {selectedProfile.age}
+                </h3>
+                <button
+                  onClick={() => setSelectedProfile(null)}
+                  className="text-stone-400 hover:text-stone-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Photo */}
+                <div className="aspect-square bg-stone-100 rounded-xl overflow-hidden">
+                  {selectedProfile.gender === 'female' ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#ECE8E1] to-[#D5CFB9]">
+                      <div className="text-center">
+                        <div className="w-20 h-20 rounded-full bg-white border-2 border-accent-pink/30 flex items-center justify-center text-accent-pink font-serif font-bold text-2xl mx-auto mb-2">
+                          {selectedProfile.name.charAt(0)}
+                        </div>
+                        <span className="text-xs font-bold text-stone-600">
+                          🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={selectedProfile.avatarUrl}
+                      alt={selectedProfile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+
+                {/* Basic Info */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-accent-coral" />
+                    <span className="font-medium">{selectedProfile.governorate}, {selectedProfile.country}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <GraduationCap className="w-4 h-4 text-[#40798C]" />
+                    <span className="font-medium">{selectedProfile.education}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="w-4 h-4 text-stone-500" />
+                    <span className="font-medium">{selectedProfile.profession}</span>
+                  </div>
+                </div>
+
+                {/* Compatibility Score */}
+                <div className="bg-[#40798C]/10 rounded-xl p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#40798C]">
+                      {txt("Compatibility Score", "نسبة التوافق", "ڕێژەی گونجاو")}
+                    </span>
+                    <span className="text-lg font-black text-accent-coral">
+                      {selectedProfile.compatibilityScore}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (onSendRequest) {
+                        onSendRequest(selectedProfile.id);
+                      }
+                      showToast(txt(
+                        "💍 Interest expressed! If mutual, you'll be matched.",
+                        "💍 تم التعبير عن الاهتمام! في حالة التبادل، سيتم التوافق.",
+                        "💍 ئارەزوو تۆمارکرا! ئەگەر دووجار بێت، دەگونجێن."
+                      ));
+                      setSelectedProfile(null);
+                    }}
+                    className="flex-1 py-3 bg-gradient-to-r from-accent-coral to-accent-pink text-white rounded-xl font-bold text-sm hover:opacity-95 transition"
+                  >
+                    <Heart className="w-4 h-4 inline mr-1" />
+                    {txt("Express Interest", "أعرب عن الاهتمام", "ئارەزوو پیشان بدە")}
+                  </button>
+                  <button
+                    onClick={() => setSelectedProfile(null)}
+                    className="flex-1 py-3 border border-stone-200 rounded-xl font-bold text-sm text-stone-600 hover:bg-stone-50 transition"
+                  >
+                    {txt("Close", "إغلاق", "داخستن")}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

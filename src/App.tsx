@@ -77,7 +77,7 @@ export default function App() {
           setMatches(matchesResult.matches);
           setConversations(convs);
 
-          // Route initial loaded user appropriately - allow full explore access
+          // Route initial loaded user to homepage discovery
           setTab('landing');
         } else {
           setIsAuthenticated(false);
@@ -126,7 +126,7 @@ export default function App() {
       setConversations(convs);
       
       // Route user correctly: registration and login are separate from onboarding now
-      setTab('explore');
+      setTab('landing');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -420,8 +420,8 @@ export default function App() {
                   if (!isAuthenticated || !userProfile) {
                     setPreselectedGender(gender);
                     triggerToast(
-                      locale === 'en' 
-                        ? `💍 Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!` 
+                      locale === 'en'
+                        ? `💍 Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!`
                         : locale === 'ckb'
                           ? `💍 ڕەگەز دیاریکرا بە ${gender === 'male' ? 'زاوا' : 'بووک'}. تکایە بۆ بەردەوامبوون پڕۆفایلەکەت دروست بکە یان بچۆ ژوورەوە!`
                           : `💍 تم تحديد الجنس كـ ${gender === 'male' ? 'عريس' : 'عروسة'}. يرجى إنشاء حسابك أو تسجيل الدخول للمتابعة!`
@@ -436,21 +436,23 @@ export default function App() {
                   };
                   await handleUpdateUserProfile(updatedProfile);
                   triggerToast(
-                    locale === 'en' 
-                      ? `✨ Gender set to ${gender}. Let's fill out your parameters!` 
+                    locale === 'en'
+                      ? `✨ Gender set to ${gender}. Let's fill out your parameters!`
                       : locale === 'ckb'
                         ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
                         : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
                   );
                   setTab('onboarding');
                 }}
-                onExploreMatches={() => setTab('explore')}
+                onExploreMatches={() => setTab('landing')}
                 onViewMemberProfile={handleViewMemberProfile}
-                setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
                 userProfile={userProfile || undefined}
                 preSelectedGender={preselectedGender}
+                onSendRequest={handleSendRequest}
+                onToggleSaveMatch={handleToggleSaveMatch}
+                savedMatchIds={savedMatchIds}
               />
             )}
 
@@ -596,7 +598,7 @@ export default function App() {
                   <button onClick={() => setTab('onboarding')} className="hover:text-white transition">{t.onboarding}</button>
                 </li>
                 <li>
-                  <button onClick={() => setTab('explore')} className="hover:text-white transition">{t.explore}</button>
+                  <button onClick={() => setTab('landing')} className="hover:text-white transition">{t.explore}</button>
                 </li>
                 <li>
                   <button onClick={() => setTab('chat')} className="hover:text-white transition">{t.chat}</button>
@@ -655,7 +657,7 @@ export default function App() {
           <span className="text-[10px] sm:text-xs tracking-tight">{t.overview}</span>
         </button>
 
-        {/* Partner Exploration Option */}
+        {/* Partner Exploration Option - redirects to homepage */}
         <button
           onClick={() => setTab('landing')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${

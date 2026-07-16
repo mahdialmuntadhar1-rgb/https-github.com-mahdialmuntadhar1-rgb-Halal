@@ -5,7 +5,7 @@
 
 export type AppLanguage = 'en' | 'ar' | 'ckb';
 
-export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin' | 'gender-selection' | 'postcards';
+export type AppTab = 'landing' | 'onboarding' | 'explore' | 'chat' | 'profile' | 'privacy' | 'account' | 'trust_safety' | 'community' | 'admin' | 'gender-selection' | 'postcards'; // 'explore' kept for backward compatibility but redirects to 'landing'
 
 export interface User {
   id: string;
