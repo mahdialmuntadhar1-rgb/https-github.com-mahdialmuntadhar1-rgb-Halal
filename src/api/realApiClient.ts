@@ -3,7 +3,7 @@
  * Replaces localStorage/mock data with Cloudflare Workers API calls
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8787';
 
 export interface ApiError {
   error: string;

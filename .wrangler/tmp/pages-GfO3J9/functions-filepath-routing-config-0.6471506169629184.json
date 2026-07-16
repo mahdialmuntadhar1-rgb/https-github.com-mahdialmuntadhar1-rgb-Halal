@@ -1,0 +1,45 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/marriage-cafe/images/:key",
+      "mountPath": "/api/marriage-cafe/images",
+      "method": "GET",
+      "module": [
+        "api/marriage-cafe/images/[key].ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/marriage-cafe/posts/:id",
+      "mountPath": "/api/marriage-cafe/posts",
+      "method": "DELETE",
+      "module": [
+        "api/marriage-cafe/posts/[id].ts:onRequestDelete"
+      ]
+    },
+    {
+      "routePath": "/api/marriage-cafe/posts/:id",
+      "mountPath": "/api/marriage-cafe/posts",
+      "method": "PUT",
+      "module": [
+        "api/marriage-cafe/posts/[id].ts:onRequestPut"
+      ]
+    },
+    {
+      "routePath": "/api/marriage-cafe/posts",
+      "mountPath": "/api/marriage-cafe",
+      "method": "GET",
+      "module": [
+        "api/marriage-cafe/posts.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/marriage-cafe/posts",
+      "mountPath": "/api/marriage-cafe",
+      "method": "POST",
+      "module": [
+        "api/marriage-cafe/posts.ts:onRequestPost"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

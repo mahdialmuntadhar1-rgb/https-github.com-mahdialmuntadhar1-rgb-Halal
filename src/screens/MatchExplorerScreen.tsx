@@ -27,6 +27,8 @@ interface MatchExplorerScreenProps {
   userProfile: UserProfile;
   onUpdateUserProfile: (updated: Partial<UserProfile>) => void;
   onNavigateToTab?: (tab: any) => void;
+  selectedMemberId?: string | null;
+  onClearSelectedMember?: () => void;
 }
 
 export default function MatchExplorerScreen({
@@ -40,7 +42,9 @@ export default function MatchExplorerScreen({
   onToggleSaveMatch,
   userProfile,
   onUpdateUserProfile,
-  onNavigateToTab
+  onNavigateToTab,
+  selectedMemberId,
+  onClearSelectedMember
 }: MatchExplorerScreenProps) {
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
@@ -232,6 +236,17 @@ export default function MatchExplorerScreen({
       });
     }
   }, [matches]);
+
+  // Auto-select member when selectedMemberId is provided
+  useEffect(() => {
+    if (selectedMemberId && loadedMatches.length > 0) {
+      const match = loadedMatches.find(m => m.id === selectedMemberId);
+      if (match) {
+        setSelectedMatch(match);
+        onClearSelectedMember?.();
+      }
+    }
+  }, [selectedMemberId, loadedMatches, onClearSelectedMember]);
 
   const isProfileIncomplete = useMemo(() => {
     return !userProfile.age || userProfile.age === 0 || !userProfile.education || !userProfile.profession;

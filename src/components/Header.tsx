@@ -333,9 +333,9 @@ export default function Header({
             <span className="shrink-0">{txt('Onboarding', 'التسجيل', 'تۆمارکردن')}</span>
           </button>
           <button
-            onClick={() => setTab('explore')}
+            onClick={() => setTab('landing')}
             className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-              currentTab === 'explore' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
+              currentTab === 'landing' ? 'bg-warm-charcoal text-white' : 'text-[#4A443F]/80'
             }`}
           >
             {txt('Members', 'الأعضاء', 'ئەندامان')}

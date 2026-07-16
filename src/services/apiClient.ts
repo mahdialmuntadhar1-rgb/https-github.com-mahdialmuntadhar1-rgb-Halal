@@ -144,7 +144,16 @@ export const apiClient = {
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
-    return data;
+    // Convert API response to expected User type
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      membershipStatus: 'free',
+      createdAt: new Date().toISOString(),
+      role: data.user.email?.includes('admin') ? 'admin' : 'user'
+    };
+    return { token: data.token, user };
   },
 
   async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
@@ -195,7 +204,16 @@ export const apiClient = {
     if (data.token) {
       localStorage.setItem('halal_token', data.token);
     }
-    return data;
+    // Convert API response to expected User type
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      membershipStatus: 'free',
+      createdAt: new Date().toISOString(),
+      role: data.user.email?.includes('admin') ? 'admin' : 'user'
+    };
+    return { token: data.token, user };
   },
 
   async logout(): Promise<void> {
@@ -343,17 +361,59 @@ export const apiClient = {
       page,
       limit
     };
-    
+
     if (filters) {
       if (filters.gender) params.gender = filters.gender;
       if (filters.governorate) params.governorate = filters.governorate;
     }
 
     const data = await realApiClient.getMembers(params);
-    
+
+    // Convert Member[] to MatchProfile[] with defaults for missing fields
+    const matches: MatchProfile[] = data.members.map((member: any) => ({
+      id: member.id,
+      name: member.name,
+      age: member.age,
+      gender: member.gender,
+      city: member.city,
+      governorate: member.governorate,
+      country: member.country || 'Iraq',
+      religion: member.religion || 'islam',
+      sect: member.sect,
+      ethnicity: member.ethnicity || 'arab',
+      profession: member.profession || '',
+      education: member.education || '',
+      intention: member.intention,
+      timeline: member.timeline || 'Flexible',
+      wantsChildren: member.wantsChildren || 'Yes',
+      communicationPreference: member.communicationPreference || 'Family involved',
+      valuesSummary: member.valuesSummary || [],
+      verified: member.verified || false,
+      isOnline: member.isOnline || false,
+      photoStatus: member.photoStatus || 'visible',
+      avatarSeed: member.avatarSeed || member.name,
+      avatarUrl: member.avatarUrl || '',
+      compatibilityScore: member.compatibilityScore || 75,
+      languages: member.languages || [],
+      aboutMe: member.aboutMe || '',
+      dealbreakers: member.dealbreakers || [],
+      requestStatus: member.requestStatus || 'none',
+      badges: member.badges || [],
+      maritalStatus: member.maritalStatus,
+      relocation: member.relocation,
+      familyValues: member.familyValues,
+      lifestyle: member.lifestyle,
+      preferredAgeRange: member.preferredAgeRange,
+      privacyLevel: member.privacyLevel,
+      isDemoProfile: member.isDemoProfile,
+      phone: member.phone,
+      district: member.district,
+      savedMatches: member.savedMatches
+    }));
+
     return {
-      matches: data.members,
-      hasMore: data.members.length >= limit
+      matches,
+      hasMore: matches.length >= limit
     };
   },
 
@@ -437,11 +497,11 @@ export const apiClient = {
 
     // Real API call using realApiClient
     const result = await realApiClient.sendMessage({ matchId, text });
-    
+
     return {
       id: result.messageId,
       matchId,
-      senderId: 'user',
+      sender: 'user' as const,
       text,
       timestamp: new Date().toISOString()
     } as Message;

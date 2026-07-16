@@ -29,6 +29,7 @@ interface LandingScreenProps {
   locale: AppLanguage;
   onSelectGender: (gender: 'male' | 'female') => void;
   onExploreMatches: () => void;
+  onViewMemberProfile: (memberId: string) => void;
   setTab: (tab: AppTab) => void;
   isAuthenticated: boolean;
   userProfileName?: string;
@@ -82,7 +83,7 @@ const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: strin
   Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
 };
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, onViewMemberProfile, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isEn = locale === 'en';
   const isCkb = locale === 'ckb';
@@ -220,7 +221,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       ));
       setTab('onboarding');
     } else {
-      onExploreMatches();
+      onViewMemberProfile(candidate.id);
     }
   };
 
@@ -755,7 +756,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       </section>
         </>
       ) : (
-        <MarriageCafe locale={locale} />
+        <MarriageCafe locale={locale} triggerToast={showToast} />
       )}
 
       {/* SOCIAL MEDIA STYLE SQUARE STORY VIEWER MODAL */}

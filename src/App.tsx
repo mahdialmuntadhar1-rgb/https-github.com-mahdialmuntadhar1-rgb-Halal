@@ -38,6 +38,7 @@ export default function App() {
   const [matches, setMatches] = useState<MatchProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [preselectedGender, setPreselectedGender] = useState<'male' | 'female' | null>(null);
 
@@ -77,7 +78,7 @@ export default function App() {
           setConversations(convs);
 
           // Route initial loaded user appropriately - allow full explore access
-          setTab('explore');
+          setTab('landing');
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -212,6 +213,11 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4500);
   };
 
+  const handleViewMemberProfile = (memberId: string) => {
+    setSelectedMemberId(memberId);
+    setTab('explore');
+  };
+
   // Profile strength indicator
   const calculateProfileStrength = (): number => {
     if (!userProfile) return 0;
@@ -244,7 +250,7 @@ export default function App() {
           ? `✨ Congratulations! Your respectful introduction is confirmed. Compatibility pool updated!`
           : `✨ مبارك! تم توثيق حسابك وربطه ببيانات الشركاء المتوافقين في العراق!`
       );
-      setTab('explore');
+      setTab('landing');
     } catch (err) {
       console.error("Failed to complete onboarding", err);
     }
@@ -439,6 +445,7 @@ export default function App() {
                   setTab('onboarding');
                 }}
                 onExploreMatches={() => setTab('explore')}
+                onViewMemberProfile={handleViewMemberProfile}
                 setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
@@ -481,6 +488,8 @@ export default function App() {
                 userProfile={userProfile}
                 onUpdateUserProfile={handleUpdateUserProfile}
                 onNavigateToTab={setTab}
+                selectedMemberId={selectedMemberId}
+                onClearSelectedMember={() => setSelectedMemberId(null)}
               />
             )}
 
@@ -648,15 +657,15 @@ export default function App() {
 
         {/* Partner Exploration Option */}
         <button
-          onClick={() => setTab('explore')}
+          onClick={() => setTab('landing')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
-            currentTab === 'explore' 
+            currentTab === 'landing' 
               ? 'text-accent-coral scale-105 font-extrabold' 
               : 'text-[#6B635B] hover:text-[#40798C] hover:bg-warm-ivory/40'
           }`}
           id="taskbar-explore-btn"
         >
-          <Compass className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'explore' ? 'scale-110' : ''}`} />
+          <Compass className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'landing' ? 'scale-110' : ''}`} />
           <span className="text-[10px] sm:text-xs tracking-tight">{t.explore}</span>
         </button>
 
