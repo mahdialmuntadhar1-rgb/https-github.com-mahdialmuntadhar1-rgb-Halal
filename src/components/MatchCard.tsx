@@ -14,6 +14,7 @@ interface MatchCardProps {
   isInterested?: boolean;
   onToggleInterested?: (id: string) => void;
   onPass?: (id: string) => void;
+  onProfileInterest?: (profileId: string, onSuccess?: () => void) => void;
 }
 
 export default function MatchCard({
@@ -24,6 +25,7 @@ export default function MatchCard({
   onOpenDetails,
   savedMatchIds = [],
   onToggleSaveMatch,
+  onProfileInterest
 }: MatchCardProps) {
 
   const isEn = locale === 'en';
@@ -48,12 +50,21 @@ export default function MatchCard({
     if (isRequestSent || isSending) return;
     
     setIsSending(true);
-    // Simulate sending progress
-    setTimeout(() => {
-      onSendRequest(match.id);
-      setIsRequestSent(true);
-      setIsSending(false);
-    }, 1000);
+    
+    // Use unified handler if provided
+    if (onProfileInterest) {
+      onProfileInterest(match.id, () => {
+        setIsRequestSent(true);
+        setIsSending(false);
+      });
+    } else {
+      // Fallback to old handler
+      setTimeout(() => {
+        onSendRequest(match.id);
+        setIsRequestSent(true);
+        setIsSending(false);
+      }, 1000);
+    }
   };
 
   const isPhotoLocked = (status: string | undefined, reqStatus: string | undefined) => {

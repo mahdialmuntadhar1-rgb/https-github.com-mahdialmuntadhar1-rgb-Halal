@@ -38,6 +38,7 @@ interface LandingScreenProps {
   onSendRequest?: (matchId: string) => void;
   onToggleSaveMatch?: (matchId: string) => void;
   savedMatchIds?: string[];
+  onProfileInterest?: (profileId: string, onSuccess?: () => void) => void;
 }
 
 // 19 Governorates list with English, Arabic, and Kurdish translations
@@ -86,7 +87,7 @@ const GOVERNORATE_LANDMARKS: Record<string, { en: string; ar: string; ckb: strin
   Qadisiyah: { en: 'Nippur Ruins & Diwaniyah River', ar: 'آثار نيبور وضفاف نهر الديوانية', ckb: 'شوێنەواری نیپۆر', icon: '🌾' },
 };
 
-export default function LandingScreen({ locale, onSelectGender, onExploreMatches, onViewMemberProfile, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender, onSendRequest, onToggleSaveMatch, savedMatchIds = [] }: LandingScreenProps) {
+export default function LandingScreen({ locale, onSelectGender, onExploreMatches, onViewMemberProfile, setTab, isAuthenticated, userProfileName, userProfile, preSelectedGender, onSendRequest, onToggleSaveMatch, savedMatchIds = [], onProfileInterest }: LandingScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isEn = locale === 'en';
   const isCkb = locale === 'ckb';
@@ -109,6 +110,12 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
   }, [userProfile, preSelectedGender]);
 
   const [genderPref, setGenderPref] = useState<'all' | 'female' | 'male'>(defaultGenderPref);
+
+  const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
+  const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
+  const [mainTab, setMainTab] = useState<'explore' | 'cafe'>('explore');
+  const [selectedProfile, setSelectedProfile] = useState<MatchProfile | null>(null);
+  const [visibleCount, setVisibleCount] = useState(8);
 
   // Synchronize default gender preference when profile changes
   React.useEffect(() => {
@@ -139,12 +146,6 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
     localStorage.setItem('landing_filter_gender', genderPref);
     localStorage.setItem('landing_visible_count', String(visibleCount));
   }, [selectedGov, minAge, maxAge, genderPref, visibleCount]);
-
-  const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
-  const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
-  const [mainTab, setMainTab] = useState<'explore' | 'cafe'>('explore');
-  const [selectedProfile, setSelectedProfile] = useState<MatchProfile | null>(null);
-  const [visibleCount, setVisibleCount] = useState(8);
 
   // Local toast notification system
   const [localToast, setLocalToast] = useState<string | null>(null);
@@ -249,6 +250,20 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
       setTab('onboarding');
     } else {
       setSelectedProfile(candidate);
+    }
+  };
+
+  const handleExpressInterest = (candidateId: string) => {
+    if (onProfileInterest) {
+      onProfileInterest(candidateId, () => {
+        // Update local state to reflect sent status
+        setSelectedProfile(prev => {
+          if (prev && prev.id === candidateId) {
+            return { ...prev, requestStatus: 'sent' as const };
+          }
+          return prev;
+        });
+      });
     }
   };
 
@@ -505,118 +520,120 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
             {/* RESULTS MATCHES GRID */}
             {filteredMatches.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {filteredMatches.slice(0, visibleCount).map((candidate) => {
-                  const isFemale = candidate.gender === 'female';
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {filteredMatches.slice(0, visibleCount).map((candidate) => {
+                    const isFemale = candidate.gender === 'female';
 
-                  return (
-                    <div
-                      key={candidate.id}
-                      onClick={() => handleProfileClick(candidate)}
-                      className="group cursor-pointer bg-[#FCFBF9] hover:bg-white border border-[#E6DCC3]/80 hover:border-accent-coral/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
-                    >
-                      <div className="space-y-3">
-                        {/* Avatar photo with forced privacy constraint */}
-                        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
-                          {isFemale ? (
-                            <>
-                              {/* FROSTED BLUR FEMALE PORTRAIT - strictly private constraint */}
-                              <img
-                                src={candidate.avatarUrl}
-                                alt={candidate.name}
-                                className="w-full h-full object-cover blur-lg scale-110 select-none pointer-events-none opacity-85"
-                                referrerPolicy="no-referrer"
-                              />
-                              <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[6px] flex flex-col items-center justify-center text-center p-3">
-                                <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-accent-pink/30 shadow-md flex items-center justify-center text-accent-pink font-serif font-black text-sm">
-                                  {candidate.name.charAt(0)}
+                    return (
+                      <div
+                        key={candidate.id}
+                        onClick={() => handleProfileClick(candidate)}
+                        className="group cursor-pointer bg-[#FCFBF9] hover:bg-white border border-[#E6DCC3]/80 hover:border-accent-coral/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between space-y-4 text-start relative overflow-hidden"
+                      >
+                        <div className="space-y-3">
+                          {/* Avatar photo with forced privacy constraint */}
+                          <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-inner bg-stone-100 flex items-center justify-center">
+                            {isFemale ? (
+                              <>
+                                {/* FROSTED BLUR FEMALE PORTRAIT - strictly private constraint */}
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover blur-lg scale-110 select-none pointer-events-none opacity-85"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-stone-900/10 backdrop-blur-[6px] flex flex-col items-center justify-center text-center p-3">
+                                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-accent-pink/30 shadow-md flex items-center justify-center text-accent-pink font-serif font-black text-sm">
+                                    {candidate.name.charAt(0)}
+                                  </div>
+                                  <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
+                                    🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                                  </span>
                                 </div>
-                                <span className="mt-2.5 text-[9px] font-bold text-stone-800 bg-[#FAF7F2]/90 border border-[#E8DCC4] px-2 py-1 rounded-full shadow-inner tracking-tight">
-                                  🔒 {txt("Photo Protected", "الصورة محمية", "وێنە پارێزراوە")}
+                              </>
+                            ) : (
+                              <>
+                                {/* REALISTIC IRAQI-LOOKING MALE PORTRAITS - unmodified */}
+                                <img
+                                  src={candidate.avatarUrl}
+                                  alt={candidate.name}
+                                  className="w-full h-full object-cover grayscale-[12%] group-hover:scale-105 transition-transform duration-500"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                                <span className="absolute bottom-2.5 left-2.5 text-[8px] sm:text-[9px] font-mono font-extrabold text-white bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md">
+                                  {txt("Verified Groom", "شاب جاد للزواج", "زاوا پشتڕاستکراوە")}
                                 </span>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              {/* REALISTIC IRAQI-LOOKING MALE PORTRAITS - unmodified */}
-                              <img
-                                src={candidate.avatarUrl}
-                                alt={candidate.name}
-                                className="w-full h-full object-cover grayscale-[12%] group-hover:scale-105 transition-transform duration-500"
-                                referrerPolicy="no-referrer"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-                              <span className="absolute bottom-2.5 left-2.5 text-[8px] sm:text-[9px] font-mono font-extrabold text-white bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md">
-                                {txt("Verified Groom", "شاب جاد للزواج", "زاوا پشتڕاستکراوە")}
-                              </span>
-                            </>
-                          )}
-                          
-                          {/* Top floating badges */}
-                          <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
-                            {candidate.verified && (
-                              <span className="bg-emerald-500 text-white p-1 rounded-full shadow-sm" title="Identity Verified">
-                                <ShieldCheck className="w-3.5 h-3.5" />
-                              </span>
+                              </>
                             )}
+
+                            {/* Top floating badges */}
+                            <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+                              {candidate.verified && (
+                                <span className="bg-emerald-500 text-white p-1 rounded-full shadow-sm" title="Identity Verified">
+                                  <ShieldCheck className="w-3.5 h-3.5" />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Name & Basic details */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal group-hover:text-[#40798C] transition-colors flex items-center gap-1">
+                                <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
+                                <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
+                              </h4>
+                              <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
+                                💖 {candidate.compatibilityScore}%
+                              </span>
+                            </div>
+
+                            {/* Profession & Education */}
+                            <p className="text-[10.5px] font-extrabold text-stone-500 flex items-center gap-1 truncate">
+                              <GraduationCap className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
+                              <span className="truncate">{candidate.profession}</span>
+                            </p>
+                            <p className="text-[9.5px] text-stone-400 font-semibold truncate">
+                              {candidate.education}
+                            </p>
                           </div>
                         </div>
 
-                        {/* Name & Basic details */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-serif font-black text-sm sm:text-base text-warm-charcoal group-hover:text-[#40798C] transition-colors flex items-center gap-1">
-                              <span>{isFemale ? txt(candidate.name, candidate.nameAr, candidate.nameCkb) : candidate.name}</span>
-                              <span className="text-xs text-[#6B635B] font-medium font-mono">({candidate.age})</span>
-                            </h4>
-                            <span className="text-[10px] font-mono font-black text-[#40798C] bg-[#40798C]/10 px-2 py-0.5 rounded-md">
-                              💖 {candidate.compatibilityScore}%
-                            </span>
-                          </div>
-                          
-                          {/* Profession & Education */}
-                          <p className="text-[10.5px] font-extrabold text-stone-500 flex items-center gap-1 truncate">
-                            <GraduationCap className="w-3.5 h-3.5 text-[#40798C] shrink-0" />
-                            <span className="truncate">{candidate.profession}</span>
-                          </p>
-                          <p className="text-[9.5px] text-stone-400 font-semibold truncate">
-                            {candidate.education}
-                          </p>
+                        {/* Card Footer tags */}
+                        <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+                          <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
+                            📍 {txt(candidate.city, candidate.city, candidate.city)}
+                          </span>
+
+                          <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
+                            <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
+                            <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
+                          </span>
                         </div>
+
                       </div>
-
-                      {/* Card Footer tags */}
-                      <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
-                        <span className="text-[8.5px] font-bold text-stone-400 font-mono tracking-wider">
-                          📍 {txt(candidate.city, candidate.city, candidate.city)}
-                        </span>
-                        
-                        <span className="text-[9.5px] font-bold text-[#40798C] group-hover:text-accent-coral flex items-center gap-0.5 font-sans">
-                          <span>{txt("View Sincere Intention", "تفاصيل نية الزواج", "بینینی مەبەست")}</span>
-                          <ArrowRight className="w-3 h-3 transform rtl:rotate-180" />
-                        </span>
-                      </div>
-
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Load More Button for Pagination */}
-              {visibleCount < filteredMatches.length && (
-                <div className="flex justify-center pt-6">
-                  <button
-                    onClick={() => setVisibleCount(prev => Math.min(prev + 8, filteredMatches.length))}
-                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#2F5866] hover:opacity-95 text-white font-black text-sm shadow-lg shadow-[#40798C]/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Compass className="w-4 h-4" />
-                    <span>
-                      {txt("Load More Matches", "تحميل المزيد من العروض", "بارکردنی زیاتر")}
-                    </span>
-                    <span className="text-xs opacity-75">({visibleCount}/{filteredMatches.length})</span>
-                  </button>
+                    );
+                  })}
                 </div>
-              )}
+
+                {/* Load More Button for Pagination */}
+                {visibleCount < filteredMatches.length && (
+                  <div className="flex justify-center pt-6">
+                    <button
+                      onClick={() => setVisibleCount(prev => Math.min(prev + 8, filteredMatches.length))}
+                      className="px-8 py-3 rounded-2xl bg-gradient-to-r from-[#40798C] to-[#2F5866] hover:opacity-95 text-white font-black text-sm shadow-lg shadow-[#40798C]/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Compass className="w-4 h-4" />
+                      <span>
+                        {txt("Load More Matches", "تحميل المزيد من العروض", "بارکردنی زیاتر")}
+                      </span>
+                      <span className="text-xs opacity-75">({visibleCount}/{filteredMatches.length})</span>
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="py-12 text-center space-y-3 bg-[#FAF8F5] rounded-3xl border border-dashed border-[#E6DCC3]/80">
                 <Users className="w-10 h-10 text-stone-300 mx-auto" />
@@ -1001,7 +1018,25 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                     <User className="w-4 h-4 text-stone-500" />
                     <span className="font-medium">{selectedProfile.profession}</span>
                   </div>
+                  {selectedProfile.verified && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span className="font-medium text-emerald-700">{txt("Verified", "موثق", "سەلمێنراو")}</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* About/Bio */}
+                {selectedProfile.aboutMe && (
+                  <div className="bg-stone-50 rounded-xl p-3">
+                    <span className="text-xs font-bold text-stone-600 uppercase tracking-wider">
+                      {txt("About", "نبذة عني", "دەربارەی من")}
+                    </span>
+                    <p className="text-sm text-stone-800 mt-1 leading-relaxed">
+                      {selectedProfile.aboutMe}
+                    </p>
+                  </div>
+                )}
 
                 {/* Compatibility Score */}
                 <div className="bg-[#40798C]/10 rounded-xl p-3">
@@ -1019,15 +1054,19 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
-                      if (onSendRequest) {
+                      if (onProfileInterest) {
+                        onProfileInterest(selectedProfile.id, () => {
+                          setSelectedProfile(null);
+                        });
+                      } else if (onSendRequest) {
                         onSendRequest(selectedProfile.id);
+                        showToast(txt(
+                          "💍 Interest expressed! If mutual, you'll be matched.",
+                          "💍 تم التعبير عن الاهتمام! في حالة التبادل، سيتم التوافق.",
+                          "💍 ئارەزوو تۆمارکرا! ئەگەر دووجار بێت، دەگونجێن."
+                        ));
+                        setSelectedProfile(null);
                       }
-                      showToast(txt(
-                        "💍 Interest expressed! If mutual, you'll be matched.",
-                        "💍 تم التعبير عن الاهتمام! في حالة التبادل، سيتم التوافق.",
-                        "💍 ئارەزوو تۆمارکرا! ئەگەر دووجار بێت، دەگونجێن."
-                      ));
-                      setSelectedProfile(null);
                     }}
                     className="flex-1 py-3 bg-gradient-to-r from-accent-coral to-accent-pink text-white rounded-xl font-bold text-sm hover:opacity-95 transition"
                   >

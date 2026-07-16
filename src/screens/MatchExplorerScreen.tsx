@@ -29,6 +29,7 @@ interface MatchExplorerScreenProps {
   onNavigateToTab?: (tab: any) => void;
   selectedMemberId?: string | null;
   onClearSelectedMember?: () => void;
+  onProfileInterest?: (profileId: string, onSuccess?: () => void) => void;
 }
 
 export default function MatchExplorerScreen({
@@ -44,7 +45,8 @@ export default function MatchExplorerScreen({
   onUpdateUserProfile,
   onNavigateToTab,
   selectedMemberId,
-  onClearSelectedMember
+  onClearSelectedMember,
+  onProfileInterest
 }: MatchExplorerScreenProps) {
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
@@ -666,6 +668,7 @@ export default function MatchExplorerScreen({
               onOpenDetails={(profile) => setSelectedMatch(profile)}
               savedMatchIds={savedMatchIds}
               onToggleSaveMatch={onToggleSaveMatch}
+              onProfileInterest={onProfileInterest}
             />
           ))}
         </div>
@@ -1154,7 +1157,19 @@ export default function MatchExplorerScreen({
                     <button
                       type="button"
                       onClick={() => {
-                        onSendRequest(activeSelectedMatch.id);
+                        if (onProfileInterest) {
+                          onProfileInterest(activeSelectedMatch.id, () => {
+                            // Update local state to reflect sent status
+                            setSelectedMatch(prev => {
+                              if (prev && prev.id === activeSelectedMatch.id) {
+                                return { ...prev, requestStatus: 'sent' as const };
+                              }
+                              return prev;
+                            });
+                          });
+                        } else {
+                          onSendRequest(activeSelectedMatch.id);
+                        }
                       }}
                       className="px-6 py-2.5 bg-gradient-to-r from-[#FF4FD8] to-[#9D4DFF] text-white font-bold text-xs rounded-xl shadow-lg shadow-[#9D4DFF]/20 hover:opacity-90 active:scale-99 transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >

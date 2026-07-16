@@ -8,7 +8,6 @@ import { UserProfile, MatchProfile, Conversation } from './types';
 import Header from './components/Header';
 import LandingScreen from './screens/LandingScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
-import MatchExplorerScreen from './screens/MatchExplorerScreen';
 import ChatScreen from './screens/ChatScreen';
 import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
@@ -215,7 +214,34 @@ export default function App() {
 
   const handleViewMemberProfile = (memberId: string) => {
     setSelectedMemberId(memberId);
-    setTab('explore');
+    // No navigation - profile modal handles viewing
+  };
+
+  // Unified Express Interest handler - ONE source of truth for all profile cards
+  const handleProfileInterest = async (profileId: string, onSuccess?: () => void) => {
+    const token = localStorage.getItem('halal_token');
+    if (!token) {
+      triggerToast("⚠️ Please login to express interest");
+      setTab('onboarding');
+      return;
+    }
+
+    try {
+      const result = await apiClient.sendIntroductionRequest(profileId);
+      
+      if (result.success) {
+        triggerToast("Interest sent successfully ❤️");
+        // Update matches to reflect new request status
+        const updatedMatches = await apiClient.getMatches();
+        setMatches(updatedMatches.matches);
+        onSuccess?.();
+      } else {
+        triggerToast("Unable to send interest. Please try again.");
+      }
+    } catch (err) {
+      console.error("Failed to send interest:", err);
+      triggerToast("Unable to send interest. Please try again.");
+    }
   };
 
   // Profile strength indicator
@@ -446,6 +472,7 @@ export default function App() {
                 }}
                 onExploreMatches={() => setTab('landing')}
                 onViewMemberProfile={handleViewMemberProfile}
+                setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
                 userProfile={userProfile || undefined}
@@ -453,6 +480,7 @@ export default function App() {
                 onSendRequest={handleSendRequest}
                 onToggleSaveMatch={handleToggleSaveMatch}
                 savedMatchIds={savedMatchIds}
+                onProfileInterest={handleProfileInterest}
               />
             )}
 
@@ -474,24 +502,6 @@ export default function App() {
                   values: ['Family First', 'Mutual Respect']
                 }}
                 onComplete={handleOnboardingComplete}
-              />
-            )}
-
-            {currentTab === 'explore' && userProfile && (
-              <MatchExplorerScreen
-                locale={locale}
-                matches={matches}
-                onSendRequest={handleSendRequest}
-                onInitiateChat={handleInitiateChat}
-                userGender={userProfile.gender}
-                userGovernorate={userProfile.governorate}
-                savedMatchIds={savedMatchIds}
-                onToggleSaveMatch={handleToggleSaveMatch}
-                userProfile={userProfile}
-                onUpdateUserProfile={handleUpdateUserProfile}
-                onNavigateToTab={setTab}
-                selectedMemberId={selectedMemberId}
-                onClearSelectedMember={() => setSelectedMemberId(null)}
               />
             )}
 
