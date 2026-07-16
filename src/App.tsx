@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -66,26 +66,11 @@ export default function App() {
       try {
         await loadHeroImages();
         if (token) {
-          const [rawProfile, matchesResult, convs] = await Promise.all([
+          const [profile, matchesResult, convs] = await Promise.all([
             apiClient.getCurrentUser(),
             apiClient.getMatches(),
             apiClient.getConversations()
           ]);
-          const profile = {
-            ...rawProfile,
-            name: rawProfile.name || '',
-            age: rawProfile.age || 18,
-            languages: rawProfile.languages || [],
-            values: rawProfile.values || [],
-            country: rawProfile.country || 'Iraq',
-            governorate: rawProfile.governorate || '',
-            religion: rawProfile.religion || '',
-            ethnicity: rawProfile.ethnicity || '',
-            education: rawProfile.education || '',
-            profession: rawProfile.profession || '',
-            photoPrivacy: rawProfile.photoPrivacy || 'visible',
-            savedMatches: rawProfile.savedMatches || [],
-          };
           setUserProfile(profile);
           setIsAuthenticated(true);
           setMatches(matchesResult.matches);
@@ -122,21 +107,6 @@ export default function App() {
     localStorage.setItem('halal_token', token);
     try {
       let currentProfile = profile;
-      currentProfile = {
-        ...currentProfile,
-        name: currentProfile.name || '',
-        age: currentProfile.age || 18,
-        languages: currentProfile.languages || [],
-        values: currentProfile.values || [],
-        country: currentProfile.country || 'Iraq',
-        governorate: currentProfile.governorate || '',
-        religion: currentProfile.religion || 'islam',
-        ethnicity: currentProfile.ethnicity || 'arab',
-        education: currentProfile.education || '',
-        profession: currentProfile.profession || '',
-        photoPrivacy: currentProfile.photoPrivacy || 'visible',
-        savedMatches: currentProfile.savedMatches || [],
-      };
       if (preselectedGender) {
         try {
           const updated = {
@@ -187,10 +157,10 @@ export default function App() {
       setUserProfile(saved);
       triggerToast(
         locale === 'en'
-          ? `âœ¨ Gender set to ${gender}. Let's fill out your parameters!`
+          ? `✨ Gender set to ${gender}. Let's fill out your parameters!`
           : locale === 'ckb'
-            ? `âœ¨ Ú•Û•Ú¯Û•Ø² Ø¯ÛŒØ§Ø±ÛŒÚ©Ø±Ø§ Ø¨Û• ${gender === 'male' ? 'Ù†ÛŽØ±' : 'Ù…ÛŽ'}. Ø¨Ø§ Ø¯Û•Ø³Øª Ù¾ÛŽ Ø¨Ú©Û•ÛŒÙ†!`
-            : `âœ¨ ØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ø¬Ù†Ø³ ÙƒÙ€ ${gender === 'male' ? 'Ø°ÙƒØ±' : 'Ø£Ù†Ø«Ù‰'}. ÙÙ„Ù†Ø¨Ø¯Ø£!`
+            ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
+            : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
       );
       setTab('onboarding');
     } catch (err) {
@@ -211,7 +181,7 @@ export default function App() {
       setConversations([]);
       setTab('landing');
       setIsLoadingSession(false);
-      triggerToast("ðŸšª Logged out securely. Come back soon!");
+      triggerToast("🚪 Logged out securely. Come back soon!");
     }
   };
 
@@ -226,8 +196,8 @@ export default function App() {
       const isSavedNow = savedIds.includes(matchId);
       triggerToast(
         isSavedNow
-          ? "â­ Candidate added to your Saved Portfolios!"
-          : "ðŸ—‘ï¸ Portfolio bookmark removed."
+          ? "⭐ Candidate added to your Saved Portfolios!"
+          : "🗑️ Portfolio bookmark removed."
       );
     } catch (err) {
       console.error("Failed toggling save candidates", err);
@@ -268,8 +238,8 @@ export default function App() {
 
       triggerToast(
         locale === 'en'
-          ? `âœ¨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`
-          : `âœ¨ Ù…Ø¨Ø§Ø±Ùƒ! ØªÙ… ØªÙˆØ«ÙŠÙ‚ Ø­Ø³Ø§Ø¨Ùƒ ÙˆØ±Ø¨Ø·Ù‡ Ø¨Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø´Ø±ÙƒØ§Ø¡ Ø§Ù„Ù…ØªÙˆØ§ÙÙ‚ÙŠÙ† ÙÙŠ Ø§Ù„Ø¹Ø±Ø§Ù‚!`
+          ? `✨ Congratulations! Your halal introduction is sealed. Compatibility pool updated!`
+          : `✨ مبارك! تم توثيق حسابك وربطه ببيانات الشركاء المتوافقين في العراق!`
       );
       setTab('explore');
     } catch (err) {
@@ -295,7 +265,7 @@ export default function App() {
       // Reload matches list immediately to show "pending" state
       const updatedMatchesRes = await apiClient.getMatches();
       setMatches(updatedMatchesRes.matches);
-      triggerToast(`âœ‰ï¸ Introduction request sent securely. Acknowledging respect rules...`);
+      triggerToast(`✉️ Introduction request sent securely. Acknowledging respect rules...`);
 
       // Trigger auto-approval response simulation
       setTimeout(async () => {
@@ -308,7 +278,7 @@ export default function App() {
           ]);
           setMatches(updatedMatchesListRes.matches);
           setConversations(updatedConvs);
-          triggerToast(`ðŸŽ‰ Mutual interest! ${match.name} accepted your request. Chat unlocked! ðŸ”“`);
+          triggerToast(`🎉 Mutual interest! ${match.name} accepted your request. Chat unlocked! 🔓`);
         } catch (simErr) {
           console.error("Failed simulator auto-approval", simErr);
         }
@@ -370,7 +340,7 @@ export default function App() {
             <div className="w-3 h-3 bg-[#40798C] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
           <p className="text-xs font-serif font-black tracking-widest text-[#6B635B] animate-pulse uppercase">
-            {locale === 'en' ? 'Verifying Sincere Connection...' : locale === 'ar' ? 'Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø§ØªØµØ§Ù„ Ø§Ù„Ø¢Ù…Ù†...' : 'Ù¾ÛŽØ¯Ø§Ú†ÙˆÙˆÙ†Û•ÙˆÛ• Ø¨Û• Ù¾Û•ÛŒÙˆÛ•Ù†Ø¯ÛŒ Ù¾Ø§Ø±ÛŽØ²Ø±Ø§Ùˆ...'}
+            {locale === 'en' ? 'Verifying Sincere Connection...' : locale === 'ar' ? 'جاري التحقق من الاتصال الآمن...' : 'پێداچوونەوە بە پەیوەندی پارێزراو...'}
           </p>
         </div>
       </div>
@@ -414,8 +384,8 @@ export default function App() {
         isAdmin={userProfile?.role === 'admin'}
         heroImages={heroImages}
         onLogout={isAuthenticated ? handleLogout : undefined}
-        onLoginClick={() => setTab('explore')}
       />
+
       {/* Primary switcher layout */}
       <main className="flex-grow">
         {isProtectedTab && !isAuthenticated ? (
@@ -441,10 +411,10 @@ export default function App() {
                     setPreselectedGender(gender);
                     triggerToast(
                       locale === 'en' 
-                        ? `ðŸ’ Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!` 
+                        ? `💍 Gender set to ${gender === 'male' ? 'Groom' : 'Bride'}. Please create your account or log in to proceed!` 
                         : locale === 'ckb'
-                          ? `ðŸ’ Ú•Û•Ú¯Û•Ø² Ø¯ÛŒØ§Ø±ÛŒÚ©Ø±Ø§ Ø¨Û• ${gender === 'male' ? 'Ø²Ø§ÙˆØ§' : 'Ø¨ÙˆÙˆÚ©'}. ØªÚ©Ø§ÛŒÛ• Ø¨Û† Ø¨Û•Ø±Ø¯Û•ÙˆØ§Ù…Ø¨ÙˆÙˆÙ† Ù¾Ú•Û†ÙØ§ÛŒÙ„Û•Ú©Û•Øª Ø¯Ø±ÙˆØ³Øª Ø¨Ú©Û• ÛŒØ§Ù† Ø¨Ú†Û† Ú˜ÙˆÙˆØ±Û•ÙˆÛ•!`
-                          : `ðŸ’ ØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ø¬Ù†Ø³ ÙƒÙ€ ${gender === 'male' ? 'Ø¹Ø±ÙŠØ³' : 'Ø¹Ø±ÙˆØ³Ø©'}. ÙŠØ±Ø¬Ù‰ Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨Ùƒ Ø£Ùˆ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ù„Ù…ØªØ§Ø¨Ø¹Ø©!`
+                          ? `💍 ڕەگەز دیاریکرا بە ${gender === 'male' ? 'زاوا' : 'بووک'}. تکایە بۆ بەردەوامبوون پڕۆفایلەکەت دروست بکە یان بچۆ ژوورەوە!`
+                          : `💍 تم تحديد الجنس كـ ${gender === 'male' ? 'عريس' : 'عروسة'}. يرجى إنشاء حسابك أو تسجيل الدخول للمتابعة!`
                     );
                     setTab('onboarding');
                     return;
@@ -457,14 +427,14 @@ export default function App() {
                   await handleUpdateUserProfile(updatedProfile);
                   triggerToast(
                     locale === 'en' 
-                      ? `âœ¨ Gender set to ${gender}. Let's fill out your parameters!` 
+                      ? `✨ Gender set to ${gender}. Let's fill out your parameters!` 
                       : locale === 'ckb'
-                        ? `âœ¨ Ú•Û•Ú¯Û•Ø² Ø¯ÛŒØ§Ø±ÛŒÚ©Ø±Ø§ Ø¨Û• ${gender === 'male' ? 'Ù†ÛŽØ±' : 'Ù…ÛŽ'}. Ø¨Ø§ Ø¯Û•Ø³Øª Ù¾ÛŽ Ø¨Ú©Û•ÛŒÙ†!`
-                        : `âœ¨ ØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ø¬Ù†Ø³ ÙƒÙ€ ${gender === 'male' ? 'Ø°ÙƒØ±' : 'Ø£Ù†Ø«Ù‰'}. ÙÙ„Ù†Ø¨Ø¯Ø£!`
+                        ? `✨ ڕەگەز دیاریکرا بە ${gender === 'male' ? 'نێر' : 'مێ'}. با دەست پێ بکەین!`
+                        : `✨ تم تحديد الجنس كـ ${gender === 'male' ? 'ذكر' : 'أنثى'}. فلنبدأ!`
                   );
                   setTab('onboarding');
                 }}
-                onExploreMatches={() => setTab('landing')}
+                onExploreMatches={() => setTab('explore')}
                 setTab={setTab}
                 isAuthenticated={isAuthenticated}
                 userProfileName={userProfile?.name}
@@ -613,7 +583,7 @@ export default function App() {
                   <button onClick={() => setTab('onboarding')} className="hover:text-white transition">{t.onboarding}</button>
                 </li>
                 <li>
-                  <button onClick={() => setTab('landing')} className="hover:text-white transition">{t.explore}</button>
+                  <button onClick={() => setTab('explore')} className="hover:text-white transition">{t.explore}</button>
                 </li>
                 <li>
                   <button onClick={() => setTab('chat')} className="hover:text-white transition">{t.chat}</button>
@@ -639,11 +609,11 @@ export default function App() {
                 onClick={() => setTab('trust_safety')} 
                 className="hover:text-white transition font-extrabold underline decoration-accent-coral decoration-2 underline-offset-4 flex items-center gap-1 text-xs"
               >
-                ðŸ›¡ï¸ {locale === 'en' ? 'Trust & Privacy Center' : locale === 'ar' ? 'Ù…Ø±ÙƒØ² Ø§Ù„Ø£Ù…Ø§Ù† ÙˆØ§Ù„Ù…ÙˆØ«ÙˆÙ‚ÙŠØ©' : 'Ú•ÛŽØ¨Û•Ø±ÛŒ Ø¦Ø§Ø³Ø§ÛŒØ´ ÙˆÙ…ØªÙ…Ø§Ù†Û•'}
+                🛡️ {locale === 'en' ? 'Trust & Privacy Center' : locale === 'ar' ? 'مركز الأمان والموثوقية' : 'ڕێبەری ئاسایش ومتمانە'}
               </button>
-              <span>â€¢</span>
+              <span>•</span>
               <button onClick={() => setTab('privacy')} className="hover:text-white transition">{t.privacyPolicy}</button>
-              <span>â€¢</span>
+              <span>•</span>
               <button onClick={() => setTab('account')} className="hover:text-white transition">{t.idVerify}</button>
             </div>
           </div>
@@ -674,7 +644,7 @@ export default function App() {
 
         {/* Partner Exploration Option */}
         <button
-          onClick={() => setTab('landing')}
+          onClick={() => setTab('explore')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
             currentTab === 'explore' 
               ? 'text-accent-coral scale-105 font-extrabold' 
@@ -692,8 +662,8 @@ export default function App() {
             if (!isAuthenticated) {
               triggerToast(
                 locale === 'en' 
-                  ? 'ðŸ’ Please log in or create an account to view and chat with matches.' 
-                  : 'ðŸ’ ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹ Ù„ØªØµÙØ­ ÙˆØ§Ù„Ø¯Ø±Ø¯Ø´Ø© Ù…Ø¹ Ø´Ø±ÙƒØ§Ø¡ Ø§Ù„ØªÙˆØ§ÙÙ‚.'
+                  ? '💍 Please log in or create an account to view and chat with matches.' 
+                  : '💍 يرجى تسجيل الدخول أولاً لتصفح والدردشة مع شركاء التوافق.'
               );
               setTab('onboarding');
             } else {
@@ -722,8 +692,8 @@ export default function App() {
             if (!isAuthenticated) {
               triggerToast(
                 locale === 'en' 
-                  ? 'ðŸ’ Please log in to view received postcards.' 
-                  : 'ðŸ’ ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹ Ù„ØªØµÙØ­ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ ÙˆØ§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„Ø¨Ø±ÙŠØ¯ÙŠØ©.'
+                  ? '💍 Please log in to view received postcards.' 
+                  : '💍 يرجى تسجيل الدخول أولاً لتصفح الرسائل والبطاقات البريدية.'
               );
               setTab('onboarding');
             } else {
@@ -741,7 +711,7 @@ export default function App() {
             <Inbox className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'postcards' ? 'scale-110' : ''}`} />
           </div>
           <span className="text-[10px] sm:text-xs tracking-tight">
-            {locale === 'en' ? 'Postbox' : locale === 'ar' ? 'ØµÙ†Ø¯ÙˆÙ‚ÙŠ' : 'Ø³Ù†Ø¯ÙˆÙ‚ÛŒ Ù¾Û†Ø³ØªÛ•'}
+            {locale === 'en' ? 'Postbox' : locale === 'ar' ? 'صندوقي' : 'سندوقی پۆستە'}
           </span>
         </button>
 
@@ -751,8 +721,8 @@ export default function App() {
             if (!isAuthenticated) {
               triggerToast(
                 locale === 'en' 
-                  ? 'ðŸ’ Please sign in to view your profile dossier.' 
-                  : 'ðŸ’ ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ø¹Ø±Ø¶ ÙˆØªØ¹Ø¯ÙŠÙ„ Ù…Ù„ÙÙƒ Ø§Ù„ØªØ¹Ø±ÙŠÙÙŠ.'
+                  ? '💍 Please sign in to view your profile dossier.' 
+                  : '💍 يرجى تسجيل الدخول لعرض وتعديل ملفك التعريفي.'
               );
               setTab('onboarding');
             } else {
@@ -768,7 +738,7 @@ export default function App() {
         >
           <User className={`w-5 h-5 mb-0.5 transition-transform duration-200 ${currentTab === 'profile' ? 'scale-110' : ''}`} />
           <span className="text-[10px] sm:text-xs tracking-tight">
-            {locale === 'en' ? 'My Profile' : locale === 'ar' ? 'Ù…Ù„ÙÙŠ' : 'Ù¾Ú•Û†ÙØ§ÛŒÙ„Ù…'}
+            {locale === 'en' ? 'My Profile' : locale === 'ar' ? 'ملفي' : 'پڕۆفایلم'}
           </span>
         </button>
       </div>
@@ -776,5 +746,3 @@ export default function App() {
     </div>
   );
 }
-
-

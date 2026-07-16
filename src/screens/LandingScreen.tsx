@@ -117,7 +117,7 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'brides' | 'grooms' | 'professionals'>('all');
   const [selectedStory, setSelectedStory] = useState<MatchProfile | null>(null);
-  const [homeTab, setHomeTab] = useState<'discover' | 'cafe'>('discover');
+  const [homeTab, setHomeTab] = useState<'discover' | 'cafe'>('cafe');
   
   // Local toast notification system
   const [localToast, setLocalToast] = useState<string | null>(null);
@@ -269,13 +269,6 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   return (
     <div className="animate-fade-in space-y-10 relative" id="landing-screen">
-      {/* Beta Badge */}
-      <div style={{position: "fixed", top: 0, left: 0, right: 0, zIndex: 99999, background: "#1C2541", color: "#E8DCC4", padding: "8px", textAlign: "center", fontSize: "13px", fontFamily: "system-ui", borderBottom: "1px solid #E8DCC4", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px"}}>
-        <span style={{width: "8px", height: "8px", background: "#f59e0b", borderRadius: "50%", display: "inline-block"}}></span>
-        {locale === "ar" ? "نسخة تجريبية" : locale === "ckb" ? "وەشانی تاقیکردنەوە" : "Beta"}
-      </div>
-      <div style={{height: "36px"}}></div>
-
       
       {/* LOCAL TOAST NOTIFICATION */}
       {localToast && (
@@ -385,27 +378,11 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="bg-[#FAF8F5]/80 border border-[#E8DCC4] rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 flex gap-2 shadow-inner">
             
-            {/* Tab 1: Discover Member */}
-            <button
-              onClick={() => {
-                setHomeTab('discover');
-                showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
-              }}
-              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                homeTab === 'discover'
-                  ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
-                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
-              }`}
-            >
-              <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
-              <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
-            </button>
-
-            {/* Tab 2: Marriage Cafe */}
+            {/* Tab 1: Marriage Cafe */}
             <button
               onClick={() => {
                 setHomeTab('cafe');
-                showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
+                showToast(txt("Entering Marriage Cafe social feed...", "جاري الانتقال لمقهى الزواج التفاعلي...", "چوونە ناو کافێی هاوسەرگیری..."));
               }}
               className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                 homeTab === 'cafe'
@@ -414,10 +391,26 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
               }`}
             >
               <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
-              <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
+              <span>{txt("Marriage Cafe", "مقهى الزواج", "کافێی هاوسەرگیری")}</span>
               <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
                 LIVE FEED
               </span>
+            </button>
+
+            {/* Tab 2: Explore Members */}
+            <button
+              onClick={() => {
+                setHomeTab('discover');
+                showToast(txt("Opening candidate explorer filters...", "جاري فتح مستكشف الأعضاء...", "کردنەوەی گەڕانی ئەندامان..."));
+              }}
+              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                homeTab === 'discover'
+                  ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
+                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
+              }`}
+            >
+              <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
+              <span>{txt("Explore Members", "استكشاف الأعضاء", "گەڕان بەدوای ئەنداماندا")}</span>
             </button>
 
           </div>
