@@ -1,4 +1,4 @@
-import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
+﻿import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
 
 let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
@@ -8,25 +8,10 @@ if (API_BASE.endsWith('/')) {
 
 /**
  * Checks if we should run in local demo mode.
- * If there is a real session token in localStorage or a backend URL is explicitly configured, 
- * we try to contact the backend, otherwise we fallback to the local mock state.
+ * FORCED TO ALWAYS RETURN FALSE - uses real backend API
  */
 export function getIsDemoMode(): boolean {
-  const forceReal = localStorage.getItem('halal_force_real') === 'true';
-  if (forceReal) return false;
-
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL;
-  // If no external/real API URL is configured, we must use demo/mock mode
-  if (!apiUrl || apiUrl === '/api') {
-    return true;
-  }
-
-  const token = localStorage.getItem('halal_token');
-  // If no token exists, or if it is a mock token/placeholder, we use demo/mock mode
-  if (!token || token.startsWith('mock_') || token === 'demo_real_token_placeholder') {
-    return true;
-  }
-
+  // Real backend mode - forced false so all API calls hit the live Worker
   return false;
 }
 
@@ -126,7 +111,7 @@ export const apiClient = {
         createdAt: new Date().toISOString(),
         role: identifier.includes('admin') || identifier.includes('safar') ? 'admin' : 'user'
       };
-      
+
       // Update mock api profile
       await mockApi.updateCurrentUserProfile({
         email: user.email,
@@ -141,7 +126,7 @@ export const apiClient = {
     const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
+      body: JSON.stringify({ email: identifier, password }),
     });
 
     if (data.token) {
@@ -204,9 +189,9 @@ export const apiClient = {
 
   async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     if (getIsDemoMode()) {
-      return { 
-        success: true, 
-        message: 'Demo forgot password instructions simulated. Check your inbox.' 
+      return {
+        success: true,
+        message: 'Demo forgot password instructions simulated. Check your inbox.'
       };
     }
 
@@ -415,10 +400,11 @@ export const apiClient = {
       return mockApi.getConversations();
     }
 
-    return safeFetch<Conversation[]>(`${API_BASE}/conversations`, {
+    const result = await safeFetch<{ conversations: Conversation[] }>(`${API_BASE}/conversations`, {
       method: 'GET',
       headers: getHeaders(),
     });
+    return result.conversations || [];
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -510,11 +496,11 @@ export const apiClient = {
   },
 
   async createCommunityPost(
-    title: string, 
-    content: string, 
-    category: CommunityPost['category'], 
-    isDaily: boolean = false, 
-    image?: string, 
+    title: string,
+    content: string,
+    category: CommunityPost['category'],
+    isDaily: boolean = false,
+    image?: string,
     status?: 'pending' | 'approved' | 'hidden' | 'rejected',
     postType?: 'standard' | 'photo' | 'opinion' | 'poll',
     opinionColor?: string,
@@ -641,3 +627,6 @@ export const apiClient = {
     return !!data.success;
   }
 };
+
+
+

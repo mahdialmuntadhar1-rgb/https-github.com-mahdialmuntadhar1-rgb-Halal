@@ -269,6 +269,13 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
   return (
     <div className="animate-fade-in space-y-10 relative" id="landing-screen">
+      {/* Beta Badge */}
+      <div style={{position: "fixed", top: 0, left: 0, right: 0, zIndex: 99999, background: "#1C2541", color: "#E8DCC4", padding: "8px", textAlign: "center", fontSize: "13px", fontFamily: "system-ui", borderBottom: "1px solid #E8DCC4", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px"}}>
+        <span style={{width: "8px", height: "8px", background: "#f59e0b", borderRadius: "50%", display: "inline-block"}}></span>
+        {locale === "ar" ? "نسخة تجريبية" : locale === "ckb" ? "وەشانی تاقیکردنەوە" : "Beta"}
+      </div>
+      <div style={{height: "36px"}}></div>
+
       
       {/* LOCAL TOAST NOTIFICATION */}
       {localToast && (

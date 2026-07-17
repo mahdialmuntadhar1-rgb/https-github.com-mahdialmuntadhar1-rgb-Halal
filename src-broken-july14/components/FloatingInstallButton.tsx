@@ -314,10 +314,26 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
             )}
 
             <button
-              onClick={() => setShowGuide(false)}
+              onClick={async () => {
+                if (deferredPrompt) {
+                  try {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                      setIsStandalone(true);
+                    }
+                    setDeferredPrompt(null);
+                  } catch (err) {
+                    console.error('Install prompt failed:', err);
+                  }
+                }
+                setShowGuide(false);
+              }}
               className="mt-5 w-full bg-gradient-to-r from-emerald-600 to-[#40798C] hover:opacity-90 text-white font-bold text-xs py-3 rounded-xl transition shadow-md"
             >
-              {txt('Got it, thanks', 'موافق، شكرًا لك', 'تێگەیشتم، سوپاس')}
+              {deferredPrompt
+                ? txt('Install Now', 'ثبّت الآن', 'ئێستا داببەزێنە')
+                : txt('Got it, thanks', 'موافق، شكرًا لك', 'تێگەیشتم، سوپاس')}
             </button>
           </div>
         </div>
