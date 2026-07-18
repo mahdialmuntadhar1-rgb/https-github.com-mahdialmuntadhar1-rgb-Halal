@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zawaj</string>
+    <string name="title_activity_main">Zawaj</string>
+    <string name="package_name">org.kaniq.zawaj</string>
+    <string name="custom_url_scheme">org.kaniq.zawaj</string>
+</resources>
