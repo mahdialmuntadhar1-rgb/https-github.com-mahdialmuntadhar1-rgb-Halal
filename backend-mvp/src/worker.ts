@@ -12,10 +12,14 @@ import { handleResetPassword } from './routes/resetPassword';
 
 function getAllowedOrigin(request: Request, env: Env): string {
   const origin = request.headers.get('Origin') || '';
-  const configured = String(env.CORS_ORIGIN || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
+  
+  // Hardcoded allowed origins for immediate fix
+  const configured = [
+    'https://app.kaniq.org',
+    'https://zawaj-app.pages.dev',
+    'https://main.zawaj-app.pages.dev',
+    'https://localhost'
+  ];
 
   if (configured.includes(origin)) return origin;
   return configured[0] || origin || '*';

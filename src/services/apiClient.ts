@@ -73,7 +73,7 @@ async function safeFetch<T = any>(url: string, options?: RequestInit): Promise<T
   try {
     res = await fetch(url, options);
   } catch (error: any) {
-    throw new Error(`Connection error: Could not connect to the matchmaking API server at ${url}. Please verify your network connection or API base URL.`);
+    throw new Error(`Connection error: Could not connect to the API server at ${url}. Please verify your network connection or API base URL.`);
   }
 
   const contentType = res.headers.get('content-type') || '';
