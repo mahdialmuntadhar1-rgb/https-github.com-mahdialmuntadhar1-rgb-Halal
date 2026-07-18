@@ -151,26 +151,7 @@ export const apiClient = {
     }
 
     // Real API call
-    const debugInfo = {
-      platform: typeof window !== 'undefined' && (window as any).Capacitor ? 'Android' : 'Web',
-      apiBase: API_BASE,
-      endpoint: `${API_BASE}/auth/login`,
-      method: 'POST',
-      emailLength: identifier?.length,
-      emailProvided: Boolean(identifier),
-      passwordProvided: Boolean(password),
-      bodyKeys: Object.keys({ email: identifier, password }),
-      isCapacitor: typeof window !== 'undefined' && !!(window as any).Capacitor
-    };
-    console.log('[AUTH DEBUG] Login request:', JSON.stringify(debugInfo));
-    
     const requestBody = JSON.stringify({ email: identifier, password });
-    console.log('[AUTH DEBUG] Request body preview:', JSON.stringify({
-      emailField: 'email',
-      emailValueLength: identifier?.length,
-      passwordField: 'password',
-      passwordValueLength: password?.length
-    }));
     
     try {
       const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
@@ -178,25 +159,12 @@ export const apiClient = {
         headers: { 'Content-Type': 'application/json' },
         body: requestBody,
       });
-      const responseDebug = {
-        success: Boolean(data.token),
-        hasUser: Boolean(data.user),
-        tokenLength: data.token?.length,
-        userEmail: data.user?.email
-      };
-      console.log('[AUTH DEBUG] Login response:', JSON.stringify(responseDebug));
       
       if (data.token) {
         localStorage.setItem('halal_token', data.token);
-        console.log('[AUTH DEBUG] Token stored in localStorage');
       }
       return data;
     } catch (error: any) {
-      console.log('[AUTH DEBUG] Login error:', JSON.stringify({
-        message: error?.message,
-        name: error?.name,
-        stack: error?.stack?.split('\n')?.slice(0, 3)
-      }));
       throw error;
     }
   },
