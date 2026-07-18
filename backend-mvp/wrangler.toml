@@ -4,7 +4,7 @@ compatibility_date = "2026-06-26"
 
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://zawaj-app.pages.dev,https://main.zawaj-app.pages.dev"
+CORS_ORIGIN = "https://app.kaniq.org,https://zawaj-app.pages.dev,https://main.zawaj-app.pages.dev,https://localhost"
 
 [[d1_databases]]
 binding = "DB"

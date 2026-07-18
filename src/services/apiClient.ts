@@ -1,29 +1,42 @@
 import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
 
+// PRODUCTION API URL - Always use the real backend for Capacitor Android builds
+const PRODUCTION_API_URL = 'https://halal-api-real.mahdialmuntadhar1.workers.dev/api';
+
 let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 if (API_BASE.endsWith('/')) {
   API_BASE = API_BASE.slice(0, -1);
 }
 
+// Force production API for Capacitor Android builds
+if (typeof window !== 'undefined' && (window as any).Capacitor) {
+  API_BASE = PRODUCTION_API_URL;
+}
+
 /**
  * Checks if we should run in local demo mode.
- * If there is a real session token in localStorage or a backend URL is explicitly configured, 
- * we try to contact the backend, otherwise we fallback to the local mock state.
+ * Demo mode is ONLY allowed in browser/web builds when explicitly enabled.
+ * Capacitor Android builds ALWAYS use the real backend.
  */
 export function getIsDemoMode(): boolean {
+  // NEVER use demo mode in Capacitor Android
+  if (typeof window !== 'undefined' && (window as any).Capacitor) {
+    return false;
+  }
+
   const forceReal = localStorage.getItem('halal_force_real') === 'true';
   if (forceReal) return false;
 
   const apiUrl = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL;
-  // If no external/real API URL is configured, we must use demo/mock mode
+  // If no external/real API URL is configured, we must use demo/mock mode (browser only)
   if (!apiUrl || apiUrl === '/api') {
     return true;
   }
 
   const token = localStorage.getItem('halal_token');
   // If no token exists, or if it is a mock token/placeholder, we use demo/mock mode
-  if (!token || token.startsWith('mock_') || token === 'demo_real_token_placeholder') {
+  if (!token || token.startsWith('mock_') || token === 'demo_real_token_placeholder' || token === 'demo_token_placeholder') {
     return true;
   }
 
@@ -138,16 +151,54 @@ export const apiClient = {
     }
 
     // Real API call
-    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
+    const debugInfo = {
+      platform: typeof window !== 'undefined' && (window as any).Capacitor ? 'Android' : 'Web',
+      apiBase: API_BASE,
+      endpoint: `${API_BASE}/auth/login`,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
-    });
-
-    if (data.token) {
-      localStorage.setItem('halal_token', data.token);
+      emailLength: identifier?.length,
+      emailProvided: Boolean(identifier),
+      passwordProvided: Boolean(password),
+      bodyKeys: Object.keys({ email: identifier, password }),
+      isCapacitor: typeof window !== 'undefined' && !!(window as any).Capacitor
+    };
+    console.log('[AUTH DEBUG] Login request:', JSON.stringify(debugInfo));
+    
+    const requestBody = JSON.stringify({ email: identifier, password });
+    console.log('[AUTH DEBUG] Request body preview:', JSON.stringify({
+      emailField: 'email',
+      emailValueLength: identifier?.length,
+      passwordField: 'password',
+      passwordValueLength: password?.length
+    }));
+    
+    try {
+      const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+      });
+      const responseDebug = {
+        success: Boolean(data.token),
+        hasUser: Boolean(data.user),
+        tokenLength: data.token?.length,
+        userEmail: data.user?.email
+      };
+      console.log('[AUTH DEBUG] Login response:', JSON.stringify(responseDebug));
+      
+      if (data.token) {
+        localStorage.setItem('halal_token', data.token);
+        console.log('[AUTH DEBUG] Token stored in localStorage');
+      }
+      return data;
+    } catch (error: any) {
+      console.log('[AUTH DEBUG] Login error:', JSON.stringify({
+        message: error?.message,
+        name: error?.name,
+        stack: error?.stack?.split('\n')?.slice(0, 3)
+      }));
+      throw error;
     }
-    return data;
   },
 
   async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
