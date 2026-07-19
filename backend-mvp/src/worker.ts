@@ -41,6 +41,17 @@ const publicRoute = await handleAuth(ctx) || await handleHeroImages(ctx) || awai
     return json({ ok: true, service: 'HALAL Worker API' });
   }
 
+  if (ctx.url.pathname === '/api/version') {
+    return json({ 
+      ok: true, 
+      service: 'HALAL Worker API',
+      version: 'zawaj-diagnostic-2026-07-19-165497c',
+      commit: '165497cd34b179dd6fb055a199233e045217d30f',
+      environment: 'production',
+      diagnostic: true
+    });
+  }
+
   if (!ctx.user) throw new HttpError(401, 'Authentication required.');
 
   const routeHandlers = [
