@@ -73,6 +73,65 @@ export async function handleAuth(ctx: RequestContext): Promise<Response | null> 
     return json({ user: publicUser(requireUser(ctx)) });
   }
 
+  // Google Play: authenticated account deletion. Path is /api/auth/account or /auth/account.
+  if (path === '/auth/account' && request.method === 'DELETE') {
+    const user = requireUser(ctx);
+    const userId = user.id;
+
+    // Atomic only — never run sequential deletes that could leave a partial wipe.
+    if (typeof env.DB.batch !== 'function') {
+      throw new HttpError(500, 'Account deletion is temporarily unavailable. Please try again later.');
+    }
+
+    // Order: clear non-CASCADE FKs → community → all messages in user's conversations →
+    // conversations → remaining owned rows → user.
+    const statements = [
+      env.DB.prepare('UPDATE halal_requests SET decided_by = NULL WHERE decided_by = ?').bind(userId),
+      env.DB.prepare('UPDATE halal_introduction_requests SET decided_by = NULL WHERE decided_by = ?').bind(userId),
+
+      // Community: likes/comments first (including rows on this user's posts), then posts.
+      env.DB.prepare(
+        `DELETE FROM halal_post_likes
+         WHERE user_id = ?
+            OR post_id IN (SELECT id FROM halal_community_posts WHERE user_id = ?)`,
+      ).bind(userId, userId),
+      env.DB.prepare(
+        `DELETE FROM halal_post_comments
+         WHERE user_id = ?
+            OR post_id IN (SELECT id FROM halal_community_posts WHERE user_id = ?)`,
+      ).bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_community_posts WHERE user_id = ?').bind(userId),
+
+      // All messages in conversations involving this user (not only messages they sent).
+      env.DB.prepare(
+        `DELETE FROM halal_messages
+         WHERE conversation_id IN (
+           SELECT id FROM halal_conversations
+           WHERE user_one_id = ? OR user_two_id = ?
+         )`,
+      ).bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_conversations WHERE user_one_id = ? OR user_two_id = ?').bind(userId, userId),
+
+      env.DB.prepare('DELETE FROM halal_cafe_answers WHERE user_id = ?').bind(userId),
+      env.DB.prepare('DELETE FROM halal_reports WHERE reporter_id = ?').bind(userId),
+      env.DB.prepare('DELETE FROM halal_blocks WHERE blocker_id = ? OR blocked_user_id = ?').bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_saved_profiles WHERE user_id = ? OR saved_user_id = ?').bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_password_resets WHERE user_id = ?').bind(userId),
+      env.DB.prepare('DELETE FROM halal_requests WHERE sender_id = ? OR receiver_id = ?').bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_introduction_requests WHERE sender_id = ? OR receiver_id = ?').bind(userId, userId),
+      env.DB.prepare('DELETE FROM halal_preferences WHERE user_id = ?').bind(userId),
+      env.DB.prepare('DELETE FROM halal_profiles WHERE user_id = ?').bind(userId),
+      env.DB.prepare('DELETE FROM halal_users WHERE id = ?').bind(userId),
+    ];
+
+    await env.DB.batch(statements);
+
+    return json({
+      success: true,
+      message: 'Your account and associated data have been deleted.',
+    });
+  }
+
   return null;
 }
 
