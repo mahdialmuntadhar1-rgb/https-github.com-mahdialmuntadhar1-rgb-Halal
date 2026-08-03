@@ -14,7 +14,7 @@ import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
 import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
-import MarriageCafeFeed from './components/MarriageCafeFeed';
+import CommunityFeed from './components/CommunityFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
 import Postbox from './components/Postbox';
@@ -40,6 +40,7 @@ export default function App() {
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [preselectedGender, setPreselectedGender] = useState<'male' | 'female' | null>(null);
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
 
   // Load Slideshow photos
   const loadHeroImages = async () => {
@@ -76,14 +77,8 @@ export default function App() {
           setMatches(matchesResult.matches);
           setConversations(convs);
 
-          // Route initial loaded user appropriately based on profile completeness
-          if (!profile.gender) {
-            setTab('gender-selection');
-          } else if (!profile.education || !profile.profession || !profile.values || profile.values.length === 0) {
-            setTab('onboarding');
-          } else {
-            setTab('explore');
-          }
+          // Route initial loaded user appropriately - allow full explore access
+          setTab('explore');
         } else {
           setIsAuthenticated(false);
           setUserProfile(null);
@@ -130,14 +125,8 @@ export default function App() {
       setMatches(matchesResult.matches);
       setConversations(convs);
       
-      // Route user correctly: registration, login, and onboarding are united as a single flow
-      if (!currentProfile.gender) {
-        setTab('gender-selection');
-      } else if (!currentProfile.education || !currentProfile.profession || !currentProfile.values || currentProfile.values.length === 0) {
-        setTab('onboarding');
-      } else {
-        setTab('explore');
-      }
+      // Route user correctly: registration and login are separate from onboarding now
+      setTab('explore');
     } catch (err) {
       console.error("Failed loading data after auth", err);
     } finally {
@@ -217,8 +206,8 @@ export default function App() {
     if (userProfile.age > 0) score += 15;
     if (userProfile.religion && userProfile.ethnicity && userProfile.country) score += 20;
     if (userProfile.profession && userProfile.education) score += 20;
-    if (userProfile.languages.length > 0) score += 15;
-    if (userProfile.values.length > 0) score += 15;
+    if (userProfile.languages?.length > 0) score += 15;
+    if (userProfile.values?.length > 0) score += 15;
     return score;
   };
 
@@ -355,7 +344,7 @@ export default function App() {
     <div 
       dir={t.dir} 
       lang={locale} 
-      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-x-hidden pb-20 sm:pb-24"
+      className="bg-warm-ivory min-h-screen text-warm-charcoal font-sans flex flex-col justify-between selection:bg-accent-coral/20 selection:text-accent-coral relative overflow-hidden pb-20 sm:pb-24"
     >
       
       {/* Blur blobs background */}
@@ -379,11 +368,16 @@ export default function App() {
         setTab={setTab}
         profileStrength={profileStrength}
         userProfileName={userProfile ? userProfile.name : undefined}
+        isAuthenticated={isAuthenticated}
         locale={locale}
         setLocale={setLocale}
         isAdmin={userProfile?.role === 'admin'}
         heroImages={heroImages}
         onLogout={isAuthenticated ? handleLogout : undefined}
+        onRequestAuth={(mode) => {
+          setAuthInitialMode(mode);
+          setTab('onboarding');
+        }}
       />
 
       {/* Primary switcher layout */}
@@ -393,6 +387,7 @@ export default function App() {
             locale={locale}
             onAuthSuccess={handleAuthSuccess}
             triggerToast={triggerToast}
+            initialMode={authInitialMode}
           />
         ) : (
           <>
@@ -538,9 +533,10 @@ export default function App() {
             )}
 
             {currentTab === 'community' && userProfile && (
-              <MarriageCafeFeed
+              <CommunityFeed
                 locale={locale}
-                userProfile={userProfile}
+                currentEmail={userProfile.email}
+                currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
                 triggerToast={triggerToast}
               />
             )}

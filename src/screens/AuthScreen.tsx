@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Lock, User, Shield, Sparkles, CheckCircle, ArrowRight, Languages, MapPin, Phone, Calendar } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { TRANSLATIONS } from '../lib/translations';
@@ -30,13 +30,21 @@ interface AuthScreenProps {
   locale: AppLanguage;
   onAuthSuccess: (token: string, userProfile: any) => void;
   triggerToast: (msg: string) => void;
+  /** UX only: which form to show first. Does not change auth API behavior. */
+  initialMode?: 'login' | 'register';
 }
 
-export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: AuthScreenProps) {
+export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initialMode = 'login' }: AuthScreenProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isRtl = t.dir === 'rtl';
 
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('register');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(initialMode);
+
+  useEffect(() => {
+    if (initialMode === 'login' || initialMode === 'register') {
+      setMode(initialMode);
+    }
+  }, [initialMode]);
   
   // Login form state
   const [identifier, setIdentifier] = useState('');
@@ -534,27 +542,31 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast }: Auth
           </form>
         )}
 
-        {/* Local Demo Fallback Link */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-stone-200/50" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-warm-ivory px-3 text-[10px] text-stone-500 font-mono tracking-wider">
-              {txt('OR', 'أو', 'یاخود')}
-            </span>
-          </div>
-        </div>
+        {/* Demo Sandbox is DEV-only — must never appear in production builds */}
+        {import.meta.env.DEV && (
+          <>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-stone-200/50" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-warm-ivory px-3 text-[10px] text-stone-500 font-mono tracking-wider">
+                  {txt('OR', 'أو', 'یاخود')}
+                </span>
+              </div>
+            </div>
 
-        <button
-          type="button"
-          onClick={enterDemoMode}
-          disabled={isLoading}
-          className="w-full py-3 px-4 border border-stone-200/80 rounded-xl text-xs sm:text-sm font-extrabold text-stone-700 bg-stone-50/60 hover:bg-stone-100/80 transition flex items-center justify-center space-x-2 border-dashed"
-        >
-          <span>⭐</span>
-          <span>{txt('Proceed to Demo Sandbox Mode', 'الدخول الفوري بوضع التجربة والمحاكاة', 'چوونە ژوورەوەی ڕاستەوخۆ بە دۆخی تاقیکاری')}</span>
-        </button>
+            <button
+              type="button"
+              onClick={enterDemoMode}
+              disabled={isLoading}
+              className="w-full py-3 px-4 border border-stone-200/80 rounded-xl text-xs sm:text-sm font-extrabold text-stone-700 bg-stone-50/60 hover:bg-stone-100/80 transition flex items-center justify-center space-x-2 border-dashed"
+            >
+              <span>⭐</span>
+              <span>{txt('Proceed to Demo Sandbox Mode', 'الدخول الفوري بوضع التجربة والمحاكاة', 'چوونە ژوورەوەی ڕاستەوخۆ بە دۆخی تاقیکاری')}</span>
+            </button>
+          </>
+        )}
 
       </div>
     </div>

@@ -93,7 +93,8 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
     sessionStorage.setItem('pwa-install-minimized', 'true');
   };
 
-  // Do not render anything if already installed
+  // Do not render anything if already installed, or when running inside Capacitor (native app).
+  if (typeof window !== 'undefined' && (window as any).Capacitor) return null;
   if (isStandalone) return null;
 
   // Translation helpers

@@ -1,4 +1,4 @@
-﻿import { hashPassword, signToken, verifyPassword } from '../auth';
+﻿import { hashPassword, needsRehash, signToken, verifyPassword } from '../auth';
 import { AuthUser, HttpError, json, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
 
 function normalizeEmail(email: string): string {
@@ -46,11 +46,26 @@ export async function handleAuth(ctx: RequestContext): Promise<Response | null> 
       .bind(email)
       .first<AuthUser & { password_hash: string }>();
 
-    if (!row || !(await verifyPassword(password, String(row.password_hash)))) {
+    const storedHash = row ? String(row.password_hash) : '';
+    if (!row || !(await verifyPassword(password, storedHash))) {
       throw new HttpError(401, 'Invalid email or password.');
     }
 
     const user: AuthUser = { id: String(row.id), email: String(row.email), role: row.role === 'admin' ? 'admin' : 'member' };
+
+    // Gradual migration: after a successful bcrypt login, upgrade hash to PBKDF2.
+    // Best-effort only — never fail the login if the UPDATE fails.
+    if (needsRehash(storedHash)) {
+      try {
+        const upgraded = await hashPassword(password);
+        await env.DB.prepare('UPDATE halal_users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+          .bind(upgraded, user.id)
+          .run();
+      } catch (migrationError) {
+        console.error('password hash migration failed', { userId: user.id, error: migrationError });
+      }
+    }
+
     return json({ user: publicUser(user), token: await signToken(env, user) });
   }
 

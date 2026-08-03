@@ -1,45 +1,17 @@
-import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
+﻿import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
-
-// PRODUCTION API URL - Always use the real backend for Capacitor Android builds
-const PRODUCTION_API_URL = 'https://halal-api-real.mahdialmuntadhar1.workers.dev/api';
 
 let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 if (API_BASE.endsWith('/')) {
   API_BASE = API_BASE.slice(0, -1);
 }
 
-// Force production API for Capacitor Android builds
-if (typeof window !== 'undefined' && (window as any).Capacitor) {
-  API_BASE = PRODUCTION_API_URL;
-}
-
 /**
  * Checks if we should run in local demo mode.
- * Demo mode is ONLY allowed in browser/web builds when explicitly enabled.
- * Capacitor Android builds ALWAYS use the real backend.
+ * FORCED TO ALWAYS RETURN FALSE - uses real backend API
  */
 export function getIsDemoMode(): boolean {
-  // NEVER use demo mode in Capacitor Android
-  if (typeof window !== 'undefined' && (window as any).Capacitor) {
-    return false;
-  }
-
-  const forceReal = localStorage.getItem('halal_force_real') === 'true';
-  if (forceReal) return false;
-
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL;
-  // If no external/real API URL is configured, we must use demo/mock mode (browser only)
-  if (!apiUrl || apiUrl === '/api') {
-    return true;
-  }
-
-  const token = localStorage.getItem('halal_token');
-  // If no token exists, or if it is a mock token/placeholder, we use demo/mock mode
-  if (!token || token.startsWith('mock_') || token === 'demo_real_token_placeholder' || token === 'demo_token_placeholder') {
-    return true;
-  }
-
+  // Real backend mode - forced false so all API calls hit the live Worker
   return false;
 }
 
@@ -64,6 +36,30 @@ const getHeaders = () => {
   return headers;
 };
 
+/** Unwrap Worker `{ profile }` payloads and guarantee array fields used by the UI. */
+function normalizeUserProfile(data: any): UserProfile {
+  const raw = (data && data.profile) ? data.profile : data;
+  return {
+    ...raw,
+    name: raw?.name || raw?.full_name || '',
+    age: Number(raw?.age) || 0,
+    education: raw?.education || '',
+    profession: raw?.profession || raw?.occupation || '',
+    country: raw?.country || 'Iraq',
+    religion: raw?.religion || 'islam',
+    ethnicity: raw?.ethnicity || 'arab',
+    languages: Array.isArray(raw?.languages) ? raw.languages : [],
+    values: Array.isArray(raw?.values) ? raw.values : [],
+    timeline: raw?.timeline || '',
+    wantsChildren: raw?.wantsChildren || raw?.wants_children || '',
+    relocation: raw?.relocation || '',
+    communicationPreference: raw?.communicationPreference || raw?.communication_preference || '',
+    gender: raw?.gender || undefined,
+    email: raw?.email,
+    savedMatches: Array.isArray(raw?.savedMatches) ? raw.savedMatches : [],
+  } as UserProfile;
+}
+
 /**
  * Robust wrapper over fetch to safely validate content-type and handle HTML/text fallbacks
  * without crashing or throwing cryptic "Unexpected token <" JSON parsing exceptions.
@@ -73,7 +69,7 @@ async function safeFetch<T = any>(url: string, options?: RequestInit): Promise<T
   try {
     res = await fetch(url, options);
   } catch (error: any) {
-    throw new Error(`Connection error: Could not connect to the API server at ${url}. Please verify your network connection or API base URL.`);
+    throw new Error(`Connection error: Could not connect to the matchmaking API server at ${url}. Please verify your network connection or API base URL.`);
   }
 
   const contentType = res.headers.get('content-type') || '';
@@ -139,7 +135,7 @@ export const apiClient = {
         createdAt: new Date().toISOString(),
         role: identifier.includes('admin') || identifier.includes('safar') ? 'admin' : 'user'
       };
-      
+
       // Update mock api profile
       await mockApi.updateCurrentUserProfile({
         email: user.email,
@@ -151,22 +147,16 @@ export const apiClient = {
     }
 
     // Real API call
-    const requestBody = JSON.stringify({ email: identifier, password });
-    
-    try {
-      const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: requestBody,
-      });
-      
-      if (data.token) {
-        localStorage.setItem('halal_token', data.token);
-      }
-      return data;
-    } catch (error: any) {
-      throw error;
+    const data = await safeFetch<{ token: string; user: User }>(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: identifier, password }),
+    });
+
+    if (data.token) {
+      localStorage.setItem('halal_token', data.token);
     }
+    return data;
   },
 
   async register(fullName: string, governorate: string, district: string, email: string, phone: string | undefined, password: string, age: number): Promise<{ token: string; user: User }> {
@@ -223,13 +213,14 @@ export const apiClient = {
 
   async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     if (getIsDemoMode()) {
-      return { 
-        success: true, 
-        message: 'Demo forgot password instructions simulated. Check your inbox.' 
+      return {
+        success: true,
+        message: 'Demo forgot password instructions simulated. Check your inbox.'
       };
     }
 
-    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/forgot-password`, {
+    // Backend route is registered at /api/auth/forgot-password (not /auth/forgot-password).
+    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/api/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -244,10 +235,12 @@ export const apiClient = {
       return mockApi.getCurrentUser();
     }
 
-    return safeFetch<UserProfile>(`${API_BASE}/profile/me`, {
+    // Worker returns { success, profile } — unwrap and normalize arrays the UI expects.
+    const data = await safeFetch<any>(`${API_BASE}/profile/me`, {
       method: 'GET',
       headers: getHeaders(),
     });
+    return normalizeUserProfile(data);
   },
 
   async updateCurrentUserProfile(updated: Partial<UserProfile>): Promise<UserProfile> {
@@ -255,11 +248,12 @@ export const apiClient = {
       return mockApi.updateCurrentUserProfile(updated);
     }
 
-    return safeFetch<UserProfile>(`${API_BASE}/profile/me`, {
+    const data = await safeFetch<any>(`${API_BASE}/profile/me`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(updated),
     });
+    return normalizeUserProfile(data);
   },
 
   /**
@@ -434,10 +428,11 @@ export const apiClient = {
       return mockApi.getConversations();
     }
 
-    return safeFetch<Conversation[]>(`${API_BASE}/conversations`, {
+    const result = await safeFetch<{ conversations: Conversation[] }>(`${API_BASE}/conversations`, {
       method: 'GET',
       headers: getHeaders(),
     });
+    return result.conversations || [];
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -529,11 +524,11 @@ export const apiClient = {
   },
 
   async createCommunityPost(
-    title: string, 
-    content: string, 
-    category: CommunityPost['category'], 
-    isDaily: boolean = false, 
-    image?: string, 
+    title: string,
+    content: string,
+    category: CommunityPost['category'],
+    isDaily: boolean = false,
+    image?: string,
     status?: 'pending' | 'approved' | 'hidden' | 'rejected',
     postType?: 'standard' | 'photo' | 'opinion' | 'poll',
     opinionColor?: string,
@@ -660,3 +655,6 @@ export const apiClient = {
     return !!data.success;
   }
 };
+
+
+

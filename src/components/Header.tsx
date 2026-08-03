@@ -1,20 +1,21 @@
-import React from 'react';
-import { Heart, ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, Shield } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ShieldCheck, User, MessageSquareHeart, Sparkles, Languages, Lock, ChevronDown, LogOut, Settings, UserCircle } from 'lucide-react';
 import { Language } from '../lib/translations';
 import { TRANSLATIONS } from '../lib/translations';
 import { HeroImage, AppTab } from '../types';
-import HeroSlideshow from './HeroSlideshow';
 
 interface HeaderProps {
   currentTab: AppTab;
   setTab: (tab: AppTab) => void;
   profileStrength: number;
   userProfileName?: string;
+  isAuthenticated?: boolean;
   locale: Language;
   setLocale: (locale: Language) => void;
   isAdmin?: boolean;
   heroImages?: HeroImage[];
   onLogout?: () => void;
+  onRequestAuth?: (mode: 'login' | 'register') => void;
 }
 
 export default function Header({ 
@@ -22,16 +23,49 @@ export default function Header({
   setTab, 
   profileStrength, 
   userProfileName, 
+  isAuthenticated = false,
   locale, 
   setLocale,
   isAdmin = false,
   heroImages = [],
-  onLogout
+  onLogout,
+  onRequestAuth
 }: HeaderProps) {
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
   const txt = (en: string, ar: string, ckb: string) => {
     return locale === 'en' ? en : locale === 'ckb' ? ckb : ar;
+  };
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+    };
+  }, [accountMenuOpen]);
+
+  useEffect(() => {
+    setAccountMenuOpen(false);
+  }, [currentTab, isAuthenticated]);
+
+  const goAccount = (tab: AppTab) => {
+    setAccountMenuOpen(false);
+    setTab(tab);
+  };
+
+  const handleLogoutClick = () => {
+    setAccountMenuOpen(false);
+    onLogout?.();
   };
 
   return (
@@ -139,28 +173,18 @@ export default function Header({
           {/* Right Action Menu: Profile Strength bar & Shortcuts */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             
-            {/* Profile Info block / Login Button */}
-            {userProfileName ? (
+            {isAuthenticated ? (
               <>
                 <div className="hidden lg:flex flex-col items-end text-right rtl:text-left">
-                  <div className="flex items-center gap-2">
-                    <span 
-                      className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
-                      onClick={() => setTab('profile')}
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
-                      {`${t.welcome}, ${userProfileName}`}
-                    </span>
-                    {onLogout && (
-                      <button 
-                        onClick={onLogout}
-                        className="text-[10px] text-accent-coral hover:text-accent-pink font-bold border border-accent-coral/20 hover:border-accent-pink/30 px-1.5 py-0.5 rounded-lg transition shrink-0"
-                        title={locale === 'en' ? 'Log Out' : locale === 'ar' ? 'تسجيل الخروج' : 'چوونە دەرەوە'}
-                      >
-                        {locale === 'en' ? 'Logout' : locale === 'ar' ? 'خروج' : 'دەرچوون'}
-                      </button>
-                    )}
-                  </div>
+                  <span 
+                    className="text-xs font-semibold text-warm-charcoal flex items-center gap-1 cursor-pointer hover:text-accent-coral transition-colors"
+                    onClick={() => setTab('profile')}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#40798C]" />
+                    {userProfileName
+                      ? `${t.welcome}, ${userProfileName}`
+                      : txt('Welcome', 'أهلاً بك', 'بەخێربێیت')}
+                  </span>
                   <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
                     <div className="w-20 bg-white/40 border border-white/20 h-2 rounded-full overflow-hidden">
                       <div
@@ -177,64 +201,98 @@ export default function Header({
                   </div>
                 </div>
 
-                {/* Quick settings switches (Dossier, Privacy, Account) */}
-                {profileStrength > 0 && (
-                  <div className="flex items-center gap-1 bg-white/30 p-1 rounded-xl border border-white/40">
-                    <button
-                      onClick={() => setTab('profile')}
-                      title="My Dossier"
-                      className={`p-1.5 rounded-lg transition-all ${
-                        currentTab === 'profile' 
-                          ? 'bg-[#40798C] text-white shadow-sm scale-102' 
-                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                      }`}
-                    >
-                      <User className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setTab('privacy')}
-                      title="Privacy Settings"
-                      className={`p-1.5 rounded-lg transition-all ${
-                        currentTab === 'privacy' 
-                          ? 'bg-[#9333EA] text-white shadow-sm scale-102' 
-                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                      }`}
-                    >
-                      <Lock className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setTab('account')}
-                      title="Account Verification Center"
-                      className={`p-1.5 rounded-lg transition-all ${
-                        currentTab === 'account' 
-                          ? 'bg-emerald-600 text-white shadow-sm scale-102' 
-                          : 'text-[#6B635B] hover:bg-white/40 hover:text-warm-charcoal'
-                      }`}
-                    >
-                      <Shield className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+                {/* Account / Profile menu */}
+                <div className="relative" ref={accountMenuRef}>
+                  <button
+                    type="button"
+                    id="header-account-menu-btn"
+                    aria-haspopup="menu"
+                    aria-expanded={accountMenuOpen}
+                    onClick={() => setAccountMenuOpen((open) => !open)}
+                    className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-[#40798C]/25 bg-white/70 text-warm-charcoal hover:bg-white shadow-sm flex items-center gap-1.5"
+                  >
+                    <UserCircle className="w-4 h-4 text-[#40798C]" />
+                    <span>{txt('Account', 'الحساب', 'هەژمار')}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                <button
-                  onClick={() => setTab(currentTab === 'onboarding' ? 'explore' : 'onboarding')}
-                  className="p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 border border-accent-coral/20 bg-[#9333EA]/10 text-accent-coral hover:bg-[#9333EA]/20 flex items-center gap-1"
-                >
-                  <User className="w-3.5 h-3.5 text-[#9333EA]" />
-                  <span className="hidden xs:inline">
-                    {t.editDetails}
-                  </span>
-                </button>
+                  {accountMenuOpen && (
+                    <div
+                      role="menu"
+                      id="header-account-menu"
+                      className="absolute end-0 mt-2 w-52 rounded-2xl border border-stone-200/80 bg-white shadow-xl shadow-stone-900/10 py-1.5 z-60 overflow-hidden"
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => goAccount('profile')}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-warm-charcoal hover:bg-[#40798C]/8 text-start"
+                      >
+                        <User className="w-3.5 h-3.5 text-[#40798C]" />
+                        {txt('My Profile', 'ملفي الشخصي', 'پڕۆفایلی من')}
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => goAccount('onboarding')}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-warm-charcoal hover:bg-[#40798C]/8 text-start"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-accent-coral" />
+                        {txt('Edit Profile', 'تعديل الملف', 'دەستکاری پڕۆفایل')}
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => goAccount('account')}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-warm-charcoal hover:bg-[#40798C]/8 text-start"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-emerald-600" />
+                        {txt('Settings', 'الإعدادات', 'ڕێکخستنەکان')}
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => goAccount('privacy')}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-warm-charcoal hover:bg-[#40798C]/8 text-start"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-[#9333EA]" />
+                        {txt('Privacy', 'الخصوصية', 'نهێنیپارێزی')}
+                      </button>
+                      <div className="my-1 border-t border-stone-100" />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={handleLogoutClick}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 text-start"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        {txt('Logout', 'تسجيل الخروج', 'چوونە دەرەوە')}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
-              <button
-                onClick={() => setTab('onboarding')}
-                className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 shadow-md shadow-accent-coral/10 hover:shadow-lg transition-all duration-200 flex items-center gap-1.5 cursor-pointer hover:scale-102"
-                id="header-login-btn"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>{locale === 'en' ? 'Login' : locale === 'ar' ? 'دخول / تسجيل' : 'چوونە ژوورەوە'}</span>
-              </button>
+              <div className="flex items-center gap-1.5 sm:gap-2" id="header-auth-actions">
+                <button
+                  type="button"
+                  id="header-sign-in-btn"
+                  onClick={() => onRequestAuth?.('login')}
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold text-warm-charcoal bg-white/80 border border-stone-200/80 hover:border-[#40798C]/30 hover:bg-white shadow-sm transition-all flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5 text-[#40798C]" />
+                  <span>{txt('Sign In', 'تسجيل الدخول', 'چوونە ژوورەوە')}</span>
+                </button>
+                <button
+                  type="button"
+                  id="header-register-btn"
+                  onClick={() => onRequestAuth?.('register')}
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-black text-white bg-gradient-to-r from-accent-coral to-accent-pink hover:opacity-95 shadow-md shadow-accent-coral/10 transition-all flex items-center gap-1.5"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>{txt('Register', 'إنشاء حساب', 'دروستکردنی هەژمار')}</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -351,42 +409,6 @@ export default function Header({
             >
               🛡️ {txt('Admin', 'التحكم', 'بەڕێوەبەر')}
             </button>
-          )}
-          {profileStrength > 0 && (
-            <>
-              <button
-                onClick={() => setTab('profile')}
-                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'profile' ? 'bg-[#40798C] text-white' : 'text-[#4A443F]/80'
-                }`}
-              >
-                {txt('Profile', 'الملف', 'پڕۆفایل')}
-              </button>
-              <button
-                onClick={() => setTab('privacy')}
-                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'privacy' ? 'bg-[#9333EA] text-white' : 'text-[#4A443F]/80'
-                }`}
-              >
-                {txt('Privacy', 'السرية', 'نهێنیپارێزی')}
-              </button>
-              <button
-                onClick={() => setTab('account')}
-                className={`px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap ${
-                  currentTab === 'account' ? 'bg-emerald-600 text-white' : 'text-[#4A443F]/80'
-                }`}
-              >
-                {txt('Verification', 'التوثيق', 'سەلماندن')}
-              </button>
-              {onLogout && (
-                <button
-                  onClick={onLogout}
-                  className="px-3 py-1.5 font-bold rounded-lg shrink-0 whitespace-nowrap bg-red-50 text-red-600 border border-red-100 hover:bg-red-100"
-                >
-                  {locale === 'en' ? 'Logout 🚪' : locale === 'ar' ? 'خروج 🚪' : 'دەرچوون 🚪'}
-                </button>
-              )}
-            </>
           )}
         </div>
       </div>

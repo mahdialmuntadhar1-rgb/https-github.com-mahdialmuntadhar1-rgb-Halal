@@ -29,21 +29,54 @@ function getJwtSecret(env: Env): string {
   return env.JWT_SECRET;
 }
 
+/**
+ * PBKDF2-SHA256 iteration count for newly written hashes.
+ * Cloudflare Workers WebCrypto rejects counts above 100_000
+ * (NotSupportedError: "iteration counts above 100000 are not supported").
+ */
+const PBKDF2_ITERATIONS = 100_000;
+
+export function isBcryptHash(stored: string): boolean {
+  return stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$');
+}
+
+export function isPBKDF2Hash(stored: string): boolean {
+  return stored.startsWith('pbkdf2_sha256$');
+}
+
+/** True when the stored hash should be upgraded to the current PBKDF2 writer format. */
+export function needsRehash(stored: string): boolean {
+  return isBcryptHash(stored);
+}
+
 export async function hashPassword(password: string): Promise<string> {
   if (password.length < 10) throw new HttpError(400, 'Password must be at least 10 characters.');
 
-  return bcrypt.hash(password, 12);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    key,
+    256,
+  );
+  const derived = new Uint8Array(bits);
+  return `pbkdf2_sha256$${PBKDF2_ITERATIONS}$${base64UrlEncode(salt)}$${base64UrlEncode(derived)}`;
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  if (stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$')) {
+  // Legacy production hashes (bcryptjs cost 12). Kept until all users migrate via login/reset.
+  if (isBcryptHash(stored)) {
     return bcrypt.compare(password, stored);
   }
 
+  if (!isPBKDF2Hash(stored)) return false;
+
   const [algorithm, iterationsRaw, saltRaw, hashRaw] = stored.split('$');
-  if (algorithm !== 'pbkdf2_sha256') return false;
+  if (algorithm !== 'pbkdf2_sha256' || !iterationsRaw || !saltRaw || !hashRaw) return false;
 
   const iterations = Number.parseInt(iterationsRaw, 10);
+  if (!Number.isFinite(iterations) || iterations < 1) return false;
+
   const salt = base64UrlDecode(saltRaw);
   const expected = base64UrlDecode(hashRaw);
   const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);

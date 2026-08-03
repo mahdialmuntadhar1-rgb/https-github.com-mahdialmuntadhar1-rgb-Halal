@@ -237,6 +237,13 @@ export default function MatchExplorerScreen({
     return !userProfile.age || userProfile.age === 0 || !userProfile.education || !userProfile.profession;
   }, [userProfile]);
 
+  const [dismissProfileReminder, setDismissProfileReminder] = useState(false);
+
+  useEffect(() => {
+    // Re-show reminder if profile becomes incomplete again after edits
+    if (!isProfileIncomplete) setDismissProfileReminder(false);
+  }, [isProfileIncomplete]);
+
   const incompleteMatches = useMemo(() => {
     const women = matches.filter(m => m.gender === 'female').slice(0, 2);
     const men = matches.filter(m => m.gender === 'male').slice(0, 2);
@@ -381,42 +388,46 @@ export default function MatchExplorerScreen({
         </div>
       )}
 
-      {/* Interactive Profile Completion Progress Card or Incomplete Warning Banner */}
-      {isProfileIncomplete ? (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs animate-fade-in text-start" id="complete-profile-banner">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">⚠️</span>
-              <h4 className="text-base sm:text-lg font-serif font-black text-amber-900">
-                {txt("Complete Your Marriage Profile", "أكمل ملف الزواج المبارك", "پڕۆفایلی هاوسەرگیریەکەت تەواو بکە")}
-              </h4>
-              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
-                {txt("Onboarding Pending", "الملف الشخصي معلّق", "پڕۆفایل چاوەڕوانکراوە")}
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-amber-800 font-medium leading-relaxed max-w-2xl">
+      {/* Non-blocking profile completion reminder — browse remains available */}
+      {isProfileIncomplete && !dismissProfileReminder ? (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs animate-fade-in text-start" id="complete-profile-banner">
+          <div className="space-y-1.5">
+            <h4 className="text-base sm:text-lg font-serif font-black text-amber-900">
+              {txt("Complete your profile to improve your matches.", "أكمل ملفك الشخصي لتحسين نتائج التوافق.", "پڕۆفایلەکەت تەواو بکە بۆ باشترکردنی هاوتاکان.")}
+            </h4>
+            <p className="text-xs sm:text-sm text-amber-800/90 font-medium leading-relaxed max-w-2xl">
               {txt(
-                "You can search and explore matches freely. However, to express serious marital interest, send postcards, or build custom serious connections, you must complete your full marriage profile form.",
-                "يمكنك البحث واستكشاف الشركاء بحرية كاملة، ولكن لإرسال طلبات التعارف الجادة والبطاقات البريدية وبدء تواصل وقور، يرجى ملء استمارة ملفك الشخصي بالكامل.",
-                "دەتوانیت کاندیدەکان بە سەربەستی ببینی و بگەڕێیت، بەڵام بۆ دەربڕینی نیەتی جدی هاوسەرگیری یان ناردنی نامەی پێشەکی، دەبێت پڕۆفایلی خۆت بە تەواوی پڕبکەیتەوە."
+                "You can keep browsing recommended partners. Completing your profile helps better matching when you are ready.",
+                "يمكنك متابعة تصفح الشركاء الموصى بهم. إكمال الملف يحسّن التوافق عندما تكون جاهزاً.",
+                "دەتوانیت بەردەوام بیت لە بینینی هاوبەشەکان. تەواوکردنی پڕۆفایل هاوتاکردن باشتر دەکات کاتێک ئامادە بیت."
               )}
             </p>
           </div>
-          <button
-            onClick={() => onNavigateToTab && onNavigateToTab('onboarding')}
-            className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition shrink-0 cursor-pointer flex items-center justify-center gap-2"
-          >
-            <Star className="w-4 h-4 text-amber-300 animate-pulse fill-amber-300" />
-            <span>{txt("Complete Form Now", "أكمل الاستمارة الآن", "ئێستا پڕۆفایلەکە تەواو بکە")}</span>
-          </button>
+          <div className="flex w-full md:w-auto flex-col sm:flex-row gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateToTab && onNavigateToTab('onboarding')}
+              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-600/10 active:scale-95 transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Star className="w-4 h-4 text-amber-300 animate-pulse fill-amber-300" />
+              <span>{txt("Complete Profile", "أكمل الملف", "پڕۆفایل تەواو بکە")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDismissProfileReminder(true)}
+              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/80 border border-amber-200 text-amber-900 font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition cursor-pointer"
+            >
+              {txt("Later", "لاحقاً", "دواتر")}
+            </button>
+          </div>
         </div>
-      ) : (
+      ) : !isProfileIncomplete ? (
         <ProfileCompletionCard
           locale={locale}
           userProfile={userProfile}
           onUpdateProfile={onUpdateUserProfile}
         />
-      )}
+      ) : null}
 
       {/* Governorate Selector Reminder Notice */}
       {filters.governorate === 'All Iraq' && (
