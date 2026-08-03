@@ -174,6 +174,21 @@ export default function App() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    await apiClient.deleteAccount();
+    setIsAuthenticated(false);
+    setUserProfile(null);
+    setMatches([]);
+    setConversations([]);
+    setSavedMatchIds([]);
+    setTab('landing');
+    triggerToast(
+      locale === 'en'
+        ? 'Your account has been permanently deleted.'
+        : 'تم حذف حسابك نهائياً.'
+    );
+  };
+
   // Bookmark Toggler
   const handleToggleSaveMatch = async (matchId: string) => {
     try {
@@ -522,6 +537,7 @@ export default function App() {
                 locale={locale}
                 userName={userProfile.name}
                 triggerToast={triggerToast}
+                onDeleteAccount={handleDeleteAccount}
               />
             )}
 

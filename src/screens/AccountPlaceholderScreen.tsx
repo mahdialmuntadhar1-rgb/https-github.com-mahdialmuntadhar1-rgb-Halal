@@ -23,12 +23,14 @@ interface AccountPlaceholderScreenProps {
   locale: AppLanguage;
   userName: string;
   triggerToast: (msg: string) => void;
+  onDeleteAccount: () => Promise<void>;
 }
 
 export default function AccountPlaceholderScreen({
   locale,
   userName,
-  triggerToast
+  triggerToast,
+  onDeleteAccount,
 }: AccountPlaceholderScreenProps) {
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
   const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone');
@@ -46,6 +48,32 @@ export default function AccountPlaceholderScreen({
   
   // Premium state
   const [tier, setTier] = useState<'standard' | 'premium'>('standard');
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') {
+      triggerToast(
+        locale === 'en'
+          ? 'Type DELETE to confirm account deletion.'
+          : 'اكتب DELETE لتأكيد حذف الحساب.'
+      );
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await onDeleteAccount();
+    } catch (err: any) {
+      triggerToast(
+        locale === 'en'
+          ? `Could not delete account: ${err?.message || 'Unknown error'}`
+          : `تعذر حذف الحساب: ${err?.message || 'خطأ غير معروف'}`
+      );
+      setIsDeleting(false);
+    }
+  };
 
   const handleDemoAuthClick = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +139,83 @@ export default function AccountPlaceholderScreen({
           <AlertTriangle className="w-4.5 h-4.5 text-accent-coral animate-pulse" />
           <span>{locale === 'en' ? 'NOTICE: Backend connection required for live auth' : 'ملاحظة: الاتصال بخادم قاعدة البيانات مطلوب للحسابات الحية'}</span>
         </div>
+      </div>
+
+      {/* Google Play: Account deletion (Settings → Delete Account) */}
+      <div
+        id="account-delete-section"
+        className="bg-red-50/80 border border-red-200/80 rounded-[1.5rem] p-5 sm:p-6 space-y-3"
+      >
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="text-sm sm:text-base font-black text-red-900">
+              {locale === 'en' ? 'Delete Account' : 'حذف الحساب'}
+            </h3>
+            <p className="text-xs sm:text-sm text-red-800/90 font-medium leading-relaxed">
+              {locale === 'en'
+                ? 'Permanently delete your ZAWAJ account and associated profile data. This cannot be undone.'
+                : 'سيؤدي هذا إلى حذف حسابك وبيانات ملفك الشخصي نهائياً. لا يمكن التراجع عن هذا الإجراء.'}
+            </p>
+          </div>
+        </div>
+
+        {!showDeleteConfirm ? (
+          <button
+            type="button"
+            id="account-delete-open-btn"
+            onClick={() => {
+              setShowDeleteConfirm(true);
+              setDeleteConfirmText('');
+            }}
+            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-extrabold transition active:scale-[0.98]"
+          >
+            {locale === 'en' ? 'Delete Account' : 'حذف الحساب'}
+          </button>
+        ) : (
+          <div className="space-y-3 bg-white/70 border border-red-200 rounded-xl p-4" id="account-delete-confirm-dialog">
+            <p className="text-xs text-red-900 font-semibold">
+              {locale === 'en'
+                ? `Type DELETE to confirm permanent deletion for ${userName || 'this account'}.`
+                : `اكتب DELETE لتأكيد الحذف النهائي لحساب ${userName || 'هذا الحساب'}.`}
+            </p>
+            <input
+              id="account-delete-confirm-input"
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              autoComplete="off"
+              disabled={isDeleting}
+              className="w-full px-3 py-2 rounded-lg border border-red-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                id="account-delete-confirm-btn"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting || deleteConfirmText.trim().toUpperCase() !== 'DELETE'}
+                className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-extrabold transition"
+              >
+                {isDeleting
+                  ? (locale === 'en' ? 'Deleting…' : 'جاري الحذف…')
+                  : (locale === 'en' ? 'Yes, delete permanently' : 'نعم، احذف نهائياً')}
+              </button>
+              <button
+                type="button"
+                id="account-delete-cancel-btn"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmText('');
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 transition"
+              >
+                {locale === 'en' ? 'Cancel' : 'إلغاء'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

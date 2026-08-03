@@ -211,6 +211,20 @@ export const apiClient = {
     localStorage.removeItem('halal_force_real');
   },
 
+  /**
+   * Permanently delete the authenticated account and user-owned server data.
+   * Requires a valid JWT. Clears the local token after a successful response.
+   */
+  async deleteAccount(): Promise<{ success: boolean; message: string }> {
+    const data = await safeFetch<{ success: boolean; message: string }>(`${API_BASE}/api/auth/account`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    localStorage.removeItem('halal_token');
+    localStorage.removeItem('halal_force_real');
+    return data;
+  },
+
   async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     if (getIsDemoMode()) {
       return {
