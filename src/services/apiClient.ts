@@ -192,6 +192,33 @@ async function resolveIntroductionRequestId(matchOrRequestId: string): Promise<s
   throw new Error('Introduction request not found for this profile.');
 }
 
+/**
+ * Worker message POST requires halal_conversations.id.
+ * UI passes the counterpart match/user id — resolve via GET /conversations.
+ * Also accepts an already-correct conversation id for compatibility.
+ */
+async function resolveConversationId(matchOrConversationId: string): Promise<string> {
+  const result = await safeFetch<any>(`${API_BASE}/conversations`, {
+    method: 'GET',
+    headers: getHeaders(),
+  });
+  const conversations: any[] = Array.isArray(result?.conversations)
+    ? result.conversations
+    : Array.isArray(result)
+      ? result
+      : [];
+
+  const byConversationId = conversations.find((c) => c?.id === matchOrConversationId);
+  if (byConversationId?.id) return String(byConversationId.id);
+
+  const byMatchId = conversations.find(
+    (c) => c?.matchId === matchOrConversationId || c?.match_id === matchOrConversationId,
+  );
+  if (byMatchId?.id) return String(byMatchId.id);
+
+  throw new Error('Conversation not found for this match. Accept the introduction first.');
+}
+
 export const apiClient = {
   isDemoMode: getIsDemoMode,
 
@@ -529,7 +556,12 @@ export const apiClient = {
       method: 'GET',
       headers: getHeaders(),
     });
-    return result.conversations || [];
+    return (result.conversations || []).map((c: any) => ({
+      ...c,
+      id: c.id,
+      matchId: c.matchId || c.match_id || '',
+      messages: Array.isArray(c.messages) ? c.messages : [],
+    }));
   },
 
   async sendMessage(matchId: string, text: string, sender: 'user' | 'match'): Promise<Message> {
@@ -537,11 +569,20 @@ export const apiClient = {
       return mockApi.sendMessage(matchId, text, sender);
     }
 
-    return safeFetch<Message>(`${API_BASE}/conversations/${matchId}/messages`, {
+    const conversationId = await resolveConversationId(matchId);
+    const data = await safeFetch<any>(`${API_BASE}/conversations/${encodeURIComponent(conversationId)}/messages`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ text, sender }),
+      // Worker infers sender from JWT; only `text` is required
+      body: JSON.stringify({ text }),
     });
+    const raw = data?.message || data;
+    return {
+      id: raw?.id || '',
+      sender: raw?.sender === 'match' ? 'match' : 'user',
+      text: raw?.text || text,
+      timestamp: raw?.timestamp || raw?.created_at || new Date().toISOString(),
+    };
   },
 
   /**

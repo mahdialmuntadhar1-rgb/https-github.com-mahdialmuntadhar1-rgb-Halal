@@ -197,6 +197,8 @@ export interface IntroductionRequest {
 }
 
 export interface Conversation {
+  /** Worker conversation UUID — required for POST /conversations/:id/messages */
+  id?: string;
   matchId: string;
   messages: Message[];
 }
