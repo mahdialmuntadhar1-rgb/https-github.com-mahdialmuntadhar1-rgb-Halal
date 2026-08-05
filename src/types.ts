@@ -46,6 +46,7 @@ export interface PartnerPreferences {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   age: number;
   gender?: 'male' | 'female';

@@ -286,6 +286,7 @@ export default function App() {
       setConversations(updatedConvs);
     } catch (err) {
       console.error("Failed to accept proposal request", err);
+      throw err;
     }
   };
 
@@ -296,6 +297,7 @@ export default function App() {
       setMatches(updatedMatchesListRes.matches);
     } catch (err) {
       console.error("Failed to decline proposal request", err);
+      throw err;
     }
   };
 

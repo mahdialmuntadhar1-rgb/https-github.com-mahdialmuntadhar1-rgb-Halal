@@ -41,6 +41,7 @@ function normalizeUserProfile(data: any): UserProfile {
   const raw = (data && data.profile) ? data.profile : data;
   return {
     ...raw,
+    id: String(raw?.id || raw?.user_id || ''),
     name: raw?.name || raw?.full_name || '',
     age: Number(raw?.age) || 0,
     education: raw?.education || '',
@@ -516,6 +517,18 @@ export const apiClient = {
       headers: getHeaders(),
       body: JSON.stringify({ receiverId: matchId }),
     });
+  },
+
+  /** Real introduction requests for the authenticated user (incoming + outgoing). */
+  async getIntroductionRequests(): Promise<any[]> {
+    if (getIsDemoMode()) {
+      return [];
+    }
+    const data = await safeFetch<any>(`${API_BASE}/request/list`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    return Array.isArray(data?.requests) ? data.requests : Array.isArray(data) ? data : [];
   },
 
   async acceptIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {

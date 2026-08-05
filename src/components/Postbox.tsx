@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppLanguage, UserProfile, MatchProfile } from '../types';
 import { 
-  Mail, Phone, Calendar, MapPin, Briefcase, GraduationCap, Check, X, 
+  Mail, Calendar, MapPin, Briefcase, GraduationCap, Check, X, 
   Inbox, Sparkles, Send, ShieldCheck, Heart, RotateCcw, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiClient } from '../services/apiClient';
 
 interface PostboxProps {
   locale: AppLanguage;
   userProfile: UserProfile;
   matches: MatchProfile[];
-  onAcceptRequest: (matchId: string) => void;
-  onDeclineRequest: (matchId: string) => void;
+  onAcceptRequest: (matchId: string) => void | Promise<void>;
+  onDeclineRequest: (matchId: string) => void | Promise<void>;
   triggerToast: (msg: string) => void;
   onNavigateToTab?: (tab: any) => void;
 }
@@ -37,6 +38,14 @@ interface PostcardData {
   status: 'pending' | 'accepted' | 'declined';
 }
 
+const HONEST_MESSAGE = {
+  en: 'Assalamu Alaikum. I would like to request a respectful introduction for the purpose of marriage, in accordance with Islamic values and with family guidance.',
+  ar: 'السلام عليكم. أرغب في طلب تعارف محترم بغرض الزواج، وفق القيم الإسلامية وبتوجيه من الأهل.',
+  ckb: 'ئەسەلامو عەلەیکوم. دەمەوێت داوای ناساندنێکی ڕێزدار بکەم بۆ مەبەستی هاوسەرگیری، بەپێی بەها ئیسلامییەکان و لە ژێر ڕێنمایی خێزان.',
+};
+
+const STAMP_URL = 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=80&fit=crop&q=80';
+
 export default function Postbox({ 
   locale, 
   userProfile, 
@@ -53,114 +62,118 @@ export default function Postbox({
     return isEn ? en : isCkb ? ckb : ar;
   };
 
-  // State for postcards
   const [postcards, setPostcards] = useState<PostcardData[]>([]);
   const [selectedPostcard, setSelectedPostcard] = useState<PostcardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isActing, setIsActing] = useState(false);
 
-  // Load / Generate postcards based on user's gender
-  useEffect(() => {
-    // Determine the gender of senders (opposite to the user)
-    const targetGender = userProfile.gender === 'female' ? 'male' : 'female';
-    
-    // Filter opposite gender matches to build postcards from
-    const prospectiveSenders = matches.filter(m => m.gender === targetGender);
-    
-    // Fallback if no matches loaded yet
-    const pool = prospectiveSenders.length > 0 ? prospectiveSenders : matches;
+  const loadPostcards = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const myId = String((userProfile as any).id || (userProfile as any).user_id || '');
+      const myEmail = (userProfile.email || '').toLowerCase();
+      const requests = await apiClient.getIntroductionRequests();
 
-    // Define some vintage stamp URLs
-    const stamps = [
-      "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=80&fit=crop&q=80", // Vintage festive
-      "https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=80&fit=crop&q=80", // Elegant crest
-      "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=80&fit=crop&q=80"  // Botanical rose
-    ];
+      const incoming = requests.filter((r: any) => {
+        const receiverId = r.receiver_id || r.receiverId;
+        const receiverEmail = String(r.receiver_email || r.receiverEmail || '').toLowerCase();
+        if (myId && receiverId === myId) return true;
+        if (myEmail && receiverEmail && receiverEmail === myEmail) return true;
+        return false;
+      });
 
-    const messages = [
-      {
-        en: "Assalamu Alaikum. I reviewed your profile and felt a deep resonance with your commitment to family first and traditional values. I hope we can establish respectful contact to understand our compatibility under the guidance of our guardians.",
-        ar: "السلام عليكم ورحمة الله. لقد اطلعت على ملفكم الشخصي الموقر وشعرت بتوافق عميق مع مبادئكم الكريمة التي تركز على العائلة أولاً. آمل أن نتمكن من فتح قناة تواصل محترمة لتقييم الانسجام تحت إشراف الأهل.",
-        ckb: "ئەسەلامو عەلەیکوم. من سەیری پڕۆفایلی جەنابتانم کرد و هەستم بە گونجانێکی قووڵ کرد لەگەڵ بەهاکانتاندا. هیوادارم بتوانین پەیوەندییەکی ڕێزدار دروست بکەین لە ژێر چاودێری سەرپەرشتیارەکانماندا."
-      },
-      {
-        en: "Respectful greetings. Your timeline and aspirations for a quiet, stable marital household match my lifestyle plan perfectly. I share your professional dedication and education level. I would be honored if you accept my proposal postcard.",
-        ar: "تحية طيبة وقورة. إن جدولكم الزمني وتطلعاتكم لتأسيس بيت زوجي مستقر وهادئ يتطابقان تماماً مع رؤيتي للمستقبل. أشارككم نفس الالتزام المهني والتعليمي، وسيكون من دواعي سروري قبول بطاقتي البريدية.",
-        ckb: "سڵاو و ڕێز. پلان و تەمەنی جەنابتان بۆ هاوسەرگیرییەکی سەقامگیر و ئارام زۆر گونجاوە لەگەڵ شێوازی ژیانی مندا. شانازی دەکەم ئەگەر پۆستکارتەکەم قبوڵ بکەن."
-      },
-      {
-        en: "Assalamu Alaikum. I am serious about finding a lifetime partner who appreciates honesty, continuous learning, and peaceful mutual support. I find your parameters truly beautiful. I pray this postcard opens a halal door for us.",
-        ar: "السلام عليكم. أنا جاد للغاية في البحث عن شريك حياة يقدر الصدق والتعلم المستمر والدعم المتبادل الهادئ. لقد وجدت معاييركم جميلة وراقية حقاً، وأدعو الله أن تفتح هذه البطاقة لنا باباً مباركاً وحلالاً.",
-        ckb: "ئەسەلامو عەلەیکوم. من زۆر جددیم لە دۆزینەوەی هاوبەشێکی ژیان کە بەهای ڕاستگۆیی و پشتگیری دوولایەنە بزانێت. هیوادارم ئەم پۆستکارتە ببێتە هۆی خێر بۆ هەردوولامان."
-      }
-    ];
+      const notShared = isEn ? 'Not shared yet' : isCkb ? 'هێشتا هاوبەش نەکراوە' : 'غير مذكور بعد';
+      const memberLabel = isEn ? 'Member' : isCkb ? 'ئەندام' : 'عضو';
 
-    // Build the 3 postcard objects
-    const items: PostcardData[] = pool.slice(0, 3).map((match, idx) => {
-      // Generate realistic Iraqi phone numbers and emails for the mock postcard senders
-      const senderLastName = match.name.split(' ')[1] || 'Al-Baghdadi';
-      const cleanFirstName = match.name.split(' ')[0].toLowerCase();
-      const mockEmail = `${cleanFirstName}.${senderLastName.toLowerCase().replace('-', '')}@halal.iq`;
-      const mockPhone = `+964 77${idx} ${400 + idx * 77} ${8000 + idx * 95}`;
-      const mockDistrict = match.city || (idx === 0 ? 'Karrada' : idx === 1 ? 'Mansour' : 'Adhamiyah');
+      const items: PostcardData[] = incoming.map((r: any) => {
+        const senderId = String(r.sender_id || r.senderId || '');
+        const match = matches.find((m) => m.id === senderId);
+        const statusRaw = String(r.status || 'pending');
+        const status: PostcardData['status'] =
+          statusRaw === 'accepted' ? 'accepted' : statusRaw === 'declined' ? 'declined' : 'pending';
 
-      return {
-        id: `postcard-${match.id}`,
-        matchId: match.id,
-        senderName: match.name,
-        senderAge: match.age,
-        senderGender: match.gender,
-        senderProfession: match.profession,
-        senderEducation: match.education,
-        senderDistrict: mockDistrict,
-        senderGovernorate: match.governorate || 'Baghdad',
-        senderEmail: mockEmail,
-        senderPhone: mockPhone,
-        senderPhoto: match.avatarUrl,
-        messageEn: messages[idx % messages.length].en,
-        messageAr: messages[idx % messages.length].ar,
-        messageCkb: messages[idx % messages.length].ckb,
-        stampUrl: stamps[idx % stamps.length],
-        createdAt: new Date(Date.now() - (idx + 1) * 3600000 * 4).toISOString(), // staggered times
-        status: match.requestStatus === 'accepted' ? 'accepted' : match.requestStatus === 'declined' ? 'declined' : 'pending'
-      };
-    });
+        return {
+          id: String(r.id),
+          matchId: senderId,
+          senderName: r.sender_name || r.senderName || match?.name || memberLabel,
+          senderAge: match?.age || 0,
+          senderGender: (match?.gender || 'male') as 'male' | 'female',
+          senderProfession: match?.profession || notShared,
+          senderEducation: match?.education || notShared,
+          senderDistrict: match?.city || match?.district || '',
+          senderGovernorate: match?.governorate || '',
+          // Never invent contact fields — only real API email after accept; no fake phones
+          senderEmail: status === 'accepted' ? String(r.sender_email || r.senderEmail || '') : '',
+          senderPhone: '',
+          senderPhoto: match?.avatarUrl || '',
+          messageEn: HONEST_MESSAGE.en,
+          messageAr: HONEST_MESSAGE.ar,
+          messageCkb: HONEST_MESSAGE.ckb,
+          stampUrl: STAMP_URL,
+          createdAt: r.created_at || r.createdAt || new Date().toISOString(),
+          status,
+        };
+      });
 
-    setPostcards(items);
-  }, [matches, userProfile.gender]);
-
-  const handleAccept = (postcard: PostcardData) => {
-    // Call the parent handler
-    onAcceptRequest(postcard.matchId);
-    
-    // Update local state
-    setPostcards(prev => prev.map(p => p.id === postcard.id ? { ...p, status: 'accepted' } : p));
-    if (selectedPostcard?.id === postcard.id) {
-      setSelectedPostcard({ ...postcard, status: 'accepted' });
+      setPostcards(items);
+      setSelectedPostcard((prev) => {
+        if (!prev) return items.find((p) => p.status === 'pending') || items[0] || null;
+        return items.find((p) => p.id === prev.id) || items.find((p) => p.status === 'pending') || items[0] || null;
+      });
+    } catch (err: any) {
+      console.error('Failed to load introduction postbox', err);
+      setLoadError(err?.message || 'Failed to load postbox');
+      setPostcards([]);
+    } finally {
+      setIsLoading(false);
     }
-    
-    triggerToast(
-      txt(
-        `💍 Accepted proposal postcard from ${postcard.senderName}! Communication unlocked in Private Chat.`,
-        `💍 تم قبول بطاقة طلب الزواج من ${postcard.senderName}! تم تفعيل التواصل الآمن في المحادثات.`,
-        `💍 پۆستکارتی داواکاری هاوسەرگیری لەلایەن ${postcard.senderName} قبوڵ کرا! گفتوگۆی تایبەت چالاک بوو.`
-      )
-    );
+  }, [matches, userProfile, isEn, isCkb]);
+
+  useEffect(() => {
+    loadPostcards();
+  }, [loadPostcards]);
+
+  const handleAccept = async (postcard: PostcardData) => {
+    if (isActing) return;
+    setIsActing(true);
+    try {
+      await Promise.resolve(onAcceptRequest(postcard.matchId));
+      await loadPostcards();
+      triggerToast(
+        txt(
+          `💍 Accepted introduction from ${postcard.senderName}. You can continue in Private Chat.`,
+          `💍 تم قبول طلب التعارف من ${postcard.senderName}. يمكنك المتابعة في المحادثة الخاصة.`,
+          `💍 داواکاری ناساندن لەلایەن ${postcard.senderName} قبوڵ کرا. دەتوانیت لە گفتوگۆی تایبەت بەردەوام بیت.`
+        )
+      );
+      if (onNavigateToTab) onNavigateToTab('chat');
+    } catch (err: any) {
+      triggerToast(err?.message || txt('Could not accept request.', 'تعذر قبول الطلب.', 'نەتوانرا داواکاری قبوڵ بکرێت.'));
+    } finally {
+      setIsActing(false);
+    }
   };
 
-  const handleDecline = (postcard: PostcardData) => {
-    onDeclineRequest(postcard.matchId);
-    
-    setPostcards(prev => prev.map(p => p.id === postcard.id ? { ...p, status: 'declined' } : p));
-    if (selectedPostcard?.id === postcard.id) {
-      setSelectedPostcard({ ...postcard, status: 'declined' });
+  const handleDecline = async (postcard: PostcardData) => {
+    if (isActing) return;
+    setIsActing(true);
+    try {
+      await Promise.resolve(onDeclineRequest(postcard.matchId));
+      await loadPostcards();
+      triggerToast(
+        txt(
+          `✉️ Declined request from ${postcard.senderName} with respect.`,
+          `✉️ تم الاعتذار عن الطلب من ${postcard.senderName} بكل احترام.`,
+          `✉️ داواکارییەکەی ${postcard.senderName} بە ڕێزەوە ڕەتکرایەوە.`
+        )
+      );
+    } catch (err: any) {
+      triggerToast(err?.message || txt('Could not decline request.', 'تعذر رفض الطلب.', 'نەتوانرا داواکاری ڕەت بکرێتەوە.'));
+    } finally {
+      setIsActing(false);
     }
-
-    triggerToast(
-      txt(
-        `✉️ Declined request from ${postcard.senderName} with respect and dignity.`,
-        `✉️ تم الاعتذار عن الطلب من ${postcard.senderName} بكل احترام ووقار شرعي.`,
-        `✉️ داواکارییەکەی ${postcard.senderName} بە ڕێزەوە ڕەتکرایەوە.`
-      )
-    );
   };
 
   const formatDate = (isoStr: string) => {
@@ -177,14 +190,15 @@ export default function Postbox({
     }
   };
 
+  const notSharedLabel = txt('Not shared yet', 'غير مذكور بعد', 'هێشتا هاوبەش نەکراوە');
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 text-start" id="postcards-tab-view">
       
-      {/* Header section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-200 pb-5">
         <div>
           <span className="inline-flex items-center gap-1.5 bg-[#40798C]/10 text-[#40798C] px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-            <Inbox className="w-4 h-4 animate-pulse" />
+            <Inbox className="w-4 h-4" />
             <span>{txt('Postbox (Postcards)', 'صندوق البريد الوقور', 'سندوقی پۆستە')}</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-warm-charcoal font-serif tracking-tight">
@@ -192,27 +206,43 @@ export default function Postbox({
           </h2>
           <p className="text-[#6B635B] text-xs sm:text-sm font-medium mt-1">
             {txt(
-              'Marriage proposals are received as traditional postcards. Senders disclose their age, profession, where they live, and their education.',
-              'تصلك طلبات الزواج والتعارف الجاد على هيئة بطاقات بريدية كلاسيكية وقورة. يظهر فيها عمر الشريك، مهنته، مكان إقامته، وتحصيله العلمي بالتفصيل.',
-              'داواکارییەکانی هاوسەرگیری وەک پۆستکارتی کلاسیکی دەگەنە دەستت. تەمەن، پیشە، شوێنی نیشتەجێبوون و ئاستی خوێندنی ناردکارەکە نیشان دەدەن.'
+              'Only real introduction requests appear here. Empty means no proposals yet — dignity over noise.',
+              'تظهر هنا فقط طلبات التعارف الحقيقية. الصندوق الفارغ يعني عدم وجود طلبات بعد — الكرامة قبل الامتلاء الزائف.',
+              'تەنها داواکارییە ڕاستەقینەکانی ناساندن لێرە دەردەکەون. بەتاڵی واتە هێشتا داواکاری نییە — ڕێز لە بری پڕکردنەوەی درۆ.'
             )}
           </p>
         </div>
 
-        {onNavigateToTab && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => onNavigateToTab('explore')}
-            className="flex items-center gap-1.5 bg-warm-charcoal hover:bg-stone-800 text-white font-bold text-xs px-4.5 py-2.5 rounded-xl transition shadow-md"
+            type="button"
+            onClick={() => loadPostcards()}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 text-warm-charcoal font-bold text-xs px-3.5 py-2.5 rounded-xl transition"
           >
-            <Send className="w-4 h-4" />
-            <span>{txt('Send a Postcard', 'أرسل بطاقة بريدية للغير', 'ناردنی پۆستکارت')}</span>
+            <RotateCcw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{txt('Refresh', 'تحديث', 'نوێکردنەوە')}</span>
           </button>
-        )}
+          {onNavigateToTab && (
+            <button
+              onClick={() => onNavigateToTab('explore')}
+              className="flex items-center gap-1.5 bg-warm-charcoal hover:bg-stone-800 text-white font-bold text-xs px-4.5 py-2.5 rounded-xl transition shadow-md"
+            >
+              <Send className="w-4 h-4" />
+              <span>{txt('Send a Postcard', 'أرسل بطاقة بريدية للغير', 'ناردنی پۆستکارت')}</span>
+            </button>
+          )}
+        </div>
       </div>
 
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 text-xs flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Side: Postcard List */}
         <div className="lg:col-span-5 space-y-4">
           <h3 className="text-sm font-bold text-warm-charcoal uppercase tracking-wider font-mono flex items-center gap-1.5">
             <span>{txt('Incoming Mailbox', 'الرسائل الواردة', 'نامە هاتووەکان')}</span>
@@ -222,7 +252,13 @@ export default function Postbox({
           </h3>
 
           <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-            {postcards.map((p) => {
+            {isLoading && (
+              <div className="p-8 text-center bg-stone-50 border border-stone-200 rounded-3xl text-xs text-stone-500 font-bold">
+                {txt('Loading real introduction requests…', 'جاري تحميل طلبات التعارف الحقيقية…', 'داواکارییە ڕاستەقینەکان باردەکرێن…')}
+              </div>
+            )}
+
+            {!isLoading && postcards.map((p) => {
               const isActive = selectedPostcard?.id === p.id;
               return (
                 <div
@@ -234,19 +270,23 @@ export default function Postbox({
                       : 'bg-slate-950/90 border-purple-500/30 hover:border-accent-pink hover:bg-slate-900 shadow-xs text-stone-200'
                   }`}
                 >
-                  {/* Status Ribbon on card */}
                   <div className={`absolute top-0 right-0 w-2.5 h-full ${
                     p.status === 'accepted' ? 'bg-emerald-500' : p.status === 'declined' ? 'bg-stone-500' : 'bg-accent-pink'
                   }`} />
 
-                  {/* Sender Avatar */}
                   <div className="relative shrink-0">
-                    <img 
-                      src={p.senderPhoto} 
-                      alt={p.senderName} 
-                      className={`w-12 h-12 rounded-full object-cover border-2 ${isActive ? 'border-accent-pink' : 'border-purple-500/40'}`}
-                      referrerPolicy="no-referrer"
-                    />
+                    {p.senderPhoto ? (
+                      <img 
+                        src={p.senderPhoto} 
+                        alt={p.senderName} 
+                        className={`w-12 h-12 rounded-full object-cover border-2 ${isActive ? 'border-accent-pink' : 'border-purple-500/40'}`}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold border-2 ${isActive ? 'border-accent-pink bg-fuchsia-900 text-white' : 'border-purple-500/40 bg-slate-800 text-stone-300'}`}>
+                        {(p.senderName || '?').charAt(0)}
+                      </div>
+                    )}
                     {p.status === 'accepted' && (
                       <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-0.5 rounded-full border border-white">
                         <Check className="w-3 h-3" />
@@ -261,9 +301,13 @@ export default function Postbox({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-400">
-                      <span>{p.senderAge} {txt('yrs', 'سنة', 'ساڵ')}</span>
-                      <span>•</span>
-                      <span>{p.senderDistrict}, {p.senderGovernorate}</span>
+                      {p.senderAge > 0 && <span>{p.senderAge} {txt('yrs', 'سنة', 'ساڵ')}</span>}
+                      {(p.senderDistrict || p.senderGovernorate) && (
+                        <>
+                          {p.senderAge > 0 && <span>•</span>}
+                          <span>{[p.senderDistrict, p.senderGovernorate].filter(Boolean).join(', ')}</span>
+                        </>
+                      )}
                     </div>
 
                     <p className="text-[11px] text-stone-300 italic truncate mt-1">
@@ -274,16 +318,22 @@ export default function Postbox({
               );
             })}
 
-            {postcards.length === 0 && (
+            {!isLoading && postcards.length === 0 && (
               <div className="p-8 text-center bg-stone-50 border border-dashed border-stone-200 rounded-3xl space-y-3">
                 <Inbox className="w-8 h-8 text-stone-300 mx-auto" />
                 <p className="text-xs text-stone-500 font-bold">{txt('Your postbox is currently empty.', 'صندوق البريد الخاص بك فارغ حالياً.', 'سندوقی پۆستەکەت لە ئێستادا بەتاڵە.')}</p>
+                <p className="text-[11px] text-stone-400 font-medium">
+                  {txt(
+                    'When someone sends a real introduction request, it will appear here.',
+                    'عندما يرسل أحدهم طلب تعارف حقيقي، سيظهر هنا.',
+                    'کاتێک کەسێک داواکاری ناساندنی ڕاستەقینە بنێرێت، لێرە دەردەکەوێت.'
+                  )}
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Side: Detailed Postcard Reader */}
         <div className="lg:col-span-7">
           <AnimatePresence mode="wait">
             {selectedPostcard ? (
@@ -295,16 +345,13 @@ export default function Postbox({
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                {/* Visual Futuristic Neon Postcard Wrapper */}
                 <div className="p-[2px] bg-gradient-to-tr from-accent-coral via-accent-pink to-purple-600 rounded-[2.5rem] shadow-[0_0_30px_rgba(255,20,147,0.35)]" id="expanded-postcard-card">
                   <div 
                     className="bg-slate-950/95 backdrop-blur-md rounded-[2.4rem] p-6 sm:p-8 relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-8 justify-between text-start"
                     style={{ backgroundImage: 'radial-gradient(rgba(147, 51, 234, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}
                   >
-                    {/* Authentic Cyber Borders */}
                     <div className="absolute inset-2 border border-purple-500/20 rounded-[2rem] pointer-events-none" />
                     
-                    {/* Left Column of Postcard: The Message */}
                     <div className="flex-1 space-y-5 relative z-10">
                       <div className="space-y-1">
                         <span className="text-[10px] font-mono font-bold text-accent-pink uppercase tracking-wider block">
@@ -318,7 +365,6 @@ export default function Postbox({
                         </p>
                       </div>
 
-                      {/* Cyber style message text */}
                       <div className="bg-slate-900 border border-purple-500/30 p-5 rounded-2xl shadow-inner text-stone-100 text-[13.5px] leading-relaxed font-serif italic relative">
                         <div className="absolute top-2 left-2 text-purple-900/40 text-4xl select-none font-serif">“</div>
                         <p className="relative z-10 pl-3">
@@ -330,7 +376,6 @@ export default function Postbox({
                         </p>
                       </div>
 
-                      {/* SENDER GENERAL INFO SUMMARY */}
                       <div className="bg-slate-900/60 p-4 rounded-2xl border border-purple-500/20 space-y-3 text-xs">
                         <h4 className="font-bold text-accent-pink uppercase tracking-wider text-[10px] font-mono border-b border-purple-500/20 pb-1.5">
                           👤 {txt('About the Sender', 'تفاصيل عن مرسل البطاقة', 'دەربارەی ناردکار')}
@@ -338,7 +383,7 @@ export default function Postbox({
                         <div className="grid grid-cols-2 gap-3 font-medium text-stone-300">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-accent-pink shrink-0" />
-                            <span><strong>{txt('Age', 'العمر', 'تەمەن')}:</strong> {selectedPostcard.senderAge} {txt('Years Old', 'سنة', 'ساڵ')}</span>
+                            <span><strong>{txt('Age', 'العمر', 'تەمەن')}:</strong> {selectedPostcard.senderAge > 0 ? `${selectedPostcard.senderAge} ${txt('Years Old', 'سنة', 'ساڵ')}` : notSharedLabel}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Briefcase className="w-4 h-4 text-accent-pink shrink-0" />
@@ -346,7 +391,7 @@ export default function Postbox({
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4 text-accent-pink shrink-0" />
-                            <span className="truncate"><strong>{txt('Lives in', 'مكان الإقامة', 'شوێنی ژیان')}:</strong> {selectedPostcard.senderDistrict}, {selectedPostcard.senderGovernorate}</span>
+                            <span className="truncate"><strong>{txt('Lives in', 'مكان الإقامة', 'شوێنی ژیان')}:</strong> {[selectedPostcard.senderDistrict, selectedPostcard.senderGovernorate].filter(Boolean).join(', ') || notSharedLabel}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <GraduationCap className="w-4 h-4 text-accent-pink shrink-0" />
@@ -356,17 +401,12 @@ export default function Postbox({
                       </div>
                     </div>
 
-                    {/* Vertical Postcard Split Line */}
                     <div className="hidden md:block w-px bg-dashed bg-purple-500/20 h-auto my-4 self-stretch relative">
                       <span className="absolute top-1/2 -translate-y-1/2 -left-1 text-[9px] text-accent-pink bg-slate-950 px-1 font-mono">POST</span>
                     </div>
 
-                    {/* Right Column of Postcard: Stamp & Address */}
                     <div className="w-full md:w-56 shrink-0 flex flex-col justify-between items-center md:items-end gap-6 relative z-10">
-                      
-                      {/* Stamp & Postmark */}
                       <div className="flex justify-between items-start w-full gap-4">
-                        {/* Postmark Circle */}
                         <div className="w-16 h-16 rounded-full border-2 border-dashed border-accent-pink/40 flex items-center justify-center text-center text-[8px] font-mono font-bold text-accent-pink/60 rotate-12">
                           <div>
                             <div>ZAWAJ</div>
@@ -375,7 +415,6 @@ export default function Postbox({
                           </div>
                         </div>
 
-                        {/* Stamp image with cyber border */}
                         <div className="w-14 h-16 border-2 border-accent-pink p-0.5 bg-slate-900 shadow-md rotate-[-6deg] relative overflow-hidden">
                           <img 
                             src={selectedPostcard.stampUrl} 
@@ -388,15 +427,20 @@ export default function Postbox({
                         </div>
                       </div>
 
-                      {/* Sender Profile Photo & Official Seal */}
                       <div className="text-center w-full space-y-2 mt-2">
                         <div className="relative inline-block">
-                          <img 
-                            src={selectedPostcard.senderPhoto} 
-                            alt={selectedPostcard.senderName} 
-                            className="w-24 h-24 rounded-full object-cover mx-auto border-3 border-accent-pink shadow-[0_0_15px_rgba(255,20,147,0.4)]"
-                            referrerPolicy="no-referrer"
-                          />
+                          {selectedPostcard.senderPhoto ? (
+                            <img 
+                              src={selectedPostcard.senderPhoto} 
+                              alt={selectedPostcard.senderName} 
+                              className="w-24 h-24 rounded-full object-cover mx-auto border-3 border-accent-pink shadow-[0_0_15px_rgba(255,20,147,0.4)]"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-24 h-24 rounded-full mx-auto border-3 border-accent-pink bg-slate-800 text-white flex items-center justify-center text-3xl font-serif font-black">
+                              {(selectedPostcard.senderName || '?').charAt(0)}
+                            </div>
+                          )}
                           <span className="absolute bottom-1 right-2 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-md">
                             <ShieldCheck className="w-4 h-4" />
                           </span>
@@ -409,21 +453,34 @@ export default function Postbox({
                         </div>
                       </div>
 
-                      {/* CONTACT INFORMATION PANEL - Reveals ONLY if accepted! */}
                       <div className="w-full mt-4">
                         {selectedPostcard.status === 'accepted' ? (
                           <div className="bg-emerald-950/50 border border-emerald-500/30 p-3 rounded-2xl text-xs space-y-2 text-emerald-300 animate-fade-in font-semibold">
                             <p className="font-bold text-[9px] font-mono text-emerald-400 uppercase tracking-widest border-b border-emerald-500/20 pb-1">
-                              🔓 {txt('CONTACT UNLOCKED', 'بيانات الاتصال مكشوفة', 'پەیوەندی ئاشکرا بوو')}
+                              🔓 {txt('CHAT UNLOCKED', 'المحادثة مفعلة', 'گفتوگۆ چالاکە')}
                             </p>
-                            <div className="flex items-center gap-2 truncate">
-                              <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>{selectedPostcard.senderEmail}</span>
-                            </div>
-                            <div className="flex items-center gap-2 truncate">
-                              <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>{selectedPostcard.senderPhone}</span>
-                            </div>
+                            {selectedPostcard.senderEmail ? (
+                              <div className="flex items-center gap-2 truncate">
+                                <Mail className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>{selectedPostcard.senderEmail}</span>
+                              </div>
+                            ) : null}
+                            <p className="text-[10px] leading-relaxed text-emerald-200/80 font-medium">
+                              {txt(
+                                'Continue respectfully in Private Chat. Contact details are not invented by the app.',
+                                'تابعي التواصل باحترام عبر المحادثة الخاصة. التطبيق لا يخترع بيانات اتصال.',
+                                'بە ڕێزەوە لە گفتوگۆی تایبەت بەردەوام بە. ئەپلیکەیشن زانیاری پەیوەندی دروست ناکات.'
+                              )}
+                            </p>
+                            {onNavigateToTab && (
+                              <button
+                                type="button"
+                                onClick={() => onNavigateToTab('chat')}
+                                className="w-full mt-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] py-2 rounded-xl"
+                              >
+                                {txt('Open Private Chat', 'فتح المحادثة الخاصة', 'کردنەوەی گفتوگۆی تایبەت')}
+                              </button>
+                            )}
                           </div>
                         ) : selectedPostcard.status === 'declined' ? (
                           <div className="bg-slate-900 border border-stone-800 p-3 rounded-2xl text-xs text-center text-stone-400 font-semibold font-mono">
@@ -435,87 +492,64 @@ export default function Postbox({
                               🔒 {txt('CONTACT LOCKED', 'بيانات الاتصال محمية', 'پەیوەندی پارێزراوە')}
                             </p>
                             <p className="text-[10px] leading-relaxed text-stone-400 font-medium">
-                              {txt('Accept proposal below to reveal the email and phone number.', 'اقبل هذا الطلب لكشف البريد الإلكتروني ورقم الهاتف.', 'ئەم داواکارییە قبوڵ بکە بۆ ئاشکراکردنی ئیمەیڵ و مۆبایل.')}
+                              {txt('Accept to unlock Private Chat. The app never invents phone numbers.', 'اقبل الطلب لتفعيل المحادثة الخاصة. التطبيق لا يخترع أرقام هاتف.', 'قبوڵ بکە بۆ چالاککردنی گفتوگۆی تایبەت. ئەپلیکەیشن ژمارەی مۆبایل دروست ناکات.')}
                             </p>
                           </div>
                         )}
                       </div>
-
                     </div>
                   </div>
                 </div>
 
-                {/* POSTCARD ACTION BAR */}
                 {selectedPostcard.status === 'pending' && (
-                  <div className="flex flex-col sm:flex-row gap-3.5 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <button
+                      type="button"
+                      disabled={isActing}
                       onClick={() => handleAccept(selectedPostcard)}
-                      className="flex-1 flex justify-center items-center gap-2 bg-gradient-to-r from-[#40798C] to-[#2D5866] hover:opacity-95 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg shadow-[#40798C]/15 transition-all duration-200 active:scale-98"
+                      className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold text-sm py-3.5 rounded-2xl transition shadow-lg"
                     >
-                      <Check className="w-5 h-5 stroke-[3]" />
-                      <span>{txt('Accept Proposal & Reveal Contact 💍', 'قبول الطلب وكشف بيانات الاتصال 💍', 'قبوڵکردنی داواکاری و بینینی ژمارە 💍')}</span>
+                      <Heart className="w-4 h-4 fill-white" />
+                      <span>{txt('Accept Respectfully', 'قبول بكل احترام', 'قبوڵکردن بە ڕێزەوە')}</span>
                     </button>
-
                     <button
+                      type="button"
+                      disabled={isActing}
                       onClick={() => handleDecline(selectedPostcard)}
-                      className="flex justify-center items-center gap-2 bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 font-bold text-sm px-6 py-4 rounded-2xl shadow-xs transition-all duration-200"
+                      className="flex-1 flex items-center justify-center gap-2 bg-stone-200 hover:bg-stone-300 disabled:opacity-60 text-warm-charcoal font-bold text-sm py-3.5 rounded-2xl transition"
                     >
-                      <X className="w-5 h-5 text-stone-400" />
-                      <span>{txt('Decline with Dignity ❌', 'الاعتذار بوقار واحترام ❌', 'ڕەتکردنەوەی بەڕێزەوە ❌')}</span>
+                      <X className="w-4 h-4" />
+                      <span>{txt('Decline with Dignity', 'اعتذار وقور', 'ڕەتکردنەوە بە ڕێز')}</span>
                     </button>
                   </div>
                 )}
 
-                {selectedPostcard.status === 'accepted' && (
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 p-5 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-start">
-                      <h4 className="font-bold text-emerald-800 text-sm flex items-center justify-center sm:justify-start gap-1.5">
-                        <Heart className="w-4 h-4 text-accent-coral fill-accent-coral animate-pulse" />
-                        <span>{txt('Mutual courtship unlocked!', 'تم فتح باب النصيب المبارك والمودة!', 'پەیوەندی هاوسەرگیری چالاک بوو!')}</span>
-                      </h4>
-                      <p className="text-xs text-stone-500 font-medium leading-relaxed">
-                        {txt(
-                          `You've accepted ${selectedPostcard.senderName}'s postcard. You can now chat directly in absolute privacy.`,
-                          `لقد قبلت بطاقة ${selectedPostcard.senderName}. يمكنكما الآن المراسلة مباشرة في بيئة آمنة تامة الخصوصية.`,
-                          `پۆستکارتی ${selectedPostcard.senderName}ت قبوڵ کرد. ئێستا دەتوانیت ڕاستەوخۆ گفتوگۆ بکەیت.`
-                        )}
-                      </p>
-                    </div>
-
-                    {onNavigateToTab && (
-                      <button
-                        onClick={() => onNavigateToTab('chat')}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition shadow-md whitespace-nowrap"
-                      >
-                        {txt('Open Private Chat 💬', 'افتح المحادثة الخاصة 💬', 'کردنەوەی چات 💬')}
-                      </button>
-                    )}
-                  </div>
+                {selectedPostcard.status === 'accepted' && onNavigateToTab && (
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToTab('chat')}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#FF4FD8] to-[#9D4DFF] text-white font-bold text-sm py-3.5 rounded-2xl transition shadow-lg"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>{txt('Continue in Private Chat', 'المتابعة في المحادثة الخاصة', 'بەردەوامبوون لە گفتوگۆی تایبەت')}</span>
+                  </button>
                 )}
-
               </motion.div>
             ) : (
-              <div className="bg-stone-50/50 border border-dashed border-stone-200 rounded-[2.5rem] p-12 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-                  <Mail className="w-8 h-8" />
+              !isLoading && (
+                <div className="h-full min-h-[320px] flex items-center justify-center bg-stone-50 border border-dashed border-stone-200 rounded-[2rem] p-8 text-center">
+                  <div className="space-y-3 max-w-sm">
+                    <Inbox className="w-10 h-10 text-stone-300 mx-auto" />
+                    <p className="text-sm font-bold text-stone-600">
+                      {txt('Select a postcard to review', 'اختر بطاقة لمراجعتها', 'پۆستکارتێک هەڵبژێرە بۆ پێداچوونەوە')}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <h4 className="text-base font-black text-warm-charcoal">{txt('Select a Postcard to Inspect', 'اختر بطاقة بريدية لمعاينتها', 'پۆستکارتێک هەڵبژێرە بۆ بینینی')}</h4>
-                  <p className="text-xs text-stone-400 font-medium max-w-sm mx-auto leading-relaxed">
-                    {txt(
-                      'Click on any incoming request from the mailbox list to inspect their handwritten letter, contact details, and complete dossier credentials.',
-                      'انقر على أي بطاقة بريدية هابطة في صندوق البريد لقراءة رسالتهم، ومعاينة بياناتهم، وتحصيلهم العلمي الموثق.',
-                      'کلیک لەسەر هەر پۆستکارتێکی هاتوودا بکە بۆ خوێندنەوەی ناوەڕۆکەکەی و بینینی زانیارییەکان.'
-                    )}
-                  </p>
-                </div>
-              </div>
+              )
             )}
           </AnimatePresence>
         </div>
-
       </div>
-
     </div>
   );
 }
