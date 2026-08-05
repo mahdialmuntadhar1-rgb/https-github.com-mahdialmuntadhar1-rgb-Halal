@@ -408,7 +408,7 @@ export const apiClient = {
     if (getIsDemoMode()) {
       return {
         success: true,
-        message: 'Demo forgot password instructions simulated. Check your inbox.'
+        message: 'If that email exists, a reset link will be sent.',
       };
     }
 
@@ -417,6 +417,17 @@ export const apiClient = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
+    });
+  },
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    if (getIsDemoMode()) {
+      return { message: 'Password reset successfully. You can now log in.' };
+    }
+    return safeFetch<{ message: string }>(`${API_BASE}/api/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, password }),
     });
   },
 
@@ -574,10 +585,15 @@ export const apiClient = {
       return mockApi.toggleSaveProfile(matchId);
     }
 
-    return safeFetch<UserProfile>(`${API_BASE}/matches/${matchId}/save`, {
-      method: 'POST',
+    // CONTRACT-02: Worker uses /saved-profiles/:id (POST save, DELETE unsave).
+    const matchesRes = await this.getMatches({} as any, 1, 50);
+    const row = matchesRes.matches.find((m) => m.id === matchId);
+    const alreadySaved = !!(row as any)?.saved || (row as any)?.saved === 1 || (row as any)?.saved === true;
+    await safeFetch(`${API_BASE}/saved-profiles/${encodeURIComponent(matchId)}`, {
+      method: alreadySaved ? 'DELETE' : 'POST',
       headers: getHeaders(),
     });
+    return this.getCurrentUser();
   },
 
   async sendIntroductionRequest(matchId: string): Promise<{ success: boolean; request: any }> {

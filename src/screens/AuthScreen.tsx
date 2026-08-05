@@ -38,11 +38,29 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initia
   const t = TRANSLATIONS[locale] || TRANSLATIONS['ar'];
   const isRtl = t.dir === 'rtl';
 
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'reset'>(initialMode);
+  const [resetToken, setResetToken] = useState('');
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
+  const [resetConfirm, setResetConfirm] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') || '';
+      const path = window.location.pathname || '';
+      if (token && (path.includes('reset-password') || params.has('token'))) {
+        setResetToken(token);
+        setMode('reset');
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (initialMode === 'login' || initialMode === 'register') {
-      setMode(initialMode);
+      if (mode !== 'reset') setMode(initialMode);
     }
   }, [initialMode]);
   
@@ -126,9 +144,43 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initia
     try {
       const result = await apiClient.forgotPassword(email);
       setForgotSuccess(true);
-      triggerToast(result.message);
+      triggerToast(result.message || txt('Check your email.', 'تحقق من بريدك.', 'ئیمەیڵەکەت بپشکنە.'));
     } catch (err: any) {
       triggerToast(err.message || 'Request failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetToken) {
+      triggerToast(txt('Reset link is missing or invalid.', 'رابط إعادة التعيين مفقود أو غير صالح.', 'بەستەری نوێکردنەوە ونە یان نادروستە.'));
+      return;
+    }
+    if (!resetPasswordValue || resetPasswordValue.length < 10) {
+      triggerToast(txt('Password must be at least 10 characters.', 'يجب أن تكون كلمة المرور 10 أحرف على الأقل.', 'وشەی تێپەڕ دەبێت لانیکەم ١٠ پیت بێت.'));
+      return;
+    }
+    if (resetPasswordValue !== resetConfirm) {
+      triggerToast(txt('Passwords do not match.', 'كلمتا المرور غير متطابقتين.', 'وشە نهێنییەکان وەک یەک نين.'));
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const result = await apiClient.resetPassword(resetToken, resetPasswordValue);
+      triggerToast(result.message || txt('Password updated. You can log in.', 'تم تحديث كلمة المرور. يمكنك تسجيل الدخول.', 'وشەی تێپەڕ نوێکرایەوە. دەتوانیت بچیتە ژوورەوە.'));
+      setMode('login');
+      setResetToken('');
+      setResetPasswordValue('');
+      setResetConfirm('');
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, '', url.pathname + url.search);
+      } catch { /* ignore */ }
+    } catch (err: any) {
+      triggerToast(err.message || txt('Could not reset password.', 'تعذر إعادة تعيين كلمة المرور.', 'نەتوانرا وشەی تێپەڕ نوێ بکرێتەوە.'));
     } finally {
       setIsLoading(false);
     }
@@ -160,10 +212,16 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initia
 
         <div className="text-center">
           <h2 className="text-3xl font-serif font-black text-warm-charcoal tracking-tight font-display">
-            {mode === 'login' ? t.loginTitle : mode === 'register' ? t.registerTitle : t.forgotPasswordLabel}
+            {mode === 'login' ? t.loginTitle
+              : mode === 'register' ? t.registerTitle
+              : mode === 'reset' ? txt('Set a new password', 'تعيين كلمة مرور جديدة', 'دانانی وشەی تێپەڕی نوێ')
+              : t.forgotPasswordLabel}
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-[#6B635B] font-medium leading-relaxed max-w-sm mx-auto">
-            {mode === 'login' ? t.loginSub : mode === 'register' ? t.registerSub : t.forgotPasswordSub}
+            {mode === 'login' ? t.loginSub
+              : mode === 'register' ? t.registerSub
+              : mode === 'reset' ? txt('Complete your password recovery securely.', 'أكمل استعادة كلمة المرور بأمان.', 'گەڕاندنەوەی وشەی تێپەڕ بە پارێزراوی تەواو بکە.')
+              : t.forgotPasswordSub}
           </p>
 
           {/* Progress / Step messages */}
@@ -475,13 +533,13 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initia
               <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200/50 text-center space-y-3">
                 <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto" />
                 <h4 className="text-sm font-bold text-emerald-800">
-                  {txt('Simulation Sent!', 'تم الإرسال بنجاح (محاكاة)!', 'ناردرا بە سەرکەوتوویی!')}
+                  {txt('Check your email', 'تحقق من بريدك الإلكتروني', 'ئیمەیڵەکەت بپشکنە')}
                 </h4>
                 <p className="text-xs text-emerald-700 font-medium leading-relaxed">
                   {txt(
-                    'Instructions to reset your password have been simulated. In sandbox mode, no real emails are sent.',
-                    'تمت محاكاة تعليمات استرداد كلمة المرور الخاصة بك. في بيئة التجربة، لا يتم إرسال رسائل بريد إلكتروني حقيقية.',
-                    'ڕێنمایی نوێکردنەوەی وشەی تێپەڕ نێردرا. لە ژینگەی تاقیکاری بە شێوەی دروستکراو کاردەکات.'
+                    'If an account exists for that email, password reset instructions will be sent shortly. Check your inbox and spam folder.',
+                    'إذا كان هناك حساب مرتبط بهذا البريد، فسيتم إرسال تعليمات إعادة تعيين كلمة المرور قريباً. تحقق من صندوق الوارد والبريد غير المرغوب.',
+                    'ئەگەر هەژمارێک بەو ئیمەیڵە هەبێت، ڕێنمایی نوێکردنەوەی وشەی تێپەڕ بەم زووانە دەنێردرێت. سندوقی هاتوو و سپام بپشکنە.'
                   )}
                 </p>
                 <button
@@ -542,8 +600,72 @@ export default function AuthScreen({ locale, onAuthSuccess, triggerToast, initia
           </form>
         )}
 
+        {mode === 'reset' && (
+          <form className="mt-8 space-y-5" onSubmit={handleResetPassword} id="reset-password-form">
+            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+              {txt(
+                'Choose a new password for your account (at least 10 characters).',
+                'اختر كلمة مرور جديدة لحسابك (١٠ أحرف على الأقل).',
+                'وشەی تێپەڕێکی نوێ هەڵبژێرە بۆ هەژمارەکەت (لانیکەم ١٠ پیت).'
+              )}
+            </p>
+            <div>
+              <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">{t.passwordLabel}</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                  <Lock className="h-4.5 w-4.5" />
+                </div>
+                <input
+                  type="password"
+                  required
+                  minLength={10}
+                  value={resetPasswordValue}
+                  onChange={(e) => setResetPasswordValue(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-warm-charcoal uppercase tracking-wider mb-1.5">
+                {txt('Confirm password', 'تأكيد كلمة المرور', 'دڵنیابوونەوەی وشەی تێپەڕ')}
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                  <Lock className="h-4.5 w-4.5" />
+                </div>
+                <input
+                  type="password"
+                  required
+                  minLength={10}
+                  value={resetConfirm}
+                  onChange={(e) => setResetConfirm(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-3 bg-white/80 border border-stone-200 rounded-xl text-warm-charcoal placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-accent-coral/20 focus:border-accent-coral text-sm font-medium transition"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-stone-900 hover:bg-stone-850 shadow-md transition-all disabled:opacity-50"
+            >
+              {isLoading
+                ? txt('Saving…', 'جاري الحفظ…', 'پاشەکەوتکردن…')
+                : txt('Update password', 'تحديث كلمة المرور', 'نوێکردنەوەی وشەی تێپەڕ')}
+            </button>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setMode('login')}
+                className="text-xs text-stone-500 hover:text-warm-charcoal font-bold underline"
+              >
+                {txt('Back to Sign In', 'العودة لتسجيل الدخول', 'گەڕانەوە بۆ چوونە ژوورەوە')}
+              </button>
+            </div>
+          </form>
+        )}
+
         {/* Demo Sandbox is DEV-only — must never appear in production builds */}
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && mode !== 'reset' && (
           <>
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">

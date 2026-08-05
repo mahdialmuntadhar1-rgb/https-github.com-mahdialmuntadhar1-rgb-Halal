@@ -65,6 +65,21 @@ export default function App() {
     }
   }, [currentTab]);
 
+  // JOURNEY-08: deep-link /reset-password?token=… must open Auth reset form (protected shell).
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token && (window.location.pathname.includes('reset-password') || params.has('token'))) {
+        if (!localStorage.getItem('halal_token')) {
+          setTab('account');
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   // Load Initial API Data
   useEffect(() => {
     async function loadData() {
@@ -276,8 +291,9 @@ export default function App() {
       const updatedMatchesRes = await apiClient.getMatches();
       setMatches(updatedMatchesRes.matches);
       triggerToast(`✉️ Introduction request sent securely. Awaiting their respectful response.`);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to send introduction request", err);
+      triggerToast(err?.message || (locale === 'en' ? 'Could not send introduction request.' : locale === 'ckb' ? 'نەتوانرا داواکاری بنێردرێت.' : 'تعذر إرسال طلب التعارف.'));
     }
   };
 
@@ -290,8 +306,9 @@ export default function App() {
       ]);
       setMatches(updatedMatchesListRes.matches);
       setConversations(updatedConvs);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to accept proposal request", err);
+      triggerToast(err?.message || (locale === 'en' ? 'Could not accept request.' : locale === 'ckb' ? 'نەتوانرا داواکاری قبوڵ بکرێت.' : 'تعذر قبول الطلب.'));
       throw err;
     }
   };
@@ -301,8 +318,9 @@ export default function App() {
       await apiClient.declineIntroductionRequest(matchId);
       const updatedMatchesListRes = await apiClient.getMatches();
       setMatches(updatedMatchesListRes.matches);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to decline proposal request", err);
+      triggerToast(err?.message || (locale === 'en' ? 'Could not decline request.' : locale === 'ckb' ? 'نەتوانرا داواکاری ڕەت بکرێتەوە.' : 'تعذر رفض الطلب.'));
       throw err;
     }
   };
@@ -319,8 +337,9 @@ export default function App() {
       await apiClient.sendMessage(matchId, text, sender);
       const updatedConvs = await apiClient.getConversations();
       setConversations(updatedConvs);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to dispatch chat log message", err);
+      triggerToast(err?.message || (locale === 'en' ? 'Could not send message.' : locale === 'ckb' ? 'نەتوانرا نامە بنێردرێت.' : 'تعذر إرسال الرسالة.'));
     }
   };
 

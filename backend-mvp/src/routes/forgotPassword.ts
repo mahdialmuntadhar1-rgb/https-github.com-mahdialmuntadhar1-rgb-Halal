@@ -31,7 +31,8 @@ async function sendResetEmail(env: Env, toEmail: string, resetLink: string, corr
       reason: 'RESEND_API_KEY not configured',
       timestamp: new Date().toISOString(),
     }));
-    return;
+    // SEC-05: fail closed — do not pretend mail was sent when mailer is unavailable.
+    throw new Error('Password recovery email is temporarily unavailable.');
   }
 
   console.log('[FORGOT_PASSWORD]', JSON.stringify({
@@ -66,6 +67,7 @@ async function sendResetEmail(env: Env, toEmail: string, resetLink: string, corr
         error: errText,
         timestamp: new Date().toISOString(),
       }));
+      throw new Error('Password recovery email could not be sent.');
     } else {
       console.log('[FORGOT_PASSWORD]', JSON.stringify({
         correlationId,
@@ -80,6 +82,7 @@ async function sendResetEmail(env: Env, toEmail: string, resetLink: string, corr
       error: emailErr instanceof Error ? emailErr.message : String(emailErr),
       timestamp: new Date().toISOString(),
     }));
+    throw emailErr instanceof Error ? emailErr : new Error(String(emailErr));
   }
 }
 
@@ -97,6 +100,17 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
     pathname: ctx.url.pathname,
     timestamp: new Date().toISOString(),
   }));
+
+  // SEC-05: fail closed when mailer is not configured (same response for all callers — no user leak).
+  if (!(ctx.env as any).RESEND_API_KEY) {
+    console.log('[FORGOT_PASSWORD]', JSON.stringify({
+      correlationId,
+      stage: 'EMAIL_SEND_SKIPPED',
+      reason: 'RESEND_API_KEY not configured',
+      timestamp: new Date().toISOString(),
+    }));
+    return json({ error: 'Password recovery is temporarily unavailable. Please try again later.' }, 503);
+  }
 
   try {
     console.log('[FORGOT_PASSWORD]', JSON.stringify({
@@ -191,7 +205,7 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
       timestamp: new Date().toISOString(),
     }));
 
-    const origin = ctx.request.headers.get('Origin') || 'https://main.zawaj-app.pages.dev';
+    const origin = ctx.request.headers.get('Origin') || 'https://app.kaniq.org';
     const resetLink = `${origin}/reset-password?token=${token}`;
 
     await sendResetEmail(ctx.env, body.email, resetLink, correlationId);
@@ -204,11 +218,21 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
 
     return json({ message: 'If that email exists, a reset link will be sent.' });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('Password recovery email') || msg.includes('temporarily unavailable')) {
+      console.log('[FORGOT_PASSWORD]', JSON.stringify({
+        correlationId,
+        stage: 'EMAIL_FAIL_CLOSED',
+        errorMessage: msg,
+        timestamp: new Date().toISOString(),
+      }));
+      return json({ error: 'Password recovery is temporarily unavailable. Please try again later.' }, 503);
+    }
     console.log('[FORGOT_PASSWORD]', JSON.stringify({
       correlationId,
       stage: 'FAILURE',
       errorName: err instanceof Error ? err.name : 'UnknownError',
-      errorMessage: err instanceof Error ? err.message : String(err),
+      errorMessage: msg,
       errorStack: err instanceof Error ? err.stack : undefined,
       timestamp: new Date().toISOString(),
     }));

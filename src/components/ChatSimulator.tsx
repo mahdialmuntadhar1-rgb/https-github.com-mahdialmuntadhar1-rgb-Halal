@@ -225,9 +225,15 @@ export default function ChatSimulator({
           </div>
           
           <div className="p-4 bg-[#40798C]/5 border border-[#40798C]/15 rounded-2xl max-w-md mx-auto text-left text-xs text-[#6B635B] space-y-2">
-            <p className="font-bold text-accent-coral">⭐ Connection Simulation Tip:</p>
+            <p className="font-bold text-accent-coral">
+              {txt('How private chat unlocks', 'كيف تُفتح المحادثة الخاصة', 'گفتوگۆی تایبەت چۆن دەکرێتەوە')}
+            </p>
             <p className="font-medium">
-              Click the **Match Explorer** tab above, choose any compatible profile (e.g. Lina or Sara or Zaid), and send a request. We\'ve built in automated simulation approval so you can immediately return here to preview the private conversation!
+              {txt(
+                'Open Match Explorer, send a respectful introduction request, and wait for mutual acceptance. Chat unlocks only after both sides agree.',
+                'افتح مستكشف الشركاء، أرسل طلب تعارف محترم، وانتظر القبول المتبادل. تُفتح المحادثة فقط بعد موافقة الطرفين.',
+                'دۆزەرەوەی هاوبەشەکان بکەرەوە، داواکاری ناساندنی ڕێزدار بنێرە، و چاوەڕوانی قبوڵکردنی دوولایەنە بە. گفتوگۆ تەنها دوای ڕەزامەندی هەردوولا دەکرێتەوە.'
+              )}
             </p>
           </div>
         </div>
