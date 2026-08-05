@@ -213,9 +213,12 @@ export default function App() {
   // Bookmark Toggler
   const handleToggleSaveMatch = async (matchId: string) => {
     try {
+      const wasSaved = savedMatchIds.includes(matchId);
       const updatedUser = await apiClient.toggleSaveProfile(matchId);
       setUserProfile(updatedUser);
-      const savedIds = updatedUser.savedMatches || [];
+      const savedIds = Array.isArray(updatedUser.savedMatches) && updatedUser.savedMatches.length > 0
+        ? updatedUser.savedMatches
+        : (wasSaved ? savedMatchIds.filter((id) => id !== matchId) : [...savedMatchIds, matchId]);
       setSavedMatchIds(savedIds);
       
       const isSavedNow = savedIds.includes(matchId);
@@ -224,8 +227,9 @@ export default function App() {
           ? "⭐ Candidate added to your Saved Portfolios!"
           : "🗑️ Portfolio bookmark removed."
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed toggling save candidates", err);
+      triggerToast(err?.message || (locale === 'en' ? 'Could not update saved list.' : 'تعذر تحديث قائمة المحفوظات.'));
     }
   };
 
