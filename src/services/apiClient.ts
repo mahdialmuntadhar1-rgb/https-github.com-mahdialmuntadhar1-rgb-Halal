@@ -132,12 +132,20 @@ async function safeFetch<T = any>(url: string, options?: RequestInit): Promise<T
     }
   }
 
+  // Worker accept/decline returns 204 No Content
+  if (res.status === 204 || res.status === 205) {
+    return undefined as T;
+  }
+
   if (!isJson) {
     let text: string;
     try {
       text = await res.text();
     } catch {
       text = '';
+    }
+    if (!text) {
+      return undefined as T;
     }
     const snippet = text.slice(0, 150).trim();
     throw new Error(`The API server returned a non-JSON response (Status ${res.status}). This usually indicates an incorrect API endpoint or route mismatch.\nResponse snippet: "${snippet}..."`);
@@ -148,6 +156,40 @@ async function safeFetch<T = any>(url: string, options?: RequestInit): Promise<T
   } catch (error: any) {
     throw new Error(`Failed to parse the response as JSON: ${error.message}`);
   }
+}
+
+/**
+ * Worker accept/decline require halal_requests.id.
+ * UI historically passes the counterpart user/match id — resolve via /request/list.
+ * Also accepts an already-correct request id for compatibility.
+ */
+async function resolveIntroductionRequestId(matchOrRequestId: string): Promise<string> {
+  const data = await safeFetch<any>(`${API_BASE}/request/list`, {
+    method: 'GET',
+    headers: getHeaders(),
+  });
+  const requests: any[] = Array.isArray(data?.requests)
+    ? data.requests
+    : Array.isArray(data)
+      ? data
+      : [];
+
+  const exact = requests.find((r) => r?.id === matchOrRequestId);
+  if (exact?.id) return String(exact.id);
+
+  const pending = requests.filter((r) => {
+    const status = String(r?.status || '');
+    const sender = r?.sender_id || r?.senderId;
+    const receiver = r?.receiver_id || r?.receiverId;
+    return status === 'pending' && (sender === matchOrRequestId || receiver === matchOrRequestId);
+  });
+
+  // Prefer incoming request (counterpart is sender) — receiver is who accepts/declines
+  const incoming = pending.find((r) => (r?.sender_id || r?.senderId) === matchOrRequestId);
+  if (incoming?.id) return String(incoming.id);
+  if (pending.length >= 1 && pending[0]?.id) return String(pending[0].id);
+
+  throw new Error('Introduction request not found for this profile.');
 }
 
 export const apiClient = {
@@ -454,10 +496,12 @@ export const apiClient = {
       return mockApi.acceptIntroductionRequest(matchId);
     }
 
-    return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/accept`, {
+    const requestId = await resolveIntroductionRequestId(matchId);
+    await safeFetch(`${API_BASE}/requests/${encodeURIComponent(requestId)}/accept`, {
       method: 'PUT',
       headers: getHeaders(),
     });
+    return { success: true, match: { id: matchId } as MatchProfile };
   },
 
   async declineIntroductionRequest(matchId: string): Promise<{ success: boolean; match: MatchProfile }> {
@@ -465,10 +509,12 @@ export const apiClient = {
       return mockApi.declineIntroductionRequest(matchId);
     }
 
-    return safeFetch<{ success: boolean; match: MatchProfile }>(`${API_BASE}/requests/${matchId}/decline`, {
+    const requestId = await resolveIntroductionRequestId(matchId);
+    await safeFetch(`${API_BASE}/requests/${encodeURIComponent(requestId)}/decline`, {
       method: 'PUT',
       headers: getHeaders(),
     });
+    return { success: true, match: { id: matchId } as MatchProfile };
   },
 
   /**
