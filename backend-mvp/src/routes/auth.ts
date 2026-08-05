@@ -1,5 +1,5 @@
 ﻿import { hashPassword, needsRehash, signToken, verifyPassword } from '../auth';
-import { AuthUser, HttpError, json, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
+import { AuthUser, HttpError, json, optionalString, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -13,6 +13,29 @@ function publicUser(user: AuthUser) {
   return { id: user.id, email: user.email, role: user.role };
 }
 
+function currentYear(): number {
+  return new Date().getUTCFullYear();
+}
+
+/** Map register body age or birthYear → birth_year column (adult profiles only). */
+function resolveRegisterBirthYear(body: Record<string, unknown>): number | null {
+  if (body.birthYear !== undefined && body.birthYear !== null && body.birthYear !== '') {
+    const birthYear = Number(body.birthYear);
+    if (!Number.isInteger(birthYear) || birthYear < currentYear() - 100 || birthYear > currentYear() - 18) {
+      throw new HttpError(400, 'birthYear must describe an adult profile.');
+    }
+    return birthYear;
+  }
+  if (body.age !== undefined && body.age !== null && body.age !== '') {
+    const age = Number(body.age);
+    if (!Number.isInteger(age) || age < 18 || age > 100) {
+      throw new HttpError(400, 'age must be an integer between 18 and 100.');
+    }
+    return currentYear() - age;
+  }
+  return null;
+}
+
 export async function handleAuth(ctx: RequestContext): Promise<Response | null> {
   const { request, url, env } = ctx;
   const path = url.pathname.replace(/^\/api(?=\/)/, '');
@@ -23,6 +46,16 @@ export async function handleAuth(ctx: RequestContext): Promise<Response | null> 
     const password = requireString(body, 'password', 200);
     if (!isValidEmail(email)) throw new HttpError(400, 'Invalid email address.');
 
+    // Client contract: fullName (alias name), governorate, district, age/birthYear.
+    // Phone is accepted but not persisted — no phone column without a schema change.
+    const fullName =
+      optionalString(body, 'fullName', 120) ||
+      optionalString(body, 'name', 120) ||
+      '';
+    const governorate = optionalString(body, 'governorate', 80);
+    const district = optionalString(body, 'district', 80);
+    const birthYear = resolveRegisterBirthYear(body);
+
     const existing = await env.DB.prepare('SELECT id FROM halal_users WHERE email = ?').bind(email).first();
     if (existing) throw new HttpError(409, 'Email is already registered.');
 
@@ -31,8 +64,11 @@ export async function handleAuth(ctx: RequestContext): Promise<Response | null> 
     await env.DB.prepare('INSERT INTO halal_users (id, email, password_hash, role) VALUES (?, ?, ?, ?)')
       .bind(user.id, user.email, passwordHash, user.role)
       .run();
-    await env.DB.prepare('INSERT INTO halal_profiles (user_id, full_name) VALUES (?, ?)')
-      .bind(user.id, '')
+    await env.DB.prepare(
+      `INSERT INTO halal_profiles (user_id, full_name, governorate, district, city, birth_year, country)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(user.id, fullName, governorate, district, district, birthYear, 'Iraq')
       .run();
 
     return json({ user: publicUser(user), token: await signToken(env, user) }, 201);

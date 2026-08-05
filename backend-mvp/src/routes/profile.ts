@@ -51,10 +51,28 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
 
   if (path === '/profile/me' && request.method === 'PUT') {
     const body = await readJson(request);
-    const birthYear = Number(body.birthYear);
-    if (body.birthYear !== undefined && (!Number.isInteger(birthYear) || birthYear < currentYear() - 100 || birthYear > currentYear() - 18)) {
-      throw new HttpError(400, 'birthYear must describe an adult profile.');
+    let birthYear: number | null = null;
+    if (body.birthYear !== undefined && body.birthYear !== null && body.birthYear !== '') {
+      const parsed = Number(body.birthYear);
+      if (!Number.isInteger(parsed) || parsed < currentYear() - 100 || parsed > currentYear() - 18) {
+        throw new HttpError(400, 'birthYear must describe an adult profile.');
+      }
+      birthYear = parsed;
+    } else if (body.age !== undefined && body.age !== null && body.age !== '') {
+      const age = Number(body.age);
+      if (!Number.isInteger(age) || age < 18 || age > 100) {
+        throw new HttpError(400, 'age must be an integer between 18 and 100.');
+      }
+      birthYear = currentYear() - age;
     }
+
+    const fullName =
+      optionalString(body, 'fullName', 120) ||
+      optionalString(body, 'name', 120) ||
+      '';
+    const occupation =
+      optionalString(body, 'occupation', 120) ||
+      optionalString(body, 'profession', 120);
 
     await env.DB.prepare(
       `INSERT INTO halal_profiles (
@@ -87,9 +105,9 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
     )
       .bind(
         user.id,
-        optionalString(body, 'fullName', 120) || '',
+        fullName,
         optionalString(body, 'gender', 20),
-        body.birthYear === undefined ? null : birthYear,
+        birthYear,
         optionalString(body, 'country', 80) || 'Iraq',
         optionalString(body, 'governorate', 80),
         optionalString(body, 'district', 80) || optionalString(body, 'city', 80),
@@ -99,7 +117,7 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
         optionalString(body, 'ethnicity', 40) || 'arab',
         optionalString(body, 'maritalStatus', 80),
         optionalString(body, 'education', 120),
-        optionalString(body, 'occupation', 120),
+        occupation,
         optionalString(body, 'bio', 2000),
         optionalString(body, 'intention', 200) || 'Serious for marriage',
         optionalString(body, 'timeline', 120) || 'Within 1 year',

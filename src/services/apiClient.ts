@@ -36,9 +36,73 @@ const getHeaders = () => {
   return headers;
 };
 
+/** Map UI photoPrivacy → Worker photo_visibility enum. */
+function toWorkerPhotoVisibility(value: unknown): string | undefined {
+  if (value == null || value === '') return undefined;
+  const v = String(value);
+  if (v === 'visible') return 'public';
+  if (v === 'hidden_by_default' || v === 'private_mode' || v === 'floral' || v === 'mutual_approval') return 'private';
+  if (v === 'public' || v === 'private' || v === 'blurred' || v === 'initials' || v === 'hidden') return v;
+  return 'private';
+}
+
+/** Serialize UserProfile fields to the Worker PUT /profile/me contract. */
+function serializeProfileForWorker(updated: Partial<UserProfile>): Record<string, unknown> {
+  const year = new Date().getUTCFullYear();
+  const ageNum = updated.age !== undefined && updated.age !== null ? Number(updated.age) : NaN;
+  const birthYearFromAge = Number.isFinite(ageNum) && ageNum > 0 ? year - ageNum : undefined;
+  const birthYear =
+    (updated as any).birthYear !== undefined
+      ? Number((updated as any).birthYear)
+      : birthYearFromAge;
+
+  const payload: Record<string, unknown> = {
+    fullName: updated.name || (updated as any).fullName || (updated as any).full_name || '',
+    gender: updated.gender,
+    country: updated.country || 'Iraq',
+    governorate: updated.governorate,
+    district: updated.district || updated.city,
+    city: updated.city || updated.district,
+    religion: updated.religion,
+    sect: updated.sect,
+    ethnicity: updated.ethnicity,
+    maritalStatus: updated.maritalStatus,
+    education: updated.education,
+    occupation: updated.profession || (updated as any).occupation,
+    bio: (updated as any).bio,
+    intention: updated.intention,
+    timeline: updated.timeline,
+    wantsChildren: updated.wantsChildren,
+    communicationPreference: updated.communicationPreference,
+    photoUrl: updated.avatarUrl || (updated as any).photoUrl || (updated as any).photo_url,
+  };
+
+  if (birthYear !== undefined && Number.isInteger(birthYear)) {
+    payload.birthYear = birthYear;
+  } else if (Number.isFinite(ageNum) && ageNum >= 18) {
+    payload.age = Math.trunc(ageNum);
+  }
+
+  const photoVisibility = toWorkerPhotoVisibility(
+    updated.photoPrivacy ?? (updated as any).photoVisibility ?? (updated as any).photo_visibility,
+  );
+  if (photoVisibility) payload.photoVisibility = photoVisibility;
+
+  return payload;
+}
+
 /** Unwrap Worker `{ profile }` payloads and guarantee array fields used by the UI. */
 function normalizeUserProfile(data: any): UserProfile {
   const raw = (data && data.profile) ? data.profile : data;
+  const photoVis = String(raw?.photo_visibility || raw?.photoVisibility || raw?.photoPrivacy || '');
+  const photoPrivacy =
+    photoVis === 'public' ? 'visible'
+      : photoVis === 'private' ? 'hidden_by_default'
+      : photoVis === 'blurred' ? 'blurred'
+      : photoVis === 'initials' ? 'initials'
+      : photoVis === 'hidden' ? 'hidden'
+      : (raw?.photoPrivacy || 'hidden_by_default');
+
   return {
     ...raw,
     id: String(raw?.id || raw?.user_id || ''),
@@ -47,8 +111,13 @@ function normalizeUserProfile(data: any): UserProfile {
     education: raw?.education || '',
     profession: raw?.profession || raw?.occupation || '',
     country: raw?.country || 'Iraq',
+    governorate: raw?.governorate || '',
+    district: raw?.district || raw?.city || '',
+    city: raw?.city || raw?.district || '',
     religion: raw?.religion || 'islam',
+    sect: raw?.sect,
     ethnicity: raw?.ethnicity || 'arab',
+    maritalStatus: raw?.maritalStatus || raw?.marital_status || '',
     languages: Array.isArray(raw?.languages) ? raw.languages : [],
     values: Array.isArray(raw?.values) ? raw.values : [],
     timeline: raw?.timeline || '',
@@ -57,6 +126,10 @@ function normalizeUserProfile(data: any): UserProfile {
     communicationPreference: raw?.communicationPreference || raw?.communication_preference || '',
     gender: raw?.gender || undefined,
     email: raw?.email,
+    phone: raw?.phone,
+    intention: raw?.intention || '',
+    avatarUrl: raw?.avatarUrl || raw?.photo_url || '',
+    photoPrivacy: photoPrivacy as UserProfile['photoPrivacy'],
     savedMatches: Array.isArray(raw?.savedMatches) ? raw.savedMatches : [],
   } as UserProfile;
 }
@@ -368,10 +441,11 @@ export const apiClient = {
       return mockApi.updateCurrentUserProfile(updated);
     }
 
+    // Worker expects fullName / birthYear / occupation — not UI name / age / profession.
     const data = await safeFetch<any>(`${API_BASE}/profile/me`, {
       method: 'PUT',
       headers: getHeaders(),
-      body: JSON.stringify(updated),
+      body: JSON.stringify(serializeProfileForWorker(updated)),
     });
     return normalizeUserProfile(data);
   },
