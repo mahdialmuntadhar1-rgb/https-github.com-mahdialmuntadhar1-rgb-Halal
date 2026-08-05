@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MatchProfile, Message, Conversation } from '../types';
 import { Language, TRANSLATIONS } from '../lib/translations';
 import { MOCK_CHATS_RESPONSES } from '../data/matches';
+import { apiClient } from '../services/apiClient';
 import { Send, Sparkles, AlertTriangle, ShieldCheck, Lock, Ban, Flag, Info, CheckCircle, MessagesSquare } from 'lucide-react';
 
 // Exact prompts requested in Chunk 6
@@ -65,6 +66,19 @@ export default function ChatSimulator({
   const [reportReason, setReportReason] = useState<string>('unserious');
   const [reportDetails, setReportDetails] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const ids = await apiClient.getBlockedUserIds();
+        if (!cancelled) setBlockedMatchIds(ids);
+      } catch (err) {
+        console.error('Failed to load blocked users', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Filter out blocked matches from connections list
   const activeConnections = acceptedMatches.filter(m => !blockedMatchIds.includes(m.id));
@@ -137,36 +151,48 @@ export default function ChatSimulator({
     }, 1600);
   };
 
-  const handleConfirmBlock = () => {
+  const handleConfirmBlock = async () => {
     if (!activeMatchId) return;
     const blockedName = activeMatch ? activeMatch.name : "Member";
-    setBlockedMatchIds(prev => [...prev, activeMatchId]);
-    setShowBlockModal(false);
-    
-    const feedback = locale === 'ar'
-      ? `Demo: تم حظر ${blockedName} محلياً بنجاح. لن يظهر هذا الملف في قائمة اتصالاتك.`
-      : locale === 'ckb'
-        ? `پیشاندان: ${blockedName} بلۆک کرا. ئەم پڕۆفایلە چیتر نابینیت.`
-        : `Demo: ${blockedName} has been blocked and removed from your connection list.`;
-    
-    triggerToast(feedback);
-    setActiveMatchId(null);
-    setMobileView('list');
+    try {
+      await apiClient.blockUser(activeMatchId);
+      setBlockedMatchIds(prev => prev.includes(activeMatchId) ? prev : [...prev, activeMatchId]);
+      setShowBlockModal(false);
+      const feedback = locale === 'ar'
+        ? `تم حظر ${blockedName}. لن يظهر هذا الملف في قائمة اتصالاتك.`
+        : locale === 'ckb'
+          ? `${blockedName} بلۆک کرا. ئەم پڕۆفایلە چیتر نابینیت.`
+          : `${blockedName} has been blocked and removed from your connection list.`;
+      triggerToast(feedback);
+      setActiveMatchId(null);
+      setMobileView('list');
+    } catch (err: any) {
+      setShowBlockModal(false);
+      triggerToast(err?.message || (locale === 'ar' ? 'تعذر الحظر.' : locale === 'ckb' ? 'بلۆک سەرکەوتوو نەبوو.' : 'Could not block this member.'));
+    }
   };
 
-  const handleSendReport = (e: React.FormEvent) => {
+  const handleSendReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowReportModal(false);
-    
+    if (!activeMatchId) return;
     const reportedName = activeMatch ? activeMatch.name : "Member";
-    const feedback = locale === 'ar'
-      ? `Demo: تم إرسال البلاغ بخصوص ${reportedName} بنجاح إلى فريق مراجعة حلال لإجراء التحقيق الهوياتي.`
-      : locale === 'ckb'
-        ? `پیشاندان: ڕاپۆرتەکە لەسەر ${reportedName} نێردرا بۆ لێکۆڵینەوە.`
-        : `Demo: Report for ${reportedName} successfully submitted to review board. Thank you for keeping the courtship environment secure.`;
-    
-    triggerToast(feedback);
-    setReportDetails('');
+    try {
+      const reason = reportDetails.trim()
+        ? `${reportReason}: ${reportDetails.trim()}`
+        : reportReason;
+      await apiClient.reportProfile(activeMatchId, reason);
+      setShowReportModal(false);
+      const feedback = locale === 'ar'
+        ? `تم تسجيل البلاغ بخصوص ${reportedName} للمراجعة.`
+        : locale === 'ckb'
+          ? `ڕاپۆرتەکە لەسەر ${reportedName} تۆمارکرا بۆ پێداچوونەوە.`
+          : `Report for ${reportedName} was recorded for review. Thank you.`;
+      triggerToast(feedback);
+      setReportDetails('');
+    } catch (err: any) {
+      setShowReportModal(false);
+      triggerToast(err?.message || (locale === 'ar' ? 'تعذر إرسال البلاغ.' : locale === 'ckb' ? 'ڕاپۆرت نەنێردرا.' : 'Could not submit report.'));
+    }
   };
 
   return (

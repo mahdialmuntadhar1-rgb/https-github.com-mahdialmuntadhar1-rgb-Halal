@@ -41,6 +41,12 @@ export async function handleMatches(ctx: RequestContext): Promise<Response | nul
   const where = ['u.id != ?', 'p.hidden_by_admin = 0'];
   const params: unknown[] = [requestedUserId];
 
+  // Hide members blocked by or blocking the viewer (persisted halal_blocks).
+  where.push('u.id NOT IN (SELECT blocked_user_id FROM halal_blocks WHERE blocker_id = ?)');
+  params.push(requestedUserId);
+  where.push('u.id NOT IN (SELECT blocker_id FROM halal_blocks WHERE blocked_user_id = ?)');
+  params.push(requestedUserId);
+
   const addFilter = (column: string, paramName: string) => {
     const value = url.searchParams.get(paramName);
     if (value && value !== 'all' && value !== 'All' && value !== 'All Iraq') {

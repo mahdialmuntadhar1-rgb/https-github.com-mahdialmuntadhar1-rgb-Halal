@@ -54,6 +54,78 @@ export default function MatchExplorerScreen({
   const [blockSuccessMessage, setBlockSuccessMessage] = useState<string | null>(null);
   const [showReportDialog, setShowReportDialog] = useState<boolean>(false);
   const [reportReason, setReportReason] = useState<string>('unserious');
+  const [safetyActing, setSafetyActing] = useState(false);
+
+  // Load persisted blocks so refresh/re-login hides the same members.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const ids = await apiClient.getBlockedUserIds();
+        if (!cancelled) setBlockedMatchIds(ids);
+      } catch (err) {
+        console.error('Failed to load blocked users', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleSubmitReport = async (matchId: string) => {
+    if (safetyActing) return;
+    setSafetyActing(true);
+    setReportSuccessMessage(null);
+    try {
+      const reasonLabel =
+        reportReason === 'fake' ? 'fake_profile'
+          : reportReason === 'harassment' ? 'harassment'
+          : reportReason === 'commercial' ? 'commercial'
+          : reportReason === 'unserious' ? 'unserious'
+          : reportReason;
+      await apiClient.reportProfile(matchId, reasonLabel);
+      setReportedMatchIds((prev) => (prev.includes(matchId) ? prev : [...prev, matchId]));
+      setReportSuccessMessage(txt(
+        `Thank you. Your report was recorded for review. Reason: ${reasonLabel.toUpperCase()}`,
+        `شكراً لك. تم تسجيل البلاغ للمراجعة. السبب: ${reasonLabel}`,
+        `سوپاس. سکاڵاکەت تۆمارکرا بۆ پێداچوونەوە. هۆکار: ${reasonLabel}`
+      ));
+      setShowReportDialog(false);
+    } catch (err: any) {
+      setReportSuccessMessage(err?.message || txt(
+        'Could not submit report. Please try again.',
+        'تعذر إرسال البلاغ. يرجى المحاولة مرة أخرى.',
+        'نەتوانرا سکاڵا بنێردرێت. دووبارە هەوڵ بدە.'
+      ));
+    } finally {
+      setSafetyActing(false);
+    }
+  };
+
+  const handleBlockCandidate = async (matchId: string) => {
+    if (safetyActing) return;
+    setSafetyActing(true);
+    setBlockSuccessMessage(null);
+    try {
+      await apiClient.blockUser(matchId);
+      setBlockedMatchIds((prev) => (prev.includes(matchId) ? prev : [...prev, matchId]));
+      setBlockSuccessMessage(txt(
+        'This member has been blocked and will stay hidden for your account.',
+        'تم حظر هذا العضو ولن يظهر لحسابك مجدداً.',
+        'ئەم ئەندامە بلۆک کرا و بۆ هەژمارەکەت شاراوە دەمێنێتەوە.'
+      ));
+      setTimeout(() => {
+        setSelectedMatch(null);
+        setBlockSuccessMessage(null);
+      }, 2500);
+    } catch (err: any) {
+      setBlockSuccessMessage(err?.message || txt(
+        'Could not block this member. Please try again.',
+        'تعذر حظر هذا العضو. يرجى المحاولة مرة أخرى.',
+        'نەتوانرا ئەم ئەندامە بلۆک بکرێت. دووبارە هەوڵ بدە.'
+      ));
+    } finally {
+      setSafetyActing(false);
+    }
+  };
 
   // Interactive Preference States
   const [activeExplorerTab, setActiveExplorerTab] = useState<'members' | 'cafe'>('members');
@@ -1062,16 +1134,9 @@ export default function MatchExplorerScreen({
                             </select>
                             <button
                               type="button"
-                              onClick={() => {
-                                setReportedMatchIds((prev) => [...prev, activeSelectedMatch.id]);
-                                setReportSuccessMessage(txt(
-                                  `Thank you. Candidate profile has been successfully reported for verification. Reason: ${reportReason.toUpperCase()}`,
-                                  `شكراً لك. تم إرسال البلاغ بنجاح للتحقق من المخالفة. السبب: ${reportReason}`,
-                                  `سوپاس. سکاڵاکەت بە سەرکەوتوویی تۆمارکرا بۆ پێداچوونەوە. هۆکار: ${reportReason}`
-                                ));
-                                setShowReportDialog(false);
-                              }}
-                              className="px-2.5 py-1 bg-red-600 text-white rounded text-xs font-black hover:bg-red-700 cursor-pointer"
+                              disabled={safetyActing}
+                              onClick={() => handleSubmitReport(activeSelectedMatch.id)}
+                              className="px-2.5 py-1 bg-red-600 text-white rounded text-xs font-black hover:bg-red-700 disabled:opacity-60 cursor-pointer"
                             >
                               {txt('Submit', 'إرسال', 'بنێرە')}
                             </button>
@@ -1088,19 +1153,9 @@ export default function MatchExplorerScreen({
                         {/* Block Action */}
                         <button
                           type="button"
-                          onClick={() => {
-                            setBlockedMatchIds((prev) => [...prev, activeSelectedMatch.id]);
-                            setBlockSuccessMessage(txt(
-                              'Candidate profile has been safely blocked. This user will no longer be visible to you.',
-                              'تم حظر هذا الملف الشخصي بأمان ولن يظهر لك مجدداً في خيارات الترشيح.',
-                              'ئەم پڕۆفایلە بە سەرکەوتوویی بلۆک کرا و چیتر پێشاند نادرێتەوە.'
-                            ));
-                            setTimeout(() => {
-                              setSelectedMatch(null);
-                              setBlockSuccessMessage(null);
-                            }, 2500);
-                          }}
-                          className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                          disabled={safetyActing}
+                          onClick={() => handleBlockCandidate(activeSelectedMatch.id)}
+                          className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 disabled:opacity-60 text-stone-700 border border-stone-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
                         >
                           🚫 {txt('Block Candidate', 'حظر المستخدم', 'بلۆک بکە')}
                         </button>

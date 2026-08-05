@@ -157,12 +157,52 @@ export async function handleProfile(ctx: RequestContext): Promise<Response | nul
   const reportMatch = path.match(/^\/reports\/profiles\/([^/]+)$/);
   if (reportMatch && request.method === 'POST') {
     const body = await readJson(request);
+    const targetId = decodeURIComponent(reportMatch[1]);
+    if (targetId === user.id) throw new HttpError(400, 'You cannot report your own profile.');
     const id = uuid();
     await env.DB.prepare('INSERT INTO halal_reports (id, reporter_id, target_type, target_id, reason) VALUES (?, ?, ?, ?, ?)')
-      .bind(id, user.id, 'profile', decodeURIComponent(reportMatch[1]), optionalString(body, 'reason', 500) || 'Reported by member')
+      .bind(id, user.id, 'profile', targetId, optionalString(body, 'reason', 500) || 'Reported by member')
       .run();
     const report = await env.DB.prepare('SELECT * FROM halal_reports WHERE id = ?').bind(id).first();
     return json({ report }, 201);
+  }
+
+  // Block list for the authenticated member (persisted in halal_blocks).
+  if (path === '/blocks' && request.method === 'GET') {
+    const rows = await env.DB.prepare(
+      'SELECT blocked_user_id, reason, created_at FROM halal_blocks WHERE blocker_id = ? ORDER BY created_at DESC LIMIT 500',
+    )
+      .bind(user.id)
+      .all<{ blocked_user_id: string; reason: string | null; created_at: string }>();
+    const blocks = (rows.results || []).map((r) => ({
+      blockedUserId: r.blocked_user_id,
+      reason: r.reason,
+      createdAt: r.created_at,
+    }));
+    return json({ blocks });
+  }
+
+  const blockMatch = path.match(/^\/blocks\/([^/]+)$/);
+  if (blockMatch && request.method === 'POST') {
+    const body = await readJson(request);
+    const blockedUserId = decodeURIComponent(blockMatch[1]);
+    if (blockedUserId === user.id) throw new HttpError(400, 'You cannot block yourself.');
+    const exists = await env.DB.prepare('SELECT id FROM halal_users WHERE id = ?').bind(blockedUserId).first();
+    if (!exists) throw new HttpError(404, 'User not found.');
+    await env.DB.prepare(
+      'INSERT OR IGNORE INTO halal_blocks (blocker_id, blocked_user_id, reason) VALUES (?, ?, ?)',
+    )
+      .bind(user.id, blockedUserId, optionalString(body, 'reason', 500))
+      .run();
+    return json({ blocked: true, blockedUserId }, 201);
+  }
+
+  if (blockMatch && request.method === 'DELETE') {
+    const blockedUserId = decodeURIComponent(blockMatch[1]);
+    await env.DB.prepare('DELETE FROM halal_blocks WHERE blocker_id = ? AND blocked_user_id = ?')
+      .bind(user.id, blockedUserId)
+      .run();
+    return json({ blocked: false, blockedUserId });
   }
 
   const moderateMatch = path.match(/^\/admin\/reports\/([^/]+)\/resolve$/);

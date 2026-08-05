@@ -819,6 +819,47 @@ export const apiClient = {
     return !!data.success;
   },
 
+  /** Persist a profile report to Worker `POST /reports/profiles/:userId`. */
+  async reportProfile(userId: string, reason: string): Promise<{ success: boolean }> {
+    if (getIsDemoMode()) {
+      return { success: true };
+    }
+    await safeFetch(`${API_BASE}/reports/profiles/${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ reason: reason || 'Reported by member' }),
+    });
+    return { success: true };
+  },
+
+  /** Persist a block to Worker `POST /blocks/:userId`. */
+  async blockUser(userId: string, reason?: string): Promise<{ success: boolean }> {
+    if (getIsDemoMode()) {
+      return { success: true };
+    }
+    await safeFetch(`${API_BASE}/blocks/${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ reason: reason || undefined }),
+    });
+    return { success: true };
+  },
+
+  /** Load blocked user ids for the current member. */
+  async getBlockedUserIds(): Promise<string[]> {
+    if (getIsDemoMode()) {
+      return [];
+    }
+    const data = await safeFetch<any>(`${API_BASE}/blocks`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    const blocks = Array.isArray(data?.blocks) ? data.blocks : Array.isArray(data) ? data : [];
+    return blocks
+      .map((b: any) => String(b.blockedUserId || b.blocked_user_id || ''))
+      .filter(Boolean);
+  },
+
   async reportComment(postId: string, commentId: string): Promise<boolean> {
     if (getIsDemoMode()) {
       return mockApi.reportComment(postId, commentId);
