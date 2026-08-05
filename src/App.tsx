@@ -262,32 +262,14 @@ export default function App() {
     }
   };
 
-  // Send request with simulation response
+  // Send introduction request and leave status pending until the receiver responds
   const handleSendRequest = async (matchId: string) => {
     try {
       await apiClient.sendIntroductionRequest(matchId);
       // Reload matches list immediately to show "pending" state
       const updatedMatchesRes = await apiClient.getMatches();
       setMatches(updatedMatchesRes.matches);
-      triggerToast(`✉️ Introduction request sent securely. Acknowledging respect rules...`);
-
-      // Trigger auto-approval response simulation
-      setTimeout(async () => {
-        try {
-          const { match } = await apiClient.acceptIntroductionRequest(matchId);
-          // Reload matches & conversations list immediately
-          const [updatedMatchesListRes, updatedConvs] = await Promise.all([
-            apiClient.getMatches(),
-            apiClient.getConversations()
-          ]);
-          setMatches(updatedMatchesListRes.matches);
-          setConversations(updatedConvs);
-          triggerToast(`🎉 Mutual interest! ${match.name} accepted your request. Chat unlocked! 🔓`);
-        } catch (simErr) {
-          console.error("Failed simulator auto-approval", simErr);
-        }
-      }, 2800);
-
+      triggerToast(`✉️ Introduction request sent securely. Awaiting their respectful response.`);
     } catch (err) {
       console.error("Failed to send introduction request", err);
     }

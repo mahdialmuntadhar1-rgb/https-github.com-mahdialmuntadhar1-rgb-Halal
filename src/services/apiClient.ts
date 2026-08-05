@@ -60,6 +60,42 @@ function normalizeUserProfile(data: any): UserProfile {
   } as UserProfile;
 }
 
+/** Map Worker match rows so intro send can use match.id as receiverId. */
+function normalizeMatchProfile(raw: any): MatchProfile {
+  const requestRaw = String(raw?.requestStatus ?? raw?.request_status ?? 'none');
+  const requestStatus =
+    requestRaw === 'pending' ? 'sent' : (requestRaw as MatchProfile['requestStatus']);
+
+  return {
+    ...raw,
+    id: String(raw?.id || raw?.user_id || ''),
+    name: raw?.name || raw?.full_name || '',
+    age: Number(raw?.age) || 0,
+    profession: raw?.profession || raw?.occupation || '',
+    education: raw?.education || '',
+    country: raw?.country || 'Iraq',
+    religion: raw?.religion || 'islam',
+    ethnicity: raw?.ethnicity || 'arab',
+    timeline: raw?.timeline || '',
+    wantsChildren: raw?.wantsChildren || raw?.wants_children || '',
+    communicationPreference: raw?.communicationPreference || raw?.communication_preference || '',
+    valuesSummary: Array.isArray(raw?.valuesSummary)
+      ? raw.valuesSummary
+      : Array.isArray(raw?.values)
+        ? raw.values
+        : [],
+    languages: Array.isArray(raw?.languages) ? raw.languages : [],
+    verified: !!(raw?.verified === true || raw?.verified === 1),
+    photoStatus: raw?.photoStatus || raw?.photo_status || 'hidden',
+    avatarUrl: raw?.avatarUrl || raw?.photo_url || '',
+    avatarSeed: raw?.avatarSeed || String(raw?.id || raw?.user_id || ''),
+    aboutMe: raw?.aboutMe || raw?.bio || '',
+    requestStatus: ['none', 'sent', 'accepted', 'declined'].includes(requestStatus)
+      ? requestStatus
+      : 'none',
+  } as MatchProfile;
+}
+
 /**
  * Robust wrapper over fetch to safely validate content-type and handle HTML/text fallbacks
  * without crashing or throwing cryptic "Unexpected token <" JSON parsing exceptions.
@@ -377,12 +413,12 @@ export const apiClient = {
 
     if (Array.isArray(data)) {
       return {
-        matches: data,
+        matches: data.map(normalizeMatchProfile),
         hasMore: data.length >= limit
       };
     } else if (data && Array.isArray(data.matches)) {
       return {
-        matches: data.matches,
+        matches: data.matches.map(normalizeMatchProfile),
         hasMore: data.hasMore !== undefined ? !!data.hasMore : data.matches.length >= limit
       };
     }
@@ -405,10 +441,11 @@ export const apiClient = {
       return mockApi.sendIntroductionRequest(matchId);
     }
 
+    // Worker accepts receiverId or toUserId (matchId is the target user's id from matches).
     return safeFetch<{ success: boolean; request: any }>(`${API_BASE}/requests`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ targetMatchId: matchId }),
+      body: JSON.stringify({ receiverId: matchId }),
     });
   },
 

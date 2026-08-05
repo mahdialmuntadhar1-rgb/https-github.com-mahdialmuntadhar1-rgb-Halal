@@ -1111,17 +1111,17 @@ export default function MatchExplorerScreen({
 
                 </div>
 
-                {/* Simulated acceptance info strip */}
+                {/* Honest pending state — awaiting receiver decision */}
                 {activeSelectedMatch.requestStatus === 'sent' && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-start gap-2 animate-pulse text-start">
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-start gap-2 text-start">
                     <AlertCircle className="w-4 h-4 text-[#FF4FD8] shrink-0 mt-0.5" />
                     <div>
-                      <strong className="block">{txt('Simulation Active', 'المحاكاة نشطة', 'سیمیولەیشن چالاکە')}</strong>
+                      <strong className="block">{txt('Request pending', 'الطلب قيد الانتظار', 'داواکاری چاوەڕوانە')}</strong>
                       <span>
                         {txt(
-                          'Demo: auto-accepting request so you can preview chat flow.',
-                          'عرض تجريبي: سيتم قبول الطلب تلقائياً لكي تتمكن من تجربة شاشة المحادثة واستعراض محاكاة الدردشة.',
-                          'پێشاندانی تاقیکاری: وەرگرتنی ئۆتۆماتیکی داواکاری بۆ ئەوەی بتوانیت چاتەکە ببینیت.'
+                          'Your introduction was sent. Chat unlocks only if they accept.',
+                          'تم إرسال طلب التعارف. تُفعّل المحادثة فقط عند قبول الطرف الآخر.',
+                          'داواکاری ناساندن نێردرا. گفتوگۆ تەنها ئەگەر ئەوان قبوڵی بکەن دەکرێتەوە.'
                         )}
                       </span>
                     </div>
