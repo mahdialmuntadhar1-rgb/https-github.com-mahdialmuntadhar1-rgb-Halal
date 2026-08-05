@@ -14,7 +14,6 @@ import ProfilePreviewScreen from './screens/ProfilePreviewScreen';
 import PrivacySettingsScreen from './screens/PrivacySettingsScreen';
 import AccountPlaceholderScreen from './screens/AccountPlaceholderScreen';
 import TrustPrivacyScreen from './screens/TrustPrivacyScreen';
-import CommunityFeed from './components/CommunityFeed';
 import AdminPanel from './components/AdminPanel';
 import AuthScreen from './screens/AuthScreen';
 import Postbox from './components/Postbox';
@@ -58,6 +57,13 @@ export default function App() {
       setSavedMatchIds(userProfile.savedMatches);
     }
   }, [userProfile]);
+
+  // CONTRACT-01: Community tab uses /community/* which has no Worker routes — redirect away.
+  useEffect(() => {
+    if (currentTab === 'community') {
+      setTab('explore');
+    }
+  }, [currentTab]);
 
   // Load Initial API Data
   useEffect(() => {
@@ -533,12 +539,9 @@ export default function App() {
             )}
 
             {currentTab === 'community' && userProfile && (
-              <CommunityFeed
-                locale={locale}
-                currentEmail={userProfile.email}
-                currentUserProfile={{ name: userProfile.name || 'Respected Member', gender: userProfile.gender }}
-                triggerToast={triggerToast}
-              />
+              // CONTRACT-01: unreachable via nav; redirect effect sends users to explore.
+              // Keep render null so broken CommunityFeed is not shown if tab flickers.
+              null
             )}
 
             {currentTab === 'admin' && userProfile && (

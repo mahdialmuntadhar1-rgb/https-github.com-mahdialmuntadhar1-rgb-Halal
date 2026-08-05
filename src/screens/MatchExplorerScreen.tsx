@@ -3,7 +3,6 @@ import { MatchProfile, SearchFilters, AppLanguage, UserProfile } from '../types'
 import { apiClient } from '../services/apiClient';
 import FilterPanel from '../components/FilterPanel';
 import MatchCard from '../components/MatchCard';
-import MarriageCafeFeed from '../components/MarriageCafeFeed';
 import Modal from '../components/Modal';
 import EmptyState from '../components/EmptyState';
 import ProfileCompletionCard from '../components/ProfileCompletionCard';
@@ -11,7 +10,7 @@ import TodayInZawaj from '../components/TodayInZawaj';
 import { 
   ShieldCheck, MapPin, Award, BookOpen, User, Star, Book, Heart, Lock, 
   CheckCircle, X, HelpCircle, Languages, AlertCircle, Fingerprint, 
-  MessageSquare, ThumbsUp, ThumbsDown, RefreshCw, Coffee
+  MessageSquare, ThumbsUp, ThumbsDown, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -359,28 +358,21 @@ export default function MatchExplorerScreen({
             {txt("HALAL ZAWAJ ISLAMIC PORTAL", "زواج حلال توافق حلال", "هاوسەرگیری حەڵاڵ گونجانی حەڵاڵ")}
           </span>
           <h1 className="text-2xl sm:text-4.5xl font-black text-[#22201E] font-serif tracking-tight">
-            {activeExplorerTab === 'members' 
-              ? txt("Recommended Partners", "الشركاء الموصى بهم", "هاوبەشە پێشنیارکراوەکان")
-              : txt("Marriage Café", "كافيه الزواج وقور", "کافێی هاوسەرگیری")}
+            {txt("Recommended Partners", "الشركاء الموصى بهم", "هاوبەشە پێشنیارکراوەکان")}
           </h1>
           <p className="text-stone-500 text-xs sm:text-[13px] font-medium leading-relaxed max-w-3xl">
-            {activeExplorerTab === 'members'
-              ? txt(
-                  "These verified profiles correspond to your religious, family, and educational goals. Select \"View Profile\" to understand their full biography before initiating any formal contact.",
-                  "تتطابق هذه الملفات الشخصية الموثقة مع أهدافك الدينية والعائلية والتعليمية. اختر \"عرض الملف الشخصي\" لفهم سيرتهم الذاتية الكاملة قبل بدء أي اتصال رسمي.",
-                  "ئەم پڕۆفایلە پشتڕاستکراوانە لەگەڵ ئامانجە ئاینی و خێزانی و پەروەردەییەکانت دەگونجێن. \"بینینی پڕۆفایل\" دیاریبکە بۆ تێگەیشتن لە ژیاننامەی تەواویان پێش دەستپێکردنی هەر پەیوەندییەکی فەرمی."
-                )
-              : txt(
-                  "A warm, respectful, and family-friendly public space where serious Iraqi members share thoughts, ask questions, and discuss marriage with pure matrimonial intentions.",
-                  "مساحة عامة دافئة ومحترمة ومناسبة للعائلات حيث يشارك الأعضاء العراقيون الجادون أفكارهم ويطرحون الأسئلة ويناقشون الزواج بنوايا شريفة.",
-                  "شوێنێکی گشتی گەرم، بەڕێز و گونجاو بۆ خێزانەکان کە تێیدا ئەندامە جدییەکان بیروڕاکانیان بڵاودەکەنەوە و باس لە هاوسەرگیری دەکەن بە شێوازێکی شەرعی."
-                )}
+            {txt(
+              "These verified profiles correspond to your religious, family, and educational goals. Select \"View Profile\" to understand their full biography before initiating any formal contact.",
+              "تتطابق هذه الملفات الشخصية الموثقة مع أهدافك الدينية والعائلية والتعليمية. اختر \"عرض الملف الشخصي\" لفهم سيرتهم الذاتية الكاملة قبل بدء أي اتصال رسمي.",
+              "ئەم پڕۆفایلە پشتڕاستکراوانە لەگەڵ ئامانجە ئاینی و خێزانی و پەروەردەییەکانت دەگونجێن. \"بینینی پڕۆفایل\" دیاریبکە بۆ تێگەیشتن لە ژیاننامەی تەواویان پێش دەستپێکردنی هەر پەیوەندییەکی فەرمی."
+            )}
           </p>
         </div>
 
-        {/* Outer Tab switch controllers */}
+        {/* Outer Tab switch controllers — Marriage Café sub-tab hidden (CONTRACT-01). */}
         <div className="flex bg-stone-100 p-1.5 rounded-2xl border border-stone-200/40 shrink-0 self-stretch sm:self-auto justify-center">
           <button
+            type="button"
             onClick={() => setActiveExplorerTab('members')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition duration-200 ${
               activeExplorerTab === 'members'
@@ -390,30 +382,10 @@ export default function MatchExplorerScreen({
           >
             <span>{txt("Members", "الأعضاء", "ئەندامان")}</span>
           </button>
-          <button
-            onClick={() => setActiveExplorerTab('cafe')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition duration-200 ${
-              activeExplorerTab === 'cafe'
-                ? 'bg-white text-[#22201E] shadow-sm'
-                : 'text-stone-500 hover:text-stone-800'
-            }`}
-          >
-            <Coffee className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>{txt("Marriage Café", "كافيه الزواج", "کافێی زواج")}</span>
-            <span className="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded-full font-bold shrink-0">
-              New
-            </span>
-          </button>
         </div>
       </div>
 
-      {activeExplorerTab === 'cafe' ? (
-        <MarriageCafeFeed 
-          locale={locale}
-          userProfile={userProfile}
-        />
-      ) : (
-        <>
+      <>
           {/* Search Filters Config Panel */}
           <FilterPanel
             filters={filters}
@@ -1285,7 +1257,6 @@ export default function MatchExplorerScreen({
         )}
       </AnimatePresence>
         </>
-      )}
 
     </div>
   );

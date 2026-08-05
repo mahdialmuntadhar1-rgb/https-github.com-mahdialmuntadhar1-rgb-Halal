@@ -5,7 +5,6 @@ import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
 import PhotoPrivacyModule from '../components/PhotoPrivacyModule';
 import TrustSafety from '../components/TrustSafety';
-import MarriageCafe from '../components/MarriageCafe';
 import { INITIAL_MATCHES } from '../data/matches';
 import { 
   Check, 
@@ -22,8 +21,7 @@ import {
   UserCheck,
   X,
   Compass,
-  Award,
-  Coffee
+  Award
 } from 'lucide-react';
 
 interface LandingScreenProps {
@@ -373,53 +371,30 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
         </div>
       </section>
 
-      {/* ----------------- HOME NAVIGATION TABS ----------------- */}
+      {/* ----------------- HOME NAVIGATION — Cafe/Social tab hidden (CONTRACT-01) ----------------- */}
       <section className="sticky top-0 md:top-20 z-40 bg-warm-ivory/95 backdrop-blur-md py-4 border-b border-[#E8DCC4]/50 shadow-xs" id="home-navigation-tabs">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="bg-[#FAF8F5]/80 border border-[#E8DCC4] rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 flex gap-2 shadow-inner">
             
-            {/* Tab 1: Discover Member */}
+            {/* Discover Member only — Marriage Café claimed LIVE FEED without Worker community routes */}
             <button
+              type="button"
               onClick={() => {
                 setHomeTab('discover');
                 showToast(txt("Opening candidate discovery filters...", "جاري الانتقال لساحة استكشاف الأعضاء...", "کردنەوەی فلتەری کاندیدەکان..."));
               }}
-              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                homeTab === 'discover'
-                  ? 'bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25'
-                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
-              }`}
+              className="flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-[#40798C] to-[#2F5866] text-white shadow-lg shadow-[#40798C]/25"
             >
-              <Compass className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'discover' ? 'animate-spin-slow' : ''}`} />
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5 animate-spin-slow" />
               <span>{txt("Discover Member", "استكشاف الأعضاء", "دۆزینەوەی ئەندام")}</span>
-            </button>
-
-            {/* Tab 2: Marriage Cafe */}
-            <button
-              onClick={() => {
-                setHomeTab('cafe');
-                showToast(txt("Entering Marriage Café social feed...", "جاري فتح مقهى ومجلس الزواج التفاعلي...", "چوونە ناو چایخانەی هاوسەرگیری..."));
-              }}
-              className={`flex-1 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                homeTab === 'cafe'
-                  ? 'bg-gradient-to-r from-accent-coral to-accent-pink text-white shadow-lg shadow-accent-coral/25'
-                  : 'bg-transparent text-stone-500 hover:text-warm-charcoal hover:bg-stone-50/50'
-              }`}
-            >
-              <Coffee className={`w-4 h-4 sm:w-5 sm:h-5 ${homeTab === 'cafe' ? 'animate-pulse' : ''}`} />
-              <span>{txt("Marriage Café (Social)", "مقهى الزواج التفاعلي", "چایخانەی هاوسەرگیری")}</span>
-              <span className="hidden sm:inline bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-mono font-extrabold animate-pulse">
-                LIVE FEED
-              </span>
             </button>
 
           </div>
         </div>
       </section>
 
-      {/* ----------------- DYNAMIC TAB RENDERING ----------------- */}
-      {homeTab === 'discover' ? (
-        <section className="py-2 space-y-8" id="governorate-matrimonial-portal">
+      {/* ----------------- DYNAMIC TAB RENDERING (discover only) ----------------- */}
+      <section className="py-2 space-y-8" id="governorate-matrimonial-portal">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             
             {/* NEARBY CANDIDATES SECTION (BY LOCATION) */}
@@ -866,19 +841,6 @@ export default function LandingScreen({ locale, onSelectGender, onExploreMatches
 
         </div>
       </section>
-      ) : (
-        /* Marriage Café Social Media Feed active tab */
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 animate-fade-in" id="marriage-cafe-social-hub">
-          <MarriageCafe
-            locale={locale}
-            triggerToast={showToast}
-            onNavigateToTab={setTab}
-            isAuthenticated={isAuthenticated}
-            userProfileName={userProfileName}
-            userProfileGovernorate={userProfile?.governorate || 'Baghdad'}
-          />
-        </section>
-      )}
 
       {/* FEATURED ACTIVE CANDIDATES PORTRAITS SLIDER (CHALLENGE REQUIREMENT) */}
       <section className="bg-[#FAF7F2] border border-[#E8DCC4] rounded-[2.5rem] py-10" id="featured-active-candidates">
