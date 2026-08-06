@@ -13,6 +13,7 @@ import {
   MessageSquare, ThumbsUp, ThumbsDown, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { resolveSampleProfilesForFilters, isSampleProfileId } from '../data/sampleProfiles';
 
 interface MatchExplorerScreenProps {
   locale: AppLanguage;
@@ -256,6 +257,9 @@ export default function MatchExplorerScreen({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  /** True only when Explore is showing demonstration samples (no real members for this filter). */
+  const [showingSampleProfiles, setShowingSampleProfiles] = useState(false);
+  const [sampleIntroDialogOpen, setSampleIntroDialogOpen] = useState(false);
 
   const fetchMatches = async (currentPage: number, currentFilters: SearchFilters, append: boolean = false) => {
     if (currentPage === 1) {
@@ -266,23 +270,47 @@ export default function MatchExplorerScreen({
     setError(null);
     try {
       const result = await apiClient.getMatches(currentFilters, currentPage, limit);
+      // Never treat API rows as samples; strip any accidental demo flags from live data.
+      const realMatches = (result.matches || []).filter((m) => !m.isDemoProfile && !isSampleProfileId(m.id));
+
       if (append) {
+        setShowingSampleProfiles(false);
         setLoadedMatches((prev) => {
           const existingIds = new Set(prev.map((m) => m.id));
-          const uniqueNew = result.matches.filter((m) => !existingIds.has(m.id));
+          const uniqueNew = realMatches.filter((m) => !existingIds.has(m.id));
           return [...prev, ...uniqueNew];
         });
+        setHasMore(result.hasMore);
+      } else if (realMatches.length === 0 && currentPage === 1) {
+        // Empty governorate (or empty All Iraq): show clearly labeled samples only.
+        const samples = resolveSampleProfilesForFilters({
+          governorate: currentFilters.governorate,
+          gender: currentFilters.gender as 'male' | 'female' | '' | undefined,
+        });
+        setLoadedMatches(samples);
+        setShowingSampleProfiles(samples.length > 0);
+        setHasMore(false);
       } else {
-        setLoadedMatches(result.matches);
+        setLoadedMatches(realMatches);
+        setShowingSampleProfiles(false);
+        setHasMore(result.hasMore);
       }
-      setHasMore(result.hasMore);
     } catch (err: any) {
       console.error("Failed to load matches:", err);
       setError(err.message || "Failed to load candidates");
+      setShowingSampleProfiles(false);
     } finally {
       setIsLoading(false);
       setLoadingMore(false);
     }
+  };
+
+  const handleSendIntroduction = (matchId: string) => {
+    if (isSampleProfileId(matchId) || loadedMatches.find((m) => m.id === matchId)?.isDemoProfile) {
+      setSampleIntroDialogOpen(true);
+      return;
+    }
+    onSendRequest(matchId);
   };
 
   // Reset page and fetch matches on filters change
@@ -291,18 +319,19 @@ export default function MatchExplorerScreen({
     fetchMatches(1, filters, false);
   }, [filters]);
 
-  // Sync prop updates (e.g., when request status changes)
+  // Sync prop updates (e.g., when request status changes) — never overwrite sample demo lists.
   useEffect(() => {
+    if (showingSampleProfiles) return;
     if (matches && matches.length > 0) {
       setLoadedMatches((prev) => {
-        if (prev.length === 0) return matches;
+        if (prev.length === 0) return matches.filter((m) => !m.isDemoProfile);
         return prev.map((localMatch) => {
           const propMatch = matches.find((m) => m.id === localMatch.id);
           return propMatch ? { ...localMatch, ...propMatch } : localMatch;
         });
       });
     }
-  }, [matches]);
+  }, [matches, showingSampleProfiles]);
 
   const isProfileIncomplete = useMemo(() => {
     return !userProfile.age || userProfile.age === 0 || !userProfile.education || !userProfile.profession;
@@ -507,7 +536,24 @@ export default function MatchExplorerScreen({
         </div>
       )}
 
-
+      {showingSampleProfiles && !isLoading && (
+        <div
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-start space-y-1"
+          id="sample-profiles-notice"
+          role="status"
+        >
+          <p className="text-xs font-black text-amber-900 uppercase tracking-wide">
+            {txt('Sample Profiles', 'ملفات تجريبية', 'پڕۆفایلی نموونەیی')}
+          </p>
+          <p className="text-[11px] text-amber-800/90 font-medium leading-relaxed">
+            {txt(
+              'These demonstration profiles show how Explore looks until real members join this area. They are clearly marked “Sample Profile” and cannot receive real introductions.',
+              'هذه الملفات التجريبية توضح شكل التصفح حتى ينضم أعضاء حقيقيون إلى هذه المنطقة. وهي موسومة بوضوح «ملف تجريبي» ولا يمكن إرسال تعارف حقيقي إليها.',
+              'ئەم پڕۆفایلە نموونەییانە شێوەی گەڕان نیشان دەدەن تا ئەندامانی ڕاستەقینە پەیوەست دەبن. بە ئاشکرا «پڕۆفایلی نموونەیی»یان لەسەرە و ناتوانرێت ناساندنی ڕاستەقینەیان بۆ بنێردرێت.'
+            )}
+          </p>
+        </div>
+      )}
 
       {/* Browsing modes tabs (Grid vs Swipe Deck vs Saved portfolios) */}
       <div className="flex flex-wrap gap-2.5 pb-2 border-b border-stone-200 text-left">
@@ -646,7 +692,7 @@ export default function MatchExplorerScreen({
                   <MatchCard
                     match={swipeMatches[0]}
                     locale={locale}
-                    onSendRequest={onSendRequest}
+                    onSendRequest={handleSendIntroduction}
                     onInitiateChat={onInitiateChat}
                     onOpenDetails={(profile) => setSelectedMatch(profile)}
                     savedMatchIds={savedMatchIds}
@@ -701,7 +747,7 @@ export default function MatchExplorerScreen({
               key={match.id}
               match={match}
               locale={locale}
-              onSendRequest={onSendRequest}
+              onSendRequest={handleSendIntroduction}
               onInitiateChat={onInitiateChat}
               onOpenDetails={(profile) => setSelectedMatch(profile)}
               savedMatchIds={savedMatchIds}
@@ -743,6 +789,11 @@ export default function MatchExplorerScreen({
                   <h3 className="text-lg font-serif font-black text-[#1E1E2F]">
                     {txt(`${activeSelectedMatch.name}'s Courtship Portfolio`, `الملف التعريفي للخطوبة: ${activeSelectedMatch.name}`, `پۆرتفۆلیۆی هاوسەرگیری تێر و تەسەلی ${activeSelectedMatch.name}`)}
                   </h3>
+                  {activeSelectedMatch.isDemoProfile && (
+                    <span className="text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-lg">
+                      {txt('Sample Profile', 'ملف تجريبي', 'پڕۆفایلی نموونەیی')}
+                    </span>
+                  )}
                 </div>
                 <button 
                   onClick={() => {
@@ -1177,12 +1228,16 @@ export default function MatchExplorerScreen({
                     <button
                       type="button"
                       onClick={() => {
-                        onSendRequest(activeSelectedMatch.id);
+                        handleSendIntroduction(activeSelectedMatch.id);
                       }}
                       className="px-6 py-2.5 bg-gradient-to-r from-[#FF4FD8] to-[#9D4DFF] text-white font-bold text-xs rounded-xl shadow-lg shadow-[#9D4DFF]/20 hover:opacity-90 active:scale-99 transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Heart className="w-4 h-4 fill-white text-white shrink-0" />
-                      <span>{txt('Send Respectful Request', 'إرسال طلب تعارف وقور', 'ناردنی داواکارییەکی بەڕێز')}</span>
+                      <span>
+                        {activeSelectedMatch.isDemoProfile
+                          ? txt('Sample Profile', 'ملف تجريبي', 'پڕۆفایلی نموونەیی')
+                          : txt('Send Introduction', 'إرسال طلب تعارف', 'ناردنی داواکاری ناساندن')}
+                      </span>
                     </button>
 
                     <button
@@ -1256,6 +1311,27 @@ export default function MatchExplorerScreen({
           </div>
         )}
       </AnimatePresence>
+
+      <Modal
+        isOpen={sampleIntroDialogOpen}
+        onClose={() => setSampleIntroDialogOpen(false)}
+        title={txt('Sample Profile', 'ملف تجريبي', 'پڕۆفایلی نموونەیی')}
+      >
+        <p className="text-sm text-stone-700 leading-relaxed font-medium">
+          {txt(
+            'This is a demonstration profile used only when no real members are available in this area. You cannot send a real introduction to sample profiles. When real members join, these samples disappear automatically.',
+            'هذا ملف تجريبي يُعرض فقط عندما لا يوجد أعضاء حقيقيون في هذه المنطقة. لا يمكن إرسال طلب تعارف حقيقي إلى الملفات التجريبية. عند انضمام أعضاء حقيقيين تختفي هذه العينات تلقائياً.',
+            'ئەمە پڕۆفایلێکی نموونەییە کە تەنها کاتێک ئەندامی ڕاستەقینە لەم ناوچەیەدا نییە پیشان دەدرێت. ناتوانیت داواکاری ناساندنی ڕاستەقینە بۆ پڕۆفایلی نموونەیی بنێریت. کاتێک ئەندامانی ڕاستەقینە دێن، ئەم نموونانە خۆکارانە ون دەبن.'
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={() => setSampleIntroDialogOpen(false)}
+          className="mt-2 w-full py-2.5 rounded-xl bg-warm-charcoal text-white text-xs font-bold"
+        >
+          {txt('Understood', 'حسناً', 'باشە')}
+        </button>
+      </Modal>
         </>
 
     </div>

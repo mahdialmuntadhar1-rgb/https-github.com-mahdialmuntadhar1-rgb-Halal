@@ -289,6 +289,16 @@ export default function App() {
 
   // Send introduction request and leave status pending until the receiver responds
   const handleSendRequest = async (matchId: string) => {
+    if (String(matchId || '').startsWith('sample-')) {
+      triggerToast(
+        locale === 'en'
+          ? 'This is a sample profile for demonstration only.'
+          : locale === 'ckb'
+            ? 'ئەمە پڕۆفایلێکی نموونەییە تەنها بۆ نیشاندان.'
+            : 'هذا ملف تجريبي للعرض فقط.'
+      );
+      return;
+    }
     try {
       await apiClient.sendIntroductionRequest(matchId);
       // Reload matches list immediately to show "pending" state
@@ -366,7 +376,8 @@ export default function App() {
 
   const profileStrength = calculateProfileStrength();
   const acceptedMatches = matches.filter(m => m.requestStatus === 'accepted');
-  const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin', 'onboarding', 'gender-selection'].includes(currentTab);
+  // postcards must be protected: otherwise Header→Postbox with no session renders an empty <main> (white screen).
+  const isProtectedTab = ['explore', 'chat', 'profile', 'privacy', 'account', 'community', 'admin', 'onboarding', 'gender-selection', 'postcards'].includes(currentTab);
 
   return (
     <div 

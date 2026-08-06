@@ -32,6 +32,7 @@ export default function MatchCard({
     return isEn ? en : isCkb ? ckb : ar;
   };
 
+  const isSample = !!match.isDemoProfile || String(match.id || '').startsWith('sample-');
   const isSaved = savedMatchIds.includes(match.id);
   const [isRequestSent, setIsRequestSent] = useState(
     match.requestStatus === 'sent' || match.requestStatus === 'accepted'
@@ -43,12 +44,16 @@ export default function MatchCard({
     setIsRequestSent(match.requestStatus === 'sent' || match.requestStatus === 'accepted');
   }, [match.requestStatus]);
 
-  const handleSendMarriageRequest = (e: React.MouseEvent) => {
+  const handleSendIntroduction = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isSample) {
+      // Parent shows informational dialog; never fire a real introduction for samples.
+      onSendRequest(match.id);
+      return;
+    }
     if (isRequestSent || isSending) return;
     
     setIsSending(true);
-    // Simulate sending progress
     setTimeout(() => {
       onSendRequest(match.id);
       setIsRequestSent(true);
@@ -112,8 +117,15 @@ export default function MatchCard({
           </>
         )}
 
-        {/* Top-Right: Verified Seal */}
-        {match.verified && (
+        {/* Sample badge — always visible for demonstration profiles */}
+        {isSample && (
+          <div className="absolute top-3.5 left-3.5 z-10 bg-amber-100/95 backdrop-blur-xs border border-amber-300 text-amber-950 text-[10px] font-black px-3 py-1.5 rounded-xl shadow-sm uppercase tracking-wide">
+            {txt('Sample Profile', 'ملف تجريبي', 'پڕۆفایلی نموونەیی')}
+          </div>
+        )}
+
+        {/* Top-Right: Verified Seal (never for samples) */}
+        {match.verified && !isSample && (
           <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-xs border border-[#EBE6DC] text-[#0B5C43] text-[10px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
             <Check className="w-3.5 h-3.5 text-[#0B5C43] stroke-[3]" />
             <span>{txt("Verified", "موثق", "سەلمێنراو")}</span>
@@ -184,12 +196,14 @@ export default function MatchCard({
             </button>
           </div>
 
-          {/* Row 2: Send Marriage Request */}
+          {/* Row 2: Send Introduction */}
           <button
-            onClick={handleSendMarriageRequest}
-            disabled={isRequestSent || isSending}
+            onClick={handleSendIntroduction}
+            disabled={!isSample && (isRequestSent || isSending)}
             className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition duration-200 cursor-pointer ${
-              isRequestSent
+              isSample
+                ? 'bg-amber-50 text-amber-950 border border-amber-200 hover:bg-amber-100'
+                : isRequestSent
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-not-allowed'
                 : isSending
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-100 cursor-wait'
@@ -202,11 +216,13 @@ export default function MatchCard({
               <Send className="w-3.5 h-3.5" />
             )}
             <span>
-              {isRequestSent
-                ? txt("Marriage Request Sent ✓", "تم إرسال طلب الزواج ✓", "داواکاری هاوسەرگیری نێردرا ✓")
+              {isSample
+                ? txt('Sample Profile', 'ملف تجريبي', 'پڕۆفایلی نموونەیی')
+                : isRequestSent
+                ? txt("Introduction Sent ✓", "تم إرسال طلب التعارف ✓", "داواکاری ناساندن نێردرا ✓")
                 : isSending
                   ? txt("Sending...", "جاري الإرسال...", "دەنێردرێت...")
-                  : txt("Send Marriage Request", "إرسال طلب زواج", "ناردنی داواکاری هاوسەرگیری")}
+                  : txt("Send Introduction", "إرسال طلب تعارف", "ناردنی داواکاری ناساندن")}
             </span>
           </button>
 

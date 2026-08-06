@@ -217,9 +217,9 @@ export default function ChatSimulator({
             </h3>
             <p className="text-[#6B635B] text-sm max-w-lg mx-auto leading-relaxed">
               {txt(
-                'To begin talking, browse portfolios in the Match Explorer and click "Send Marriage Request". Once the request is mutually accepted, communication is unlocked in absolute privacy!',
-                'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف للزواج". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.',
-                'بۆ دەستپێکردنی گفتوگۆ، بڕۆ پڕۆفایلەکان لە دۆزەرەوەی هاوبەشەکان ببینە و کرتە بکە لەسەر "ناردنی داواکاری هاوسەرگیری". کاتێک داواکارییەکە لەلایەن هەردوولاوە پەسەندکرا، گفتوگۆ لە پارێزگاریی و متمانەی تەواودا دەکرێتەوە!'
+                'To begin talking, browse portfolios in the Match Explorer and click "Send Introduction". Once the request is mutually accepted, communication is unlocked in absolute privacy!',
+                'لبدء الحوار العائلي، يرجى تصفح الملفات في مستكشف الشركاء والنقر على "إرسال طلب تعارف". حالما يتم القبول المتبادل بوقار، يتم فتح المحادثة الخاصة.',
+                'بۆ دەستپێکردنی گفتوگۆ، بڕۆ پڕۆفایلەکان لە دۆزەرەوەی هاوبەشەکان ببینە و کرتە بکە لەسەر "ناردنی داواکاری ناساندن". کاتێک داواکارییەکە لەلایەن هەردوولاوە پەسەندکرا، گفتوگۆ لە پارێزگاریی و متمانەی تەواودا دەکرێتەوە!'
               )}
             </p>
           </div>

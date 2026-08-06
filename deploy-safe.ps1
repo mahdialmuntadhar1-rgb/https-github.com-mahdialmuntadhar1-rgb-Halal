@@ -88,7 +88,8 @@ Write-Host "[OK] Build succeeded" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "Deploying to Cloudflare Pages..." -ForegroundColor Yellow
-& npx wrangler pages deploy dist --project-name=zawaj-app --branch=main --commit-dirty=true
+# app.kaniq.org is bound to zawaj-app-v4 (not zawaj-app)
+& npx wrangler pages deploy dist --project-name=zawaj-app-v4 --branch=main --commit-dirty=true
 if ($LASTEXITCODE -ne 0) {
     Write-Host "DEPLOY FAILED." -ForegroundColor Red
     Read-Host "Press Enter to exit"
@@ -98,7 +99,7 @@ Write-Host "[OK] Deploy succeeded" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
-Write-Host "  DONE - https://main.zawaj-app.pages.dev" -ForegroundColor Green
+Write-Host "  DONE - https://app.kaniq.org (zawaj-app-v4)" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
 
 Read-Host "Press Enter to close"

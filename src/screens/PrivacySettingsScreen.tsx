@@ -217,7 +217,7 @@ export default function PrivacySettingsScreen({
               {/* Who can send requests option */}
               <div className="space-y-2">
                 <label className="block text-[10px] font-mono font-bold text-[#6B635B] uppercase tracking-wide">
-                  Who can send me Marriage Requests?
+                  Who can send me introduction requests?
                 </label>
                 <select
                   value={whoCanSend}

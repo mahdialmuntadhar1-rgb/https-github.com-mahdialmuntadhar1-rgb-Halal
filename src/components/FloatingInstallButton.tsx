@@ -73,7 +73,6 @@ export default function FloatingInstallButton({ locale }: FloatingInstallButtonP
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          console.log('User accepted the install prompt');
           setIsStandalone(true);
         }
         setDeferredPrompt(null);
