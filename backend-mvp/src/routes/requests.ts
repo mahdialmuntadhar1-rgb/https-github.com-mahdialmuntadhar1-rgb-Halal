@@ -1,4 +1,5 @@
 ﻿import { HttpError, json, noContent, readJson, RequestContext, requireAdmin, requireString, requireUser, uuid } from '../db';
+import { publicRequestRow } from '../privacy';
 
 async function ensureConversation(ctx: RequestContext, requestId: string): Promise<void> {
   const row = await ctx.env.DB.prepare('SELECT sender_id, receiver_id FROM halal_requests WHERE id = ? AND status = ?')
@@ -114,8 +115,6 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
          r.status,
          r.created_at,
          r.decided_at,
-         sender.email AS sender_email,
-         receiver.email AS receiver_email,
          sender_profile.full_name AS sender_name,
          receiver_profile.full_name AS receiver_name
        FROM halal_requests r
@@ -129,7 +128,8 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
     )
       .bind(user.id, user.id)
       .all();
-    return json({ requests: rows.results || [] });
+    const requests = (rows.results || []).map((row) => publicRequestRow(row as Record<string, unknown>));
+    return json({ requests });
   }
 
   if (path === '/admin/requests' && request.method === 'GET') {

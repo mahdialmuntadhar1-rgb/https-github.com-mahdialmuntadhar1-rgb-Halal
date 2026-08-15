@@ -1,10 +1,8 @@
 ﻿import { UserProfile, MatchProfile, Conversation, Message, HeroImage, CommunityPost, PostComment, SearchFilters, User } from '../types';
 import { mockApi } from './mockApi';
+import { resolveApiBase } from './apiBase';
 
-let API_BASE = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/api';
-if (API_BASE.endsWith('/')) {
-  API_BASE = API_BASE.slice(0, -1);
-}
+const API_BASE = resolveApiBase();
 
 /**
  * Checks if we should run in local demo mode.
@@ -395,7 +393,7 @@ export const apiClient = {
    * Requires a valid JWT. Clears the local token after a successful response.
    */
   async deleteAccount(): Promise<{ success: boolean; message: string }> {
-    const data = await safeFetch<{ success: boolean; message: string }>(`${API_BASE}/api/auth/account`, {
+    const data = await safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/account`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
@@ -412,8 +410,7 @@ export const apiClient = {
       };
     }
 
-    // Backend route is registered at /api/auth/forgot-password (not /auth/forgot-password).
-    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/api/auth/forgot-password`, {
+    return safeFetch<{ success: boolean; message: string }>(`${API_BASE}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -424,7 +421,7 @@ export const apiClient = {
     if (getIsDemoMode()) {
       return { message: 'Password reset successfully. You can now log in.' };
     }
-    return safeFetch<{ message: string }>(`${API_BASE}/api/auth/reset-password`, {
+    return safeFetch<{ message: string }>(`${API_BASE}/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, password }),

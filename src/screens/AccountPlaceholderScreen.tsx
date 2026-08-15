@@ -42,8 +42,8 @@ export default function AccountPlaceholderScreen({
   
   // Verification states
   const [idSubmitted, setIdSubmitted] = useState<boolean>(false);
-  const [civilVerified, setCivilVerified] = useState<boolean>(true); // For current demo profile
-  const [smsVerified, setSmsVerified] = useState<boolean>(true);
+  const [civilVerified] = useState<boolean>(false);
+  const [smsVerified] = useState<boolean>(false);
   const [profileAudited, setProfileAudited] = useState<boolean>(false);
   
   // Premium state
@@ -82,9 +82,9 @@ export default function AccountPlaceholderScreen({
     
     // Clear warning about backend requirement
     triggerToast(
-      locale === 'en' 
-        ? `⚠️ Sandbox Demo: ${action} via ${method} simulated. Backend database connection is required for live accounts.` 
-        : `⚠️ محاكاة تجريبية: تم إرسال طلب ${action === 'Login' ? 'تسجيل الدخول' : 'إنشاء الحساب'} عبر ${authMethod === 'phone' ? 'الهاتف' : 'البريد'}. الاتصال بقاعدة البيانات مطلوب للإنتاج.`
+      locale === 'en'
+        ? `You are already signed in. Use Sign Out in the header to change accounts. ${action} via ${method} is not used on this screen.`
+        : `أنت مسجّل الدخول بالفعل. استخدم تسجيل الخروج من الشريط العلوي لتغيير الحساب.`
     );
   };
 
@@ -92,8 +92,8 @@ export default function AccountPlaceholderScreen({
     setIdSubmitted(true);
     triggerToast(
       locale === 'en' 
-        ? "📄 Demo: Identity files uploaded successfully. Profile analysis is pending." 
-        : "📄 تجريبية: تم رفع مستندات الهوية بنجاح. المراجعة الحكومية معلقة لحين توفر قاعدة البيانات."
+        ? "Government ID verification is not available yet. Nothing was uploaded."
+        : "التحقق من الهوية الحكومية غير متاح حالياً. لم يتم رفع أي ملف."
     );
   };
 
@@ -129,15 +129,15 @@ export default function AccountPlaceholderScreen({
           </h2>
           <p className="text-[#6B635B] text-xs sm:text-sm font-medium mt-1">
             {locale === 'en'
-              ? 'Preview login authentication portals, legal verification badge tracking, and premium plan limits.'
-              : 'استعرض بوابات تسجيل الدخول التجريبية، تتبع شارات التدقيق القانوني، وحدود الباقة الممتازة.'}
+              ? 'Manage account deletion, review coming identity checks, and see membership pledges.'
+              : 'إدارة حذف الحساب، ومراجعة فحوصات الهوية القادمة، وميثاق العضوية.'}
           </p>
         </div>
 
         {/* Global Backend Disclaimer Badge */}
         <div className="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] sm:text-xs font-mono font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm shrink-0">
           <AlertTriangle className="w-4.5 h-4.5 text-accent-coral animate-pulse" />
-          <span>{locale === 'en' ? 'NOTICE: Backend connection required for live auth' : 'ملاحظة: الاتصال بخادم قاعدة البيانات مطلوب للحسابات الحية'}</span>
+          <span>{locale === 'en' ? 'Signed in to your live HALAL account' : 'أنت مسجّل الدخول إلى حساب حلال الفعلي'}</span>
         </div>
       </div>
 
@@ -228,10 +228,10 @@ export default function AccountPlaceholderScreen({
             <div className="flex justify-between items-center pb-2 border-b border-stone-200/50">
               <h3 className="font-serif font-black text-warm-charcoal text-base flex items-center gap-2">
                 <Lock className="w-4.5 h-4.5 text-[#40798C]" />
-                <span>{locale === 'en' ? 'Secure Authentication Sandbox' : 'بوابة تسجيل الدخول التجريبية'}</span>
+                <span>{locale === 'en' ? 'Account access' : 'الوصول إلى الحساب'}</span>
               </h3>
-              <span className="text-[9px] bg-amber-500/10 text-amber-600 font-mono font-bold px-2 py-0.5 rounded border border-amber-200">
-                Mock Portal
+              <span className="text-[9px] bg-emerald-500/10 text-emerald-700 font-mono font-bold px-2 py-0.5 rounded border border-emerald-200">
+                {locale === 'en' ? 'Signed in' : 'مسجّل الدخول'}
               </span>
             </div>
 
@@ -304,7 +304,7 @@ export default function AccountPlaceholderScreen({
                     />
                   </div>
                   <p className="text-[10px] text-[#A2978C] font-semibold">
-                    {locale === 'en' ? 'We will simulate sending a 6-digit verification code.' : 'سنقوم بمحاكاة إرسال رمز تأكيد هاتف مؤلف من 6 أرقام.'}
+                    {locale === 'en' ? 'Phone sign-in is not offered yet. Use email on the Sign In screen.' : 'تسجيل الدخول بالهاتف غير متاح بعد. استخدم البريد من شاشة الدخول.'}
                   </p>
                 </div>
               ) : (
@@ -341,7 +341,7 @@ export default function AccountPlaceholderScreen({
                 type="submit"
                 className="w-full py-3 bg-gradient-to-br from-[#40798C] to-[#2E5968] text-white font-bold text-xs sm:text-sm rounded-xl hover:opacity-95 transition-all shadow-md flex items-center justify-center gap-1.5"
               >
-                <span>{authTab === 'login' ? (locale === 'en' ? 'Login Secure Sandbox' : 'تسجيل دخول تجريبي مسموح') : (locale === 'en' ? 'Create Demo Identity' : 'إنشاء الهوية التجريبية')}</span>
+                <span>{locale === 'en' ? 'You are already signed in' : 'أنت مسجّل الدخول بالفعل'}</span>
               </button>
             </form>
           </div>
@@ -362,10 +362,10 @@ export default function AccountPlaceholderScreen({
 
             {/* Clear Warning About Real Verification */}
             <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl text-[11px] text-stone-600 font-semibold leading-relaxed">
-              <strong>🔒 Demo Notice: </strong>
+              <strong>Note: </strong>
               {locale === 'en'
-                ? "This interface demonstrates verification architecture. No actual personal civil status information or government ID databases are accessed or stored. We do not claim users are verified for real."
-                : "هذه الواجهة تستعرض نظام الموثوقية فقط لتقييم تجربة الاستخدام. لا يتم تخزين أو مشاركة أي وثائق مدنية حقيقية مع جهة حكومية فعلياً."}
+                ? "Government ID and SMS verification are not implemented. We do not claim members are civil-status verified."
+                : "التحقق الحكومي والتحقق عبر الرسائل غير مطبّقين. لا ندّعي أن الأعضاء موثّقون مدنياً."}
             </div>
 
             <div className="space-y-4 pt-1">
@@ -385,12 +385,12 @@ export default function AccountPlaceholderScreen({
                         ? 'Checks names & age against civic registers for complete safety.' 
                         : 'مقارنة البيانات المدخلة مع السجلات المدنية للتأكد من الموثوقية بالكامل.'}
                     </p>
-                    <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: Coming soon to live production</span>
+                    <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: Coming soon</span>
                   </div>
                 </div>
 
                 <span className="text-[9px] bg-amber-500/10 text-amber-600 border border-amber-200 font-extrabold px-3 py-1 rounded-full uppercase shrink-0 font-mono">
-                  Simulated
+                  Coming soon
                 </span>
               </div>
 
@@ -409,12 +409,12 @@ export default function AccountPlaceholderScreen({
                         ? 'Requires valid cell validation for one-account per-citizen integrity.' 
                         : 'يتطلب تأكيداً هاتفياً حياً لمنع الحسابات الوهمية المتكررة.'}
                     </p>
-                    <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: In-Review / Simulated</span>
+                    <span className="text-[9px] text-[#A2978C] font-mono mt-1 block">Status: Coming soon</span>
                   </div>
                 </div>
 
                 <span className="text-[9px] bg-amber-500/10 text-amber-600 border border-amber-200 font-extrabold px-3 py-1 rounded-full uppercase shrink-0 font-mono">
-                  Simulated
+                  Coming soon
                 </span>
               </div>
 
@@ -446,7 +446,7 @@ export default function AccountPlaceholderScreen({
                     onClick={handleIdSubmitDemo}
                     className="px-3 py-1.5 bg-accent-coral text-white font-bold text-[9px] rounded-lg shadow hover:opacity-90 transition shrink-0"
                   >
-                    {locale === 'en' ? 'Submit Identity Details' : 'رفع إثبات تجريبي'}
+                    {locale === 'en' ? 'Coming soon' : 'قريباً'}
                   </button>
                 )}
               </div>

@@ -63,7 +63,7 @@ export default function PhotoPrivacyModule({ locale }: PhotoPrivacyProps) {
               
               <div className="flex justify-between items-center pb-4 border-b border-white/30">
                 <h4 className="text-sm font-bold text-warm-charcoal">
-                  {locale === 'en' ? 'Privacy Sandbox Simulator' : locale === 'ar' ? 'مُحاكي خصوصية الصور' : 'سیمیولەتەری پاراستنی وێنە'}
+                  {locale === 'en' ? 'Photo privacy preview' : locale === 'ar' ? 'معاينة خصوصية الصور' : 'پێشبینی پاراستنی وێنە'}
                 </h4>
                 <div className="text-[10px] bg-accent-coral/10 text-accent-coral font-bold px-2.5 py-0.5 rounded-full border border-accent-coral/20">
                   {locale === 'en' ? 'WOMAN PERSPECTIVE' : locale === 'ar' ? 'منظور المرأة' : 'تێڕوانینی ئافرەت'}

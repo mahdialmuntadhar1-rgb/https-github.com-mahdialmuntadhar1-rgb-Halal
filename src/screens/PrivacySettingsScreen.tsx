@@ -79,8 +79,8 @@ export default function PrivacySettingsScreen({
     if (!blockSearchTerm.trim()) return;
     triggerToast(
       locale === 'en'
-        ? `Demo Blocked: Member "${blockSearchTerm}" block simulated. Permanent database storage requires backend integration.`
-        : `حظر تجريبي: تم حظر العميل "${blockSearchTerm}". تخزين القائمة الدائمة يتطلب الاتصال بخادم قاعدة البيانات.`
+        ? `To block a member, open their profile or chat and use Block. Blocks are saved on your account.`
+        : `لحظر عضو، افتح ملفه أو المحادثة واستخدم الحظر. يتم حفظ الحظر في حسابك.`
     );
     setBlockSearchTerm('');
   };
@@ -133,7 +133,7 @@ export default function PrivacySettingsScreen({
         {/* Status Indicator */}
         <div className="bg-stone-100 border border-stone-200/80 px-4 py-2 rounded-2xl text-[10px] sm:text-xs font-mono font-bold text-[#6B635B] flex items-center gap-1.5 shrink-0">
           <Settings className="w-4 h-4 text-[#40798C] animate-spin" />
-          <span>{locale === 'en' ? 'Demo Sandbox Settings Active' : 'مستويات الأمان التجريبية نشطة'}</span>
+          <span>{locale === 'en' ? 'Privacy settings' : 'إعدادات الخصوصية'}</span>
         </div>
       </div>
 
@@ -305,12 +305,12 @@ export default function PrivacySettingsScreen({
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-xs font-bold text-warm-charcoal">{locale === 'en' ? 'Dossier Profile Views Alerts' : 'تنبيهات بمشاهدة الملف الشخصي'}</p>
-                    <span className="text-[8px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono font-bold uppercase">Sandbox</span>
+                    <span className="text-[8px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono font-bold uppercase">Coming soon</span>
                   </div>
                   <p className="text-[10px] text-[#6B635B] font-semibold mt-0.5">{locale === 'en' ? 'Receive summary of verified partners who visited your portfolio.' : 'تحديثات أسبوعية بالملفات التي تصفحت بياناتك.'}</p>
                 </div>
                 <button 
-                  onClick={() => { setNotifyViews(!notifyViews); triggerToast(locale === 'en' ? "Views alert toggled. Sandbox simulation." : "تم تغيير خيارات تنبيه زيارة الملف الشخصي تجريبياً."); }}
+                  onClick={() => { setNotifyViews(!notifyViews); triggerToast(locale === 'en' ? "Profile view alerts are not available yet." : "تنبيهات مشاهدة الملف غير متاحة حالياً."); }}
                   className="text-[#40798C] focus:outline-none"
                 >
                   {notifyViews ? <ToggleRight className="w-10 h-10 text-[#40798C]" /> : <ToggleLeft className="w-10 h-10 text-stone-300" />}
@@ -329,7 +329,7 @@ export default function PrivacySettingsScreen({
           <div className="bg-white/40 backdrop-blur-xl border border-white/55 p-6 sm:p-8 rounded-[2rem] shadow-xl space-y-4">
             <h3 className="font-serif font-black text-warm-charcoal text-base flex items-center gap-2 pb-2 border-b border-stone-200/50">
               <Ban className="w-4.5 h-4.5 text-red-600" />
-              <span>{locale === 'en' ? 'Blocked Users Sandbox' : 'قائمة الحظر والأمان'}</span>
+              <span>{locale === 'en' ? 'Blocked Users' : 'قائمة الحظر والأمان'}</span>
             </h3>
 
             <p className="text-[11px] text-[#6B635B] leading-relaxed font-semibold">
@@ -359,7 +359,9 @@ export default function PrivacySettingsScreen({
                 </button>
               </div>
               <p className="text-[9px] text-[#A2978C] font-mono leading-relaxed mt-1">
-                📋 Demo: Block List contains 0 permanent Custom records. Needs database backend to save lists permanently between different device sessions.
+                {locale === 'en'
+                  ? 'Blocks are saved on your account when you block someone from their profile or chat.'
+                  : 'يتم حفظ الحظر في حسابك عند حظر شخص من ملفه أو من المحادثة.'}
               </p>
             </form>
           </div>

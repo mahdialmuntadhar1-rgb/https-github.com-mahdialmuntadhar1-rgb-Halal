@@ -50,8 +50,8 @@
     <h1>Privacy Policy - ZAWAJ Marriage Platform</h1>
     
     <div class="effective-date">
-        <strong>Effective Date:</strong> July 21, 2026<br>
-        <strong>Last Updated:</strong> July 21, 2026
+        <strong>Effective Date:</strong> August 15, 2026<br>
+        <strong>Last Updated:</strong> August 15, 2026
     </div>
 
     <h2>1. Introduction</h2>
@@ -68,7 +68,7 @@
         <li><strong>Full Name:</strong> Required for profile display and identification</li>
         <li><strong>Age/Date of Birth:</strong> Required for age verification (18+ requirement) and matching compatibility</li>
         <li><strong>Gender:</strong> Required for matchmaking algorithm and compatibility matching</li>
-        <li><strong>Phone Number:</strong> Optional for SMS verification and communication</li>
+        <li><strong>Phone Number:</strong> Optional on the registration form. The current production API does not persist phone numbers</li>
         <li><strong>Location Information:</strong> Governorate, city, and district for regional matching</li>
         <li><strong>Religious Information:</strong> Religion (Islam/Other), sect (Sunni/Shiaa/Other) for compatibility matching</li>
         <li><strong>Ethnicity:</strong> Ethnic background for compatibility matching</li>
@@ -89,17 +89,15 @@
 
     <h3>2.3 Messages and Communications</h3>
     <ul>
-        <li><strong>Chat Messages:</strong> Private messages between matched users</li>
-        <li><strong>Community Posts:</strong> Public posts in community feed</li>
-        <li><strong>Comments:</strong> Comments on community posts</li>
+        <li><strong>Chat Messages:</strong> Private messages between members after an introduction is accepted</li>
+        <li><strong>Introduction Requests:</strong> Pending, accepted, and declined introduction records</li>
+        <li><strong>Reports and Blocks:</strong> Safety reports and block relationships you submit</li>
     </ul>
 
     <h3>2.4 Device and Technical Information</h3>
     <ul>
-        <li><strong>Device ID:</strong> Capacitor device identifier for security and analytics</li>
-        <li><strong>IP Address:</strong> Collected by Cloudflare Workers for security and fraud prevention</li>
-        <li><strong>App Usage Data:</strong> Basic app usage statistics and login activity</li>
-        <li><strong>Profile Views:</strong> Number of times your profile is viewed by others</li>
+        <li><strong>IP Address:</strong> Received by Cloudflare Workers (for example CF-Connecting-IP) for security and rate limiting</li>
+        <li><strong>Authentication Tokens:</strong> A JWT stored in the app/browser local storage to keep you signed in</li>
     </ul>
 
     <h3>2.5 Search and Filter Data</h3>
@@ -115,18 +113,16 @@
     <ul>
         <li>Create an account</li>
         <li>Complete your profile</li>
-        <li>Upload photos</li>
-        <li>Send messages</li>
-        <li>Post in community feed</li>
+        <li>Save a profile photo URL (if you provide one)</li>
+        <li>Send messages after an accepted introduction</li>
         <li>Use search and filter features</li>
     </ul>
 
     <h3>3.2 Automatic Collection</h3>
     <p>We automatically collect certain information when you use the application:</p>
     <ul>
-        <li>Device identifiers and IP address for security</li>
-        <li>App usage data for analytics and improvement</li>
-        <li>Login activity for security monitoring</li>
+        <li>IP address for security and abuse prevention</li>
+        <li>Login and password-reset activity for account security</li>
     </ul>
 
     <h2>4. How We Use Your Information</h2>
@@ -157,17 +153,17 @@
     <h3>5.2 Service Providers</h3>
     <p>We share data with the following service providers to operate our services:</p>
     <ul>
-        <li><strong>Cloudflare Workers (USA):</strong> Backend API hosting and data processing</li>
-        <li><strong>Cloudflare KV (USA):</strong> Data storage and retrieval</li>
+        <li><strong>Cloudflare Workers (USA):</strong> Backend API hosting (Worker name: halal-api-real)</li>
+        <li><strong>Cloudflare D1 (USA):</strong> Application database (rafid-db)</li>
+        <li><strong>Cloudflare R2 (USA):</strong> Object storage bucket halal-assets is bound for future private media. Profile photos are currently stored as URLs in D1, not as private signed objects</li>
+        <li><strong>Resend:</strong> Transactional email for password-reset links only, when that feature is configured</li>
     </ul>
     <p>These service providers are bound by strict data protection agreements and only use your data to provide services to us.</p>
 
     <h3>5.3 Public Data</h3>
     <p>The following information may be visible to other users:</p>
     <ul>
-        <li><strong>Community Posts:</strong> Public posts in community feed</li>
-        <li><strong>Comments:</strong> Comments on community posts</li>
-        <li><strong>Limited Profile Information:</strong> Profile information visible to matched users based on your privacy settings</li>
+        <li><strong>Limited Profile Information:</strong> Name, age, location, and other profile fields visible to signed-in members according to matching and photo-visibility rules</li>
     </ul>
     <p>You can control what profile information is visible through your privacy settings.</p>
 
@@ -208,10 +204,8 @@
     <h3>7.1 Retention Periods</h3>
     <ul>
         <li><strong>Active Accounts:</strong> Data retained while your account is active</li>
-        <li><strong>Deleted Accounts:</strong> Data deleted within 30 days of account deletion</li>
-        <li><strong>Inactive Accounts:</strong> Data retained for 1 year after last login</li>
-        <li><strong>Community Posts:</strong> Retained indefinitely unless deleted by you or admin</li>
-        <li><strong>Chat Messages:</strong> Retained for 1 year</li>
+        <li><strong>Deleted Accounts:</strong> Account, profile, messages, requests, reports, blocks, and related rows are deleted immediately when you confirm Delete Account. This is a live cascade, not a 30-day delay</li>
+        <li><strong>Password Reset Tokens:</strong> Expire after one hour and are removed with the account</li>
     </ul>
 
     <h3>7.2 Retention Purpose</h3>
@@ -236,7 +230,7 @@
         <li>Go to Settings in the app</li>
         <li>Select "Delete Account"</li>
         <li>Confirm the deletion</li>
-        <li>Your account and data will be deleted within 30 days</li>
+        <li>Your account and associated data are deleted immediately after confirmation</li>
     </ul>
 
     <h3>8.4 Data Portability</h3>
@@ -284,7 +278,8 @@
     <div class="contact">
         <p>If you have questions about this privacy policy or your personal data, please contact us:</p>
         <ul>
-            <li><strong>Email:</strong> privacy@kaniq.org</li>
+            <li><strong>Privacy:</strong> privacy@kaniq.org</li>
+            <li><strong>Support:</strong> support@kaniq.org</li>
             <li><strong>Website:</strong> https://kaniq.org</li>
             <li><strong>App Name:</strong> ZAWAJ</li>
             <li><strong>Package Name:</strong> org.kaniq.zawaj</li>
@@ -338,16 +333,11 @@
 
     <h2>17. AI Processing</h2>
 
-    <p>Our application may use AI services for:</p>
-    <ul>
-        <li><strong>Content Moderation:</strong> To detect inappropriate content</li>
-        <li><strong>Matching Algorithms:</strong> To improve compatibility matching</li>
-    </ul>
-    <p>AI processing is performed with appropriate safeguards to protect your privacy. We do not use your personal data to train AI models without your consent.</p>
+    <p>The current production application does not send your profile or messages to an AI provider. Matching uses database filters (for example gender, age, and governorate). We do not use your personal data to train AI models.</p>
 
     <h2>18. Analytics</h2>
 
-    <p>We use analytics to understand how users interact with our application. This helps us improve the user experience and identify technical issues. Analytics data is aggregated and anonymized where possible.</p>
+    <p>We do not currently use a third-party analytics SDK. Cloudflare may process request metadata as part of hosting the Worker and website.</p>
 
     <h2>19. Cookies and Tracking</h2>
 
@@ -362,8 +352,9 @@
 
     <p>We use the following third-party services:</p>
     <ul>
-        <li><strong>Cloudflare:</strong> For backend API hosting, data storage, and security</li>
-        <li><strong>Capacitor:</strong> For cross-platform application framework</li>
+        <li><strong>Cloudflare:</strong> Workers, D1, R2, and Pages hosting</li>
+        <li><strong>Resend:</strong> Password-reset email delivery when configured</li>
+        <li><strong>Capacitor:</strong> Android application wrapper</li>
     </ul>
     <p>Each third-party service has its own privacy policy. We encourage you to review their policies.</p>
 
@@ -389,7 +380,7 @@
 
     <p>This privacy policy is governed by the laws of Iraq. Any disputes arising from this policy will be resolved in accordance with Iraqi law.</p>
 
-    <p><strong>Last Updated:</strong> July 21, 2026<br>
-    <strong>Effective Date:</strong> July 21, 2026</p>
+    <p><strong>Last Updated:</strong> August 15, 2026<br>
+    <strong>Effective Date:</strong> August 15, 2026</p>
 </body>
 </html>

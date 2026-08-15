@@ -112,7 +112,7 @@ export default function ProfileCompletionCard({
     {
       id: 'verify',
       title: txt("Verify your account", "توثيق حسابك بالهوية", "پشتڕاستکردنەوەی هەژمار"),
-      desc: txt("Upload simulated ID to get verified badge", "ارفع إثبات الهوية لتفعيل شارة الأمان", "ناسنامەکەت پشتڕاست بکەرەوە بۆ وەرگرتنی نیشانەی متمانە"),
+      desc: txt("Government ID verification is not available yet", "التحقق من الهوية الحكومية غير متاح حالياً", "پشتڕاستکردنەوەی ناسنامەی حکومی ئێستا بەردەست نییە"),
       icon: <ShieldCheck className="w-5 h-5" />,
       completed: isVerified,
       points: "+10%"
@@ -308,7 +308,7 @@ export default function ProfileCompletionCard({
                   <div className="p-3.5 bg-stone-50 border border-stone-200 rounded-2xl flex items-start gap-2.5">
                     <UploadCloud className="w-5 h-5 text-[#40798C] shrink-0" />
                     <span className="text-[10px] text-[#6B635B] font-semibold leading-relaxed">
-                      {txt("This is a safe preview sandbox simulation. No real identification documents are uploaded.", "هذا مجرد نموذج تفاعلي محاكي لحماية الخصوصية بالكامل.", "ئەمە تەنها دۆخی تاقیکارییە بۆ پاراستنی زانیارییەکانت.")}
+                      {txt("Government ID upload is not available. We do not store identity documents.", "رفع الهوية الحكومية غير متاح. لا نخزّن وثائق الهوية.", "بارکردنی ناسنامەی حکومی بەردەست نییە. ئێمە بەڵگەنامەی ناسنامە هەڵناگرین.")}
                     </span>
                   </div>
 

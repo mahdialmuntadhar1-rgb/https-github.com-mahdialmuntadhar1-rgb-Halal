@@ -152,13 +152,13 @@ export default function TrustPrivacyScreen({ locale, onBackToOverview }: TrustPr
           </p>
           <p className="text-[11px] text-[#6B635B] font-medium leading-relaxed">
             {isEn && (
-              "This interface demonstrates the modular security and privacy design of the HALAL Matchmaking app. In compliance with high standards, we do not claim that users are verified for real, completely secure, screenshot-blocked, or that we prevent all abuse. All operations in the current version run as realistic frontend simulations awaiting server backends. Choose partner interactions with family consultation, coordination and safe traditional guidance."
+              "Matching, introductions, chat, report, and block use the live HALAL API. We do not claim members are government-ID verified, that screenshots are blocked, or that we can prevent all abuse. Involve family and keep conversations respectful."
             )}
             {isAr && (
-              "هذه الواجهة تستعرض بناء الخصوصية والأمان في منصة حلال. نحن لا ندعي بأن الأعضاء موثقين بشكل نهائي أو حقيقي، أو أن النظام يمنع كافة التجاوزات أو لقطات الشاشة بنسبة كاملة. جميع الضوابط والتحققات الحالية مدمجة كبناء تفاعلي محلي وتجريبي قبل تفعيل قواعد البيانات الخارجية. تواصل دائماً مع شريكك بوجود الأهل والتنسيق المباشر مع عائلاتكم."
+              "المطابقة وطلبات التعارف والمحادثة والإبلاغ والحظر تعمل عبر واجهة حلال الفعلية. لا ندّعي أن الأعضاء موثّقون بهوية حكومية، أو أن لقطات الشاشة ممنوعة، أو أن النظام يمنع كل إساءة. أشرك العائلة وحافظ على الاحترام."
             )}
             {isCkb && (
-              "ئەم پاشخانە تەواوکاری کارکردن و بەهاداری بەکارهێنانی حەڵاڵ پیشان دەدات. ئێمە ناڵێین کە بەکارهێنەران بە تەواوی ڕاستەقینەن یان وێنەگرتنی شاشە ئەستەمە. هەموو کارەکان لە ئێستادا وەک سیمولەیشنی لۆکاڵی ئەنجام دەدرێن تا بەستنەوە بە سێرڤەر. گفتوگۆکان بە ئارامی و هۆشیاری و چاودێری خێزانی ئەنجام بدەن."
+              "هاوتاکردن و داواکاری و گفتوگۆ و ڕاپۆرت و بلۆک لە ڕێگەی APIی ڕاستەقینەی حەڵاڵەوە کاردەکەن. ئێمە ناڵێین ئەندامان بە ناسنامەی حکومی پشتڕاستکراونەتەوە یان وێنەگرتنی شاشە قەدەغەیە. گفتوگۆکان بە ڕێز و بە بەشداری خێزان ئەنجام بدەن."
             )}
           </p>
         </div>

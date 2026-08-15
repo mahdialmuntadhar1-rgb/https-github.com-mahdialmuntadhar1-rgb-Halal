@@ -12,7 +12,8 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 export async function handleResetPassword(ctx: RequestContext): Promise<Response | null> {
-  if (ctx.url.pathname !== '/api/auth/reset-password' || ctx.request.method !== 'POST') {
+  const path = ctx.url.pathname.replace(/^\/api(?=\/)/, '');
+  if (path !== '/auth/reset-password' || ctx.request.method !== 'POST') {
     return null;
   }
 

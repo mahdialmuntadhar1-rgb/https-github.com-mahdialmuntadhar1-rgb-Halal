@@ -87,7 +87,8 @@ async function sendResetEmail(env: Env, toEmail: string, resetLink: string, corr
 }
 
 export async function handleForgotPassword(ctx: RequestContext): Promise<Response | null> {
-  if (ctx.url.pathname !== '/api/auth/forgot-password' || ctx.request.method !== 'POST') {
+  const path = ctx.url.pathname.replace(/^\/api(?=\/)/, '');
+  if (path !== '/auth/forgot-password' || ctx.request.method !== 'POST') {
     return null;
   }
 
