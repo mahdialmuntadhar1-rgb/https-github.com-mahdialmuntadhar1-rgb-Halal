@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppLanguage, UserProfile } from '../types';
+import { apiClient } from '../services/apiClient';
 import { 
   Shield, 
   Eye, 
@@ -41,7 +42,23 @@ export default function PrivacySettingsScreen({
   const [hideProfile, setHideProfile] = useState<boolean>(false);
   const [whoCanSend, setWhoCanSend] = useState<'all' | 'same_govt' | 'same_sect'>('all');
   const [whoCanMessage, setWhoCanMessage] = useState<'accepted_only' | 'all_verified'>('accepted_only');
-  const [blockSearchTerm, setBlockSearchTerm] = useState('');
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+  const [blocksLoading, setBlocksLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    apiClient.getBlockedUserIds()
+      .then((ids) => {
+        if (active) setBlockedUserIds(ids);
+      })
+      .catch(() => {
+        if (active) setBlockedUserIds([]);
+      })
+      .finally(() => {
+        if (active) setBlocksLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
 
   // Photo / Contact mode triggers
   const handlePhotoPrivacyChange = (v: UserProfile['photoPrivacy']) => {
@@ -72,17 +89,6 @@ export default function PrivacySettingsScreen({
         ? (newState ? "🔒 Profile Hidden. You will not appear in the Match Explorer results." : "🔓 Profile Visible. Other verified partners can now search your dossier.")
         : (newState ? "🔒 الملف الشخصي محجوب الآن. لن تظهر في مستكشف وعمليات فرز الشركاء." : "🔓 الملف الشخصي مرئي الآن للأعضاء الآخرين الموثقين.")
     );
-  };
-
-  const handleAddBlockMock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!blockSearchTerm.trim()) return;
-    triggerToast(
-      locale === 'en'
-        ? `To block a member, open their profile or chat and use Block. Blocks are saved on your account.`
-        : `لحظر عضو، افتح ملفه أو المحادثة واستخدم الحظر. يتم حفظ الحظر في حسابك.`
-    );
-    setBlockSearchTerm('');
   };
 
   // Guidelines set for serious marital intent
@@ -325,7 +331,7 @@ export default function PrivacySettingsScreen({
         {/* RIGHT COLUMN (5 Cols): Safety Block/Report Lists & Guidelines */}
         <div className="lg:col-span-5 space-y-8">
           
-          {/* Safety: Block & Report Placeholders */}
+          {/* Safety: blocked members (live API) */}
           <div className="bg-white/40 backdrop-blur-xl border border-white/55 p-6 sm:p-8 rounded-[2rem] shadow-xl space-y-4">
             <h3 className="font-serif font-black text-warm-charcoal text-base flex items-center gap-2 pb-2 border-b border-stone-200/50">
               <Ban className="w-4.5 h-4.5 text-red-600" />
@@ -334,36 +340,36 @@ export default function PrivacySettingsScreen({
 
             <p className="text-[11px] text-[#6B635B] leading-relaxed font-semibold">
               {locale === 'en' 
-                ? 'Need to block or report a specific unserious account? You can do so directly from their profile card or chat header. Review policy below:'
-                : 'هل واجهتك إساءة أو عدم جدية؟ يمكنك اتخاذ قرار الحظر أو التبليغ مباشرة من شريط المحادثة الفتحة لقمع التجاوزات.'}
+                ? 'Block or report a member from their profile card or chat header. Blocks are saved on your account and enforced on the server for requests and messages.'
+                : 'احظر أو بلّغ عن عضو من ملفه أو من رأس المحادثة. يُحفظ الحظر في حسابك ويُطبَّق على الخادم لطلبات التعارف والرسائل.'}
             </p>
 
-            {/* Block list mock form */}
-            <form onSubmit={handleAddBlockMock} className="space-y-2 pt-2 text-left">
-              <label className="block text-[9px] font-mono font-bold text-[#6B635B] uppercase tracking-wider">
-                {locale === 'en' ? 'Block member by Username / ID' : 'إضافة مستخدم لقائمة الحظر المباشر'}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={blockSearchTerm}
-                  onChange={(e) => setBlockSearchTerm(e.target.value)}
-                  placeholder="e.g. AmberDossier"
-                  className="flex-1 bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-warm-charcoal font-semibold focus:outline-none focus:ring-1 focus:ring-accent-coral"
-                />
-                <button
-                  type="submit"
-                  className="px-3 bg-warm-charcoal text-white font-bold text-xs rounded-xl hover:bg-stone-800 transition shadow"
-                >
-                  {locale === 'en' ? 'Block' : 'حظر'}
-                </button>
-              </div>
+            <div className="pt-2 text-left space-y-2">
+              {blocksLoading ? (
+                <p className="text-[10px] text-[#6B635B] font-semibold">
+                  {locale === 'en' ? 'Loading blocked members…' : 'جاري تحميل قائمة الحظر…'}
+                </p>
+              ) : blockedUserIds.length === 0 ? (
+                <p className="text-[10px] text-[#6B635B] font-semibold">
+                  {locale === 'en'
+                    ? 'You have not blocked anyone yet.'
+                    : 'لم تحظر أي عضو بعد.'}
+                </p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {blockedUserIds.map((id) => (
+                    <li key={id} className="text-[10px] font-mono text-warm-charcoal bg-white/70 border border-stone-200/60 rounded-lg px-3 py-2">
+                      {id}
+                    </li>
+                  ))}
+                </ul>
+              )}
               <p className="text-[9px] text-[#A2978C] font-mono leading-relaxed mt-1">
                 {locale === 'en'
-                  ? 'Blocks are saved on your account when you block someone from their profile or chat.'
-                  : 'يتم حفظ الحظر في حسابك عند حظر شخص من ملفه أو من المحادثة.'}
+                  ? 'To block someone new, open their profile or an active chat and tap Block.'
+                  : 'لحظر عضو جديد، افتح ملفه أو المحادثة واضغط حظر.'}
               </p>
-            </form>
+            </div>
           </div>
 
           {/* Safety Reminders: Community Guidelines */}

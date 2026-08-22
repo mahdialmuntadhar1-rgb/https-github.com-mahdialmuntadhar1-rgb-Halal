@@ -1,9 +1,6 @@
 ﻿import { hashPassword, needsRehash, signToken, verifyPassword } from '../auth';
 import { AuthUser, HttpError, json, optionalString, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
-
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
+import { normalizeEmail } from '../email';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

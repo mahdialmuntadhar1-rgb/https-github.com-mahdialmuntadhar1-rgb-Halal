@@ -1,6 +1,6 @@
 ﻿import { authenticateRequest } from './auth';
 import { Env, errorResponse, HttpError, json, RequestContext } from './db';
-import { assertAuthRateLimit } from './rateLimit';
+import { assertAuthRateLimit, assertUserRateLimit } from './rateLimit';
 import { handleAuth } from './routes/auth';
 import { handleCafe } from './routes/cafe';
 import { handleConversations } from './routes/conversations';
@@ -39,8 +39,10 @@ function withCors(request: Request, env: Env, response: Response): Response {
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
   headers.set('X-Frame-Options', 'DENY');
+  headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  headers.set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
   const path = new URL(request.url).pathname.toLowerCase();
-  if (path.includes('/auth/')) {
+  if (path.includes('/auth/') || path.startsWith('/api/')) {
     headers.set('Cache-Control', 'no-store');
   }
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
@@ -99,6 +101,10 @@ export default {
         url,
         user: await authenticateRequest(env, request),
       };
+      if (ctx.user) {
+        const userLimited = await assertUserRateLimit(env, request, url, ctx.user.id);
+        if (userLimited) return withCors(request, env, userLimited);
+      }
       return withCors(request, env, await route(ctx));
     } catch (error) {
       return withCors(request, env, errorResponse(error));

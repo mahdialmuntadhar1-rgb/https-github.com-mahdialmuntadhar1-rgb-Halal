@@ -22,5 +22,16 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "src/**/*",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "good_*",
+    "src-broken-july14",
+    "node_modules",
+    "dist",
+    "backend-mvp"
+  ]
 }

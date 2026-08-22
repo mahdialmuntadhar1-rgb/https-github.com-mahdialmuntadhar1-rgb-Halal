@@ -1,4 +1,5 @@
-﻿import { HttpError, json, noContent, readJson, RequestContext, requireAdmin, requireString, requireUser, uuid } from '../db';
+﻿import { assertUsersNotBlocked } from '../blocks';
+import { HttpError, json, noContent, readJson, RequestContext, requireAdmin, requireString, requireUser, uuid } from '../db';
 import { publicRequestRow } from '../privacy';
 
 async function ensureConversation(ctx: RequestContext, requestId: string): Promise<void> {
@@ -10,6 +11,13 @@ async function ensureConversation(ctx: RequestContext, requestId: string): Promi
   await ctx.env.DB.prepare('INSERT OR IGNORE INTO halal_conversations (id, request_id, user_one_id, user_two_id) VALUES (?, ?, ?, ?)')
     .bind(uuid(), requestId, row.sender_id, row.receiver_id)
     .run();
+}
+
+async function assertIntroParticipantsNotBlocked(
+  ctx: RequestContext,
+  intro: Record<string, unknown>,
+): Promise<void> {
+  await assertUsersNotBlocked(ctx.env, String(intro.sender_id), String(intro.receiver_id));
 }
 
 export async function handleRequests(ctx: RequestContext): Promise<Response | null> {
@@ -27,6 +35,8 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
 
     const receiver = await env.DB.prepare('SELECT id FROM halal_users WHERE id = ?').bind(receiverId).first();
     if (!receiver) throw new HttpError(404, 'Receiver not found.');
+
+    await assertUsersNotBlocked(env, user.id, receiverId);
 
     const existing = await env.DB.prepare(
       `SELECT id, status FROM halal_requests
@@ -63,6 +73,8 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
     const isAdmin = user.role === 'admin';
     if (!isReceiver && !isAdmin) throw new HttpError(403, 'Only the receiver or an admin can decide this request.');
 
+    await assertIntroParticipantsNotBlocked(ctx, intro);
+
     const status = action === 'accept' || action === 'accepted' ? 'accepted' : 'declined';
     await env.DB.prepare(
       'UPDATE halal_requests SET status = ?, decided_by = ?, decided_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -89,6 +101,8 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
     const isReceiver = intro.receiver_id === user.id;
     const isAdmin = user.role === 'admin';
     if (!isReceiver && !isAdmin) throw new HttpError(403, 'Only the receiver or an admin can decide this request.');
+
+    await assertIntroParticipantsNotBlocked(ctx, intro);
 
     const status = action === 'accept' ? 'accepted' : 'declined';
     await env.DB.prepare(
@@ -122,11 +136,17 @@ export async function handleRequests(ctx: RequestContext): Promise<Response | nu
        JOIN halal_users receiver ON receiver.id = r.receiver_id
        LEFT JOIN halal_profiles sender_profile ON sender_profile.user_id = r.sender_id
        LEFT JOIN halal_profiles receiver_profile ON receiver_profile.user_id = r.receiver_id
-       WHERE r.sender_id = ? OR r.receiver_id = ?
+       WHERE (r.sender_id = ? OR r.receiver_id = ?)
+         AND CASE WHEN r.sender_id = ? THEN r.receiver_id ELSE r.sender_id END NOT IN (
+           SELECT blocked_user_id FROM halal_blocks WHERE blocker_id = ?
+         )
+         AND CASE WHEN r.sender_id = ? THEN r.receiver_id ELSE r.sender_id END NOT IN (
+           SELECT blocker_id FROM halal_blocks WHERE blocked_user_id = ?
+         )
        ORDER BY r.created_at DESC
        LIMIT 100`,
     )
-      .bind(user.id, user.id)
+      .bind(user.id, user.id, user.id, user.id, user.id, user.id)
       .all();
     const requests = (rows.results || []).map((row) => publicRequestRow(row as Record<string, unknown>));
     return json({ requests });

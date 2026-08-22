@@ -1,3 +1,24 @@
+# =============================================================================
+# LEGACY — DO NOT USE
+# =============================================================================
+# This script is FORBIDDEN for the current HALAL / ZAWAJ production deployment.
+#
+# If you run this script it will:
+#   - DELETE the entire backend-mvp/ directory
+#   - Restore PRE-HARDENING code from origin/codex/halal-workers-mvp
+#   - Run REMOTE D1 migrations against production rafid-db
+#   - Overwrite wrangler.toml (including missing app.kaniq.org CORS)
+#   - Deploy an outdated Worker to halal-api-real
+#
+# Authoritative production deploy (human-authorized only):
+#   cd backend-mvp
+#   npx wrangler deploy
+#
+# Pages deploy: deploy-safe.ps1
+#
+# NEVER use this file for halal-api-real / rafid-db / app.kaniq.org.
+# =============================================================================
+
 $ErrorActionPreference = "Stop"
 $root = "C:\Users\HB LAPTOP STORE\Documents\https-github.com-mahdialmuntadhar1-rgb-Halal"
 $backendDir = Join-Path $root "backend-mvp"

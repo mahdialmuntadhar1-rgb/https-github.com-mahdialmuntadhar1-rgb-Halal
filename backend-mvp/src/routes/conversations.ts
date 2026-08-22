@@ -1,4 +1,5 @@
-﻿import { HttpError, json, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
+﻿import { assertUsersNotBlocked } from '../blocks';
+import { HttpError, json, readJson, RequestContext, requireString, requireUser, uuid } from '../db';
 import { filterProfilePhoto } from './profile';
 
 export async function handleConversations(ctx: RequestContext): Promise<Response | null> {
@@ -20,10 +21,16 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
        JOIN halal_requests r ON r.id = c.request_id AND r.status = 'accepted'
        JOIN halal_users u ON u.id = CASE WHEN c.user_one_id = ? THEN c.user_two_id ELSE c.user_one_id END
        LEFT JOIN halal_profiles p ON p.user_id = u.id
-       WHERE c.user_one_id = ? OR c.user_two_id = ?
+       WHERE (c.user_one_id = ? OR c.user_two_id = ?)
+         AND CASE WHEN c.user_one_id = ? THEN c.user_two_id ELSE c.user_one_id END NOT IN (
+           SELECT blocked_user_id FROM halal_blocks WHERE blocker_id = ?
+         )
+         AND CASE WHEN c.user_one_id = ? THEN c.user_two_id ELSE c.user_one_id END NOT IN (
+           SELECT blocker_id FROM halal_blocks WHERE blocked_user_id = ?
+         )
        ORDER BY c.created_at DESC`,
     )
-      .bind(user.id, user.id, user.id, user.id)
+      .bind(user.id, user.id, user.id, user.id, user.id, user.id, user.id, user.id)
       .all<Record<string, unknown>>();
 
     const result = [];
@@ -51,14 +58,17 @@ export async function handleConversations(ctx: RequestContext): Promise<Response
   if (messageMatch && request.method === 'POST') {
     const conversationId = decodeURIComponent(messageMatch[1]);
     const conversation = await env.DB.prepare(
-      `SELECT c.id
+      `SELECT c.id, c.user_one_id, c.user_two_id
        FROM halal_conversations c
        JOIN halal_requests r ON r.id = c.request_id AND r.status = 'accepted'
        WHERE c.id = ? AND (c.user_one_id = ? OR c.user_two_id = ?)`,
     )
       .bind(conversationId, user.id, user.id)
-      .first();
+      .first<{ id: string; user_one_id: string; user_two_id: string }>();
     if (!conversation) throw new HttpError(404, 'Conversation not found.');
+
+    const recipientId = conversation.user_one_id === user.id ? conversation.user_two_id : conversation.user_one_id;
+    await assertUsersNotBlocked(env, user.id, recipientId);
 
     const body = await readJson(request);
     const text = requireString(body, 'text', 2000);

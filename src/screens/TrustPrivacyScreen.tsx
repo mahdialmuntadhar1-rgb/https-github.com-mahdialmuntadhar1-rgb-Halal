@@ -72,6 +72,16 @@ export default function TrustPrivacyScreen({ locale, onBackToOverview }: TrustPr
       status: isAr ? 'مدمج في تدفق المحادثات' : isCkb ? 'لەنێو ژووری گفتوگۆی ئەپەکەدایە' : 'Privacy controls built into the product flow'
     },
     {
+      icon: <Flag className="w-6 h-6 text-amber-600" />,
+      title: isAr ? 'أدوات التبليغ والحظر' : isCkb ? 'بلۆککردن و ڕاپۆرتکردن' : 'Block & Report',
+      desc: isAr
+        ? 'يمكنك حظر عضو أو الإبلاغ عنه من ملفه أو من رأس المحادثة. يمنع الحظر طلبات التعارف والرسائل على الخادم.'
+        : isCkb
+          ? 'لە پڕۆفایل یان گفتوگۆدا بلۆک یان ڕاپۆرت بکە. بلۆککردن لەسەر سێرڤەر داواکاری و نامە ڕادەگرێت.'
+          : 'Block or report from a profile card or chat header. Blocks are enforced server-side on introduction requests and messages.',
+      status: isAr ? 'متاح الآن' : isCkb ? 'ئێستا بەردەستە' : 'Live on the HALAL API'
+    },
+    {
       icon: <Camera className="w-6 h-6 text-pink-600" />,
       title: isAr ? 'تحكم مرن بالصورة الشخصية' : isCkb ? 'کۆنترۆڵی پاراستنی وێنە' : 'Photo Control Settings',
       desc: isAr
@@ -95,24 +105,14 @@ export default function TrustPrivacyScreen({ locale, onBackToOverview }: TrustPr
       status: isAr ? 'مخطط للتطوير مع تفعيل قاعدة البيانات' : isCkb ? 'پلانی بۆ دانراوە لەگەڵ سێرڤەر' : 'Backend verification planned'
     },
     {
-      icon: <Flag className="w-6 h-6 text-amber-600" />,
-      title: isAr ? 'أدوات التبليغ التلقائي والحظر الكامل' : isCkb ? 'ئامرازەکانی بلۆککردن و ڕاپۆرتکردن' : 'Automated Block & Report Infrastructure',
-      desc: isAr
-        ? 'يتم اختبار أدوات تقديم التقارير وحظر الحسابات المسيئة محلياً في نسخة العرض الحالية. سيتم تطبيق الحظر الدائم والعقوبات الإدارية تلقائياً بمجرد إتمام خوادم التخزين الحية.'
-        : isCkb
-          ? 'ئامرازەکانی ڕاپۆرتکردن و تۆمارکردنی سەرپێچی لەسەر سێرڤەر و بلۆککردنی هەمیشەیی پۆڵ پۆڵ کار دەکات بێت کاتێک سێرڤەر بەسترایەوە.'
-          : 'Integrated interface layouts for immediate reporting of unserious actions or behavior. Actionable lifetime database bans and review board queues are scheduled.',
-      status: isAr ? 'مخطط للتطوير النهائي' : isCkb ? 'پلانی بۆ دانراوە بۆ بەردەستبوونی سێرڤەر' : 'Report and block tools planned'
-    },
-    {
       icon: <Shield className="w-6 h-6 text-[#40798C]" />,
-      title: isAr ? 'بروتوكولات حماية وتشفير قواعد البيانات' : isCkb ? 'پاراستنی پێشکەوتووی داتا لەسەر سێرڤەر' : 'Durable Data Protection Policies',
+      title: isAr ? 'بروتوكولات حماية قواعد البيانات' : isCkb ? 'پاراستنی داتا لەسەر سێرڤەر' : 'Production Data Protection',
       desc: isAr
-        ? 'صممت سياسة أمان البيانات المستقبلية لتتوافق مع معايير الأمان المتقدمة. سيتم حماية وتشفير تخزين البيانات الشخصية بالكامل فور دمج قاعدة البيانات السحابية الحية.'
+        ? 'تعمل المنصة على قاعدة بيانات D1 الإنتاجية مع ضوابط وصول ومصادقة. التشفير المتقدم للبيانات والمراجعات الإدارية التلقائية ما زالت قيد التطوير.'
         : isCkb
-          ? 'پاراستنی زانیارییەکانت لەسەر سێرڤەری سحاب چالاک دەبێت بە کۆدکردنی پێشکەوتوو بۆ نەهێشتنی دزەکردنی نهێنییەکانتان.'
-          : 'Full relational security schema, transactional safeguards, and access policies designed to keep every interaction private, active with our upcoming database node deployment.',
-      status: isAr ? 'مستعد للتطبيق مع قواعد البيانات' : isCkb ? 'تەواوکاری جێگیر لەگەڵ جێبەجێبوونی سێرڤەر' : 'Data protection will be implemented with backend'
+          ? 'پلاتفۆرمەکە لەسەر D1ی بەرهەمهێنان کاردەکات لەگەڵ کۆنترۆڵی دەستگەیشتن. کۆدکردنی پێشکەوتوو و پێداچوونەوەی بەڕێوەبەر هێشتا لە پەرەپێداندا.'
+          : 'The platform runs on production D1 with authentication and access controls. Advanced encryption-at-rest and automated admin review queues remain on the roadmap.',
+      status: isAr ? 'نشط جزئياً على الإنتاج' : isCkb ? 'بەشێکی لە بەرهەمهێنان چالاکە' : 'Partially live on production D1'
     }
   ];
 

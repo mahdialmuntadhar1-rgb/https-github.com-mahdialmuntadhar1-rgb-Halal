@@ -1,4 +1,5 @@
 ﻿import { Env, json, RequestContext, uuid } from '../db';
+import { normalizeEmail } from '../email';
 
 const encoder = new TextEncoder();
 
@@ -139,6 +140,8 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
       return json({ error: 'Email required' }, 400);
     }
 
+    const email = normalizeEmail(body.email);
+
     console.log('[FORGOT_PASSWORD]', JSON.stringify({
       correlationId,
       stage: 'EMAIL_VALIDATION_PASSED',
@@ -152,7 +155,7 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
     }));
 
     const user = await ctx.env.DB.prepare('SELECT id FROM halal_users WHERE email = ?')
-      .bind(body.email)
+      .bind(email)
       .first<{ id: string }>();
 
     console.log('[FORGOT_PASSWORD]', JSON.stringify({
@@ -209,7 +212,7 @@ export async function handleForgotPassword(ctx: RequestContext): Promise<Respons
     const origin = ctx.request.headers.get('Origin') || 'https://app.kaniq.org';
     const resetLink = `${origin}/reset-password?token=${token}`;
 
-    await sendResetEmail(ctx.env, body.email, resetLink, correlationId);
+    await sendResetEmail(ctx.env, email, resetLink, correlationId);
 
     console.log('[FORGOT_PASSWORD]', JSON.stringify({
       correlationId,
